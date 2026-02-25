@@ -8,7 +8,6 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Index
-import jakarta.persistence.Lob
 import jakarta.persistence.Table
 import me.iamhardyha.bugbuddy.model.common.BaseSoftDeleteEntity
 import me.iamhardyha.bugbuddy.model.enum.ChatMessageType
@@ -44,5 +43,5 @@ class ChatMessage(
 
     /** URL of uploaded file (if messageType = FILE). */
     @Column(name = "file_url", length = 500)
-    var fileUrl: String? = nullsou
+    var fileUrl: String? = null
 ) : BaseSoftDeleteEntity()
