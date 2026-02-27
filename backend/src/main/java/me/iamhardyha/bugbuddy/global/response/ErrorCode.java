@@ -19,6 +19,9 @@ public enum ErrorCode {
 
     // 질문
     QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "질문을 찾을 수 없습니다."),
+    QUESTION_FORBIDDEN(HttpStatus.FORBIDDEN, "질문 수정/삭제 권한이 없습니다."),
+    QUESTION_ALREADY_CLOSED(HttpStatus.BAD_REQUEST, "이미 마감된 질문입니다."),
+    TAG_NOT_FOUND(HttpStatus.NOT_FOUND, "태그를 찾을 수 없습니다."),
 
     // 답변
     ANSWER_NOT_FOUND(HttpStatus.NOT_FOUND, "답변을 찾을 수 없습니다."),
