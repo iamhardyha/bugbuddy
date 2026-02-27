@@ -13,18 +13,29 @@ async function refreshTokens(): Promise<string | null> {
   const refreshToken = getRefreshToken();
   if (!refreshToken) return null;
 
-  const res = await fetch(`${BASE_URL}/api/auth/refresh`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ refreshToken }),
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${BASE_URL}/api/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    });
+  } catch {
+    return null;
+  }
 
   if (!res.ok) {
     clearTokens();
     return null;
   }
 
-  const json: ApiResponse<TokenResponse> = await res.json();
+  let json: ApiResponse<TokenResponse>;
+  try {
+    json = await res.json();
+  } catch {
+    clearTokens();
+    return null;
+  }
   if (!json.success || !json.data) {
     clearTokens();
     return null;
@@ -47,7 +58,12 @@ export async function apiFetch<T>(
     ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
   };
 
-  const res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
+  let res: Response;
+  try {
+    res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
+  } catch {
+    return { success: false, data: null, error: { code: 'NETWORK_ERROR', message: '서버에 연결할 수 없습니다.' } };
+  }
 
   if (res.status === 401 && retry) {
     const newToken = await refreshTokens();
@@ -57,5 +73,9 @@ export async function apiFetch<T>(
     window.location.href = '/';
   }
 
-  return res.json() as Promise<ApiResponse<T>>;
+  try {
+    return await res.json() as ApiResponse<T>;
+  } catch {
+    return { success: false, data: null, error: { code: 'PARSE_ERROR', message: '응답을 처리할 수 없습니다.' } };
+  }
 }
