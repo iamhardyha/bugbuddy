@@ -1,0 +1,52 @@
+services:
+  # MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: bugbuddy-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: bugbuddy
+      MYSQL_USER: bugbuddy
+      MYSQL_PASSWORD: bugbuddy
+    volumes:
+      - bugbuddy-mysql-data:/var/lib/mysql
+
+  # MinIO (FakeS3 — 로컬 개발용)
+  minio:
+    image: minio/minio:latest
+    container_name: bugbuddy-minio
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # 웹 콘솔 (http://localhost:9001)
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - bugbuddy-minio-data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # MinIO 버킷 자동 생성
+  minio-init:
+    image: minio/mc:latest
+    container_name: bugbuddy-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+        mc alias set local http://minio:9000 minioadmin minioadmin;
+        mc mb --ignore-existing local/bugbuddy-uploads;
+        mc anonymous set public local/bugbuddy-uploads;
+        exit 0;
+      "
+
+volumes:
+  bugbuddy-mysql-data:
+  bugbuddy-minio-data:

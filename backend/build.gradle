@@ -28,6 +28,8 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
     runtimeOnly 'com.mysql:mysql-connector-j'
+    // AWS S3 SDK (MinIO 로컬 / Cloudflare R2 프로덕션 모두 S3 호환)
+    implementation 'software.amazon.awssdk:s3:2.29.52'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

@@ -41,7 +41,13 @@ public enum ErrorCode {
     MENTOR_APPLICATION_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 멘토 신청이 존재합니다."),
 
     // 신고
-    REPORT_NOT_FOUND(HttpStatus.NOT_FOUND, "신고를 찾을 수 없습니다.");
+    REPORT_NOT_FOUND(HttpStatus.NOT_FOUND, "신고를 찾을 수 없습니다."),
+
+    // 파일 업로드
+    UPLOAD_NOT_FOUND(HttpStatus.NOT_FOUND, "업로드 파일을 찾을 수 없습니다."),
+    UPLOAD_INVALID_TYPE(HttpStatus.BAD_REQUEST, "허용되지 않는 파일 형식입니다. (jpeg, png, gif, webp만 허용)"),
+    UPLOAD_FILE_TOO_LARGE(HttpStatus.BAD_REQUEST, "파일 크기가 초과되었습니다."),
+    UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다.");
 
     private final HttpStatus status;
     private final String message;

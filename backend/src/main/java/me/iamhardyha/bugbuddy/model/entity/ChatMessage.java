@@ -36,11 +36,7 @@ public class ChatMessage extends BaseSoftDeleteEntity {
     @Column(name = "message_type", nullable = false, length = 20)
     private ChatMessageType messageType = ChatMessageType.TEXT;
 
-    /** Content of text or system messages. Nullable when messageType = FILE. */
+    /** 텍스트/시스템 메시지 내용. 마크다운 지원 (이미지는 uploads 테이블로 관리). */
     @Column(columnDefinition = "MEDIUMTEXT")
     private String content;
-
-    /** URL of uploaded file (if messageType = FILE). */
-    @Column(name = "file_url", length = 500)
-    private String fileUrl;
 }
