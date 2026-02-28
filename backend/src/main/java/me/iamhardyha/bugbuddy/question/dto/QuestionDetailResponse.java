@@ -11,6 +11,7 @@ import java.util.List;
 public record QuestionDetailResponse(
         Long id,
         Long authorUserId,
+        String authorNickname,
         String title,
         String body,
         QuestionCategory category,
@@ -22,10 +23,11 @@ public record QuestionDetailResponse(
         Instant createdAt,
         Instant updatedAt
 ) {
-    public static QuestionDetailResponse of(Question question, List<String> tags) {
+    public static QuestionDetailResponse of(Question question, List<String> tags, String authorNickname) {
         return new QuestionDetailResponse(
                 question.getId(),
                 question.getAuthorUserId(),
+                authorNickname,
                 question.getTitle(),
                 question.getBody(),
                 question.getCategory(),

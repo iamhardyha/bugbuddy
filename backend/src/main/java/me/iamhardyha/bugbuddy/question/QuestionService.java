@@ -12,9 +12,13 @@ import me.iamhardyha.bugbuddy.question.dto.QuestionCreateRequest;
 import me.iamhardyha.bugbuddy.question.dto.QuestionDetailResponse;
 import me.iamhardyha.bugbuddy.question.dto.QuestionSummaryResponse;
 import me.iamhardyha.bugbuddy.question.dto.QuestionUpdateRequest;
+import me.iamhardyha.bugbuddy.model.entity.UserEntity;
+import me.iamhardyha.bugbuddy.model.enums.ReferenceType;
 import me.iamhardyha.bugbuddy.repository.QuestionRepository;
 import me.iamhardyha.bugbuddy.repository.QuestionTagRepository;
 import me.iamhardyha.bugbuddy.repository.TagRepository;
+import me.iamhardyha.bugbuddy.repository.UserRepository;
+import me.iamhardyha.bugbuddy.upload.UploadService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -29,13 +33,19 @@ public class QuestionService {
     private final QuestionRepository questionRepository;
     private final QuestionTagRepository questionTagRepository;
     private final TagRepository tagRepository;
+    private final UploadService uploadService;
+    private final UserRepository userRepository;
 
     public QuestionService(QuestionRepository questionRepository,
                            QuestionTagRepository questionTagRepository,
-                           TagRepository tagRepository) {
+                           TagRepository tagRepository,
+                           UploadService uploadService,
+                           UserRepository userRepository) {
         this.questionRepository = questionRepository;
         this.questionTagRepository = questionTagRepository;
         this.tagRepository = tagRepository;
+        this.uploadService = uploadService;
+        this.userRepository = userRepository;
     }
 
     @Transactional
@@ -52,8 +62,9 @@ public class QuestionService {
         Question saved = questionRepository.save(question);
 
         List<String> tagNames = attachTags(saved.getId(), request.tags());
+        uploadService.linkUploads(request.uploadIds(), userId, ReferenceType.QUESTION, saved.getId());
 
-        return QuestionDetailResponse.of(saved, tagNames);
+        return QuestionDetailResponse.of(saved, tagNames, getNickname(userId));
     }
 
     public Page<QuestionSummaryResponse> findAll(QuestionCategory category,
@@ -76,7 +87,7 @@ public class QuestionService {
 
         return questions.map(q -> {
             List<String> tags = getTagNames(q.getId());
-            return QuestionSummaryResponse.of(q, tags);
+            return QuestionSummaryResponse.of(q, tags, getNickname(q.getAuthorUserId()));
         });
     }
 
@@ -89,7 +100,7 @@ public class QuestionService {
         question.setViewCount(question.getViewCount() + 1);
 
         List<String> tags = getTagNames(questionId);
-        return QuestionDetailResponse.of(question, tags);
+        return QuestionDetailResponse.of(question, tags, getNickname(question.getAuthorUserId()));
     }
 
     @Transactional
@@ -113,8 +124,9 @@ public class QuestionService {
 
         questionTagRepository.deleteByQuestionId(questionId);
         List<String> tagNames = attachTags(questionId, request.tags());
+        uploadService.linkUploads(request.uploadIds(), userId, ReferenceType.QUESTION, questionId);
 
-        return QuestionDetailResponse.of(question, tagNames);
+        return QuestionDetailResponse.of(question, tagNames, getNickname(userId));
     }
 
     @Transactional
@@ -145,7 +157,7 @@ public class QuestionService {
         question.setStatus(QuestionStatus.CLOSED);
 
         List<String> tags = getTagNames(questionId);
-        return QuestionDetailResponse.of(question, tags);
+        return QuestionDetailResponse.of(question, tags, getNickname(question.getAuthorUserId()));
     }
 
     private List<String> attachTags(Long questionId, List<String> tagNames) {
@@ -179,5 +191,11 @@ public class QuestionService {
 
         List<Long> tagIds = questionTags.stream().map(QuestionTag::getTagId).toList();
         return tagRepository.findAllById(tagIds).stream().map(Tag::getName).toList();
+    }
+
+    private String getNickname(Long userId) {
+        return userRepository.findById(userId)
+                .map(UserEntity::getNickname)
+                .orElse("알 수 없음");
     }
 }

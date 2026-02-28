@@ -26,6 +26,8 @@ public record QuestionCreateRequest(
         boolean allowOneToOne,
 
         @Size(max = 5, message = "태그는 최대 5개입니다.")
-        List<String> tags
+        List<String> tags,
+
+        List<Long> uploadIds
 ) {
 }

@@ -10,6 +10,8 @@ import java.util.List;
 
 public record QuestionSummaryResponse(
         Long id,
+        Long authorUserId,
+        String authorNickname,
         String title,
         QuestionCategory category,
         QuestionType questionType,
@@ -19,9 +21,11 @@ public record QuestionSummaryResponse(
         List<String> tags,
         Instant createdAt
 ) {
-    public static QuestionSummaryResponse of(Question question, List<String> tags) {
+    public static QuestionSummaryResponse of(Question question, List<String> tags, String authorNickname) {
         return new QuestionSummaryResponse(
                 question.getId(),
+                question.getAuthorUserId(),
+                authorNickname,
                 question.getTitle(),
                 question.getCategory(),
                 question.getQuestionType(),
