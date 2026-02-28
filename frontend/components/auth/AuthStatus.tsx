@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { Button, Flex, Avatar, Skeleton, Typography } from 'antd';
 import LoginButton from './LoginButton';
 import { apiFetch } from '@/lib/api';
@@ -37,35 +38,38 @@ export default function AuthStatus() {
   if (user) {
     return (
       <Flex align="center" gap={8}>
-        <Avatar
-          size={30}
-          style={{
-            background: 'var(--accent-subtle)',
-            color: 'var(--accent)',
-            border: '1.5px solid var(--accent-ring)',
-            fontSize: 12,
-            fontWeight: 700,
-            letterSpacing: '-0.02em',
-            flexShrink: 0,
-          }}
-        >
-          {user.nickname.charAt(0).toUpperCase()}
-        </Avatar>
+        <Link href={`/users/${user.id}`} style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
+          <Avatar
+            size={30}
+            style={{
+              background: 'var(--accent-subtle)',
+              color: 'var(--accent)',
+              border: '1.5px solid var(--accent-ring)',
+              fontSize: 12,
+              fontWeight: 700,
+              letterSpacing: '-0.02em',
+              flexShrink: 0,
+              cursor: 'pointer',
+            }}
+          >
+            {user.nickname.charAt(0).toUpperCase()}
+          </Avatar>
 
-        <Text
-          className="auth-nickname"
-          style={{
-            fontSize: 13,
-            fontWeight: 500,
-            color: 'var(--text-primary)',
-            maxWidth: 100,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {user.nickname}
-        </Text>
+          <Text
+            className="auth-nickname"
+            style={{
+              fontSize: 13,
+              fontWeight: 500,
+              color: 'var(--text-primary)',
+              maxWidth: 100,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {user.nickname}
+          </Text>
+        </Link>
 
         <Button
           type="text"
