@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Sans, Syne, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/common/ThemeProvider";
+import { ModalProvider } from "@/components/common/ModalProvider";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -50,7 +51,9 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className={`${dmSans.variable} ${syne.variable} ${jetbrainsMono.variable} antialiased`}>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <ModalProvider>{children}</ModalProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

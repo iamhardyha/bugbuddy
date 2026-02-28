@@ -16,6 +16,7 @@ import type { Answer } from '@/types/answer';
 import type { QuestionStatus } from '@/types/question';
 import MarkdownRenderer from '@/components/editor/MarkdownRenderer';
 import MarkdownEditor from '@/components/editor/MarkdownEditor';
+import { useModal } from '@/components/common/ModalProvider';
 
 interface Props {
   questionId: number;
@@ -46,6 +47,7 @@ export default function AnswerList({
 
   const [reacted, setReacted] = useState<Set<number>>(new Set());
 
+  const { confirm } = useModal();
   const isLoggedIn = !!getAccessToken();
   const canWrite = isLoggedIn && questionStatus !== 'CLOSED';
   const isQuestionAuthor = currentUserId === questionAuthorId;
@@ -97,7 +99,13 @@ export default function AnswerList({
   }
 
   async function handleDelete(answerId: number) {
-    if (!confirm('답변을 삭제할까요?')) return;
+    const ok = await confirm({
+      title: '답변을 삭제할까요?',
+      message: '삭제 후에는 복구할 수 없습니다.',
+      variant: 'danger',
+      confirmLabel: '삭제',
+    });
+    if (!ok) return;
     const res = await deleteAnswer(questionId, answerId);
     if (res.success) {
       setAnswers(prev => prev.filter(a => a.id !== answerId));
@@ -105,7 +113,13 @@ export default function AnswerList({
   }
 
   async function handleAccept(answerId: number) {
-    if (!confirm('이 답변을 채택할까요? 채택 후에는 변경할 수 없습니다.')) return;
+    const ok = await confirm({
+      title: '이 답변을 채택할까요?',
+      message: '채택 후에는 변경할 수 없습니다.',
+      variant: 'success',
+      confirmLabel: '채택',
+    });
+    if (!ok) return;
     const res = await acceptAnswer(questionId, answerId);
     if (res.success && res.data) {
       setAnswers(prev => prev.map(a => (a.id === answerId ? res.data! : a)));

@@ -10,6 +10,7 @@ import type { QuestionDetail } from '@/types/question';
 import type { UserProfile } from '@/types/user';
 import MarkdownRenderer from '@/components/editor/MarkdownRenderer';
 import AnswerList from '@/components/answer/AnswerList';
+import { useModal } from '@/components/common/ModalProvider';
 
 export default function QuestionDetailPage() {
   const router = useRouter();
@@ -20,6 +21,7 @@ export default function QuestionDetailPage() {
   const [deleting, setDeleting] = useState(false);
   const [closing, setClosing] = useState(false);
   const [answerKey, setAnswerKey] = useState(0);
+  const { confirm } = useModal();
 
   useEffect(() => {
     async function load() {
@@ -37,7 +39,13 @@ export default function QuestionDetailPage() {
   }, [id]);
 
   async function handleDelete() {
-    if (!confirm('질문을 삭제할까요?')) return;
+    const ok = await confirm({
+      title: '질문을 삭제할까요?',
+      message: '삭제 후에는 복구할 수 없습니다.',
+      variant: 'danger',
+      confirmLabel: '삭제',
+    });
+    if (!ok) return;
     setDeleting(true);
     const res = await deleteQuestion(Number(id));
     if (res.success) {
@@ -48,7 +56,13 @@ export default function QuestionDetailPage() {
   }
 
   async function handleClose() {
-    if (!confirm('질문을 마감할까요? 마감 후에는 수정할 수 없습니다.')) return;
+    const ok = await confirm({
+      title: '질문을 마감할까요?',
+      message: '마감 후에는 수정할 수 없습니다.',
+      variant: 'warning',
+      confirmLabel: '마감',
+    });
+    if (!ok) return;
     setClosing(true);
     const res = await closeQuestion(Number(id));
     if (res.success && res.data) {
