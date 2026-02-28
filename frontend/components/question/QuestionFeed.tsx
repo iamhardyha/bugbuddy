@@ -1,5 +1,7 @@
+'use client';
+
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { Select, Button, Flex, Skeleton, Typography } from 'antd';
 import QuestionCard from './QuestionCard';
 import { getQuestions } from '@/lib/questions';
@@ -39,7 +41,7 @@ const CATEGORY_ACCENT: Partial<Record<CategoryFilter, string>> = {
 };
 
 export default function QuestionFeed() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [category, setCategory] = useState<CategoryFilter>(ALL);
   const [questionType, setQuestionType] = useState<QuestionType | ''>('');
   const [status, setStatus] = useState<QuestionStatus | ''>('');
@@ -145,7 +147,7 @@ export default function QuestionFeed() {
           {isLoggedIn && (
             <Button
               type="primary"
-              onClick={() => navigate('/questions/new')}
+              onClick={() => router.push('/questions/new')}
               style={{ width: 'calc(100% - 24px)', margin: '0 12px' }}
             >
               + 질문하기
@@ -190,7 +192,7 @@ export default function QuestionFeed() {
             <Button
               type="primary"
               size="small"
-              onClick={() => navigate('/questions/new')}
+              onClick={() => router.push('/questions/new')}
               className="lg:hidden"
             >
               + 질문하기
@@ -231,7 +233,7 @@ export default function QuestionFeed() {
               아직 질문이 없어요.
             </Text>
             {isLoggedIn && (
-              <Button type="link" onClick={() => navigate('/questions/new')} style={{ fontSize: 13 }}>
+              <Button type="link" onClick={() => router.push('/questions/new')} style={{ fontSize: 13 }}>
                 첫 질문을 작성해보세요 →
               </Button>
             )}

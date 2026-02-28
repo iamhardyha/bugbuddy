@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import { Button, Flex, Typography, Tag, Divider } from 'antd';
 import {

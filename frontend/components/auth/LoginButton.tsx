@@ -2,7 +2,7 @@ import { Button } from 'antd';
 import { GithubOutlined } from '@ant-design/icons';
 
 const GITHUB_LOGIN_URL =
-  (import.meta.env.VITE_API_URL ?? 'http://localhost:8080') +
+  (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080') +
   '/oauth2/authorization/github';
 
 export default function LoginButton() {

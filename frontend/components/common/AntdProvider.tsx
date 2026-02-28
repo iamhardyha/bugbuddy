@@ -1,3 +1,5 @@
+'use client';
+
 import { ConfigProvider, theme as antTheme } from 'antd';
 import { useTheme } from './ThemeProvider';
 import type { ReactNode } from 'react';

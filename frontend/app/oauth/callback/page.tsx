@@ -1,5 +1,7 @@
-import { useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+'use client';
+
+import { Suspense, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Flex, Spin, Typography } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import { saveTokens } from '@/lib/auth';
@@ -17,22 +19,30 @@ function LoadingState() {
   );
 }
 
-export default function OAuthCallbackPage() {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+function OAuthCallbackContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     const accessToken = searchParams.get('accessToken');
     const refreshToken = searchParams.get('refreshToken');
 
     if (!accessToken || !refreshToken) {
-      navigate('/?error=auth_failed', { replace: true });
+      router.replace('/?error=auth_failed');
       return;
     }
 
     saveTokens(accessToken, refreshToken);
-    navigate('/', { replace: true });
-  }, [navigate, searchParams]);
+    router.replace('/');
+  }, [router, searchParams]);
 
   return <LoadingState />;
+}
+
+export default function OAuthCallbackPage() {
+  return (
+    <Suspense fallback={<LoadingState />}>
+      <OAuthCallbackContent />
+    </Suspense>
+  );
 }

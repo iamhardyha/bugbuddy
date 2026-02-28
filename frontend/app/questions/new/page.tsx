@@ -1,5 +1,7 @@
+'use client';
+
 import { useState, useEffect, type KeyboardEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { Button, Input, Select, Switch, Tag, Alert } from 'antd';
 import { getAccessToken } from '@/lib/auth';
 import { createQuestion } from '@/lib/questions';
@@ -8,7 +10,7 @@ import type { QuestionCategory, QuestionType } from '@/types/question';
 import MarkdownEditor from '@/components/editor/MarkdownEditor';
 
 export default function NewQuestionPage() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [category, setCategory] = useState<QuestionCategory | undefined>(undefined);
@@ -22,9 +24,9 @@ export default function NewQuestionPage() {
 
   useEffect(() => {
     if (!getAccessToken()) {
-      navigate('/', { replace: true });
+      router.replace('/');
     }
-  }, [navigate]);
+  }, [router]);
 
   function addTag() {
     const trimmed = tagInput.trim().toLowerCase().replace(/^#/, '');
@@ -72,7 +74,7 @@ export default function NewQuestionPage() {
     });
 
     if (res.success && res.data) {
-      navigate(`/questions/${res.data.id}`);
+      router.push(`/questions/${res.data.id}`);
     } else {
       setError(res.error?.message ?? '질문 등록에 실패했습니다.');
       setSubmitting(false);
@@ -83,7 +85,7 @@ export default function NewQuestionPage() {
     <div className="page-root">
       <header className="page-header">
         <div style={{ margin: '0 auto', maxWidth: '720px', display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <Button type="link" onClick={() => navigate(-1)} style={{ padding: 0, height: 'auto', fontSize: '13px', color: 'var(--text-tertiary)' }}>
+          <Button type="link" onClick={() => router.back()} style={{ padding: 0, height: 'auto', fontSize: '13px', color: 'var(--text-tertiary)' }}>
             ← 돌아가기
           </Button>
           <span style={{ color: 'var(--border)', fontSize: '16px' }}>|</span>
@@ -210,7 +212,7 @@ export default function NewQuestionPage() {
 
           {/* 버튼 */}
           <div className="form-actions">
-            <Button onClick={() => navigate(-1)}>
+            <Button onClick={() => router.back()}>
               취소
             </Button>
             <Button

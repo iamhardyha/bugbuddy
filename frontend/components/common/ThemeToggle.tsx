@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect } from 'react';
 import { Button } from 'antd';
 import { SunOutlined, MoonOutlined } from '@ant-design/icons';

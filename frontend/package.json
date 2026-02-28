@@ -3,23 +3,22 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "lint": "eslint"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
     "@ant-design/icons": "^6.1.0",
-    "@vitejs/plugin-react": "^5.1.4",
+    "@ant-design/nextjs-registry": "^1.0.2",
     "antd": "^6.3.1",
     "framer-motion": "^12.34.3",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
+    "next": "^15.3.3",
+    "react": "^19",
+    "react-dom": "^19",
     "react-markdown": "^10.1.0",
-    "react-router-dom": "^7.13.1",
     "rehype-highlight": "^7.0.2",
-    "remark-gfm": "^4.0.1",
-    "vite": "^7.3.1"
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -27,6 +26,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
+    "eslint-config-next": "^15",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

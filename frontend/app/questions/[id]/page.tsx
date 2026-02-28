@@ -1,5 +1,7 @@
+'use client';
+
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useRouter } from 'next/navigation';
 import { Button, Flex, Tag, Typography, Spin, Divider } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import { getQuestion, deleteQuestion, closeQuestion } from '@/lib/questions';
@@ -15,8 +17,9 @@ import { useModal } from '@/components/common/ModalProvider';
 const { Title, Text } = Typography;
 
 export default function QuestionDetailPage() {
-  const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
+  const router = useRouter();
+  const params = useParams<{ id: string }>();
+  const id = params.id;
   const [question, setQuestion] = useState<QuestionDetail | null>(null);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -50,7 +53,7 @@ export default function QuestionDetailPage() {
     setDeleting(true);
     const res = await deleteQuestion(Number(id));
     if (res.success) {
-      navigate('/', { replace: true });
+      router.replace('/');
     } else {
       setDeleting(false);
     }
@@ -88,7 +91,7 @@ export default function QuestionDetailPage() {
         <Flex vertical align="center" justify="center" gap={12} style={{ minHeight: '60vh' }}>
           <Text style={{ fontSize: '3rem', lineHeight: 1 }}>🔍</Text>
           <Text type="secondary" style={{ fontSize: 14 }}>질문을 찾을 수 없어요.</Text>
-          <Button type="link" onClick={() => navigate('/', { replace: true })} style={{ fontSize: 13 }}>
+          <Button type="link" onClick={() => router.replace('/')} style={{ fontSize: 13 }}>
             홈으로 돌아가기
           </Button>
         </Flex>
@@ -111,7 +114,7 @@ export default function QuestionDetailPage() {
         >
           <Button
             type="link"
-            onClick={() => navigate(-1)}
+            onClick={() => router.back()}
             style={{ padding: 0, height: 'auto', fontSize: '13px', color: 'var(--text-tertiary)' }}
           >
             ← 목록으로
@@ -123,7 +126,7 @@ export default function QuestionDetailPage() {
                 <>
                   <Button
                     size="small"
-                    onClick={() => navigate(`/questions/${id}/edit`)}
+                    onClick={() => router.push(`/questions/${id}/edit`)}
                   >
                     수정
                   </Button>

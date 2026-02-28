@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import { Button, Flex, Avatar, Skeleton, Typography } from 'antd';
 import LoginButton from './LoginButton';

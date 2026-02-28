@@ -1,5 +1,7 @@
+'use client';
+
 import { useState, useEffect, type KeyboardEvent } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useRouter } from 'next/navigation';
 import { Button, Input, Select, Switch, Tag, Alert } from 'antd';
 import { getAccessToken } from '@/lib/auth';
 import { getQuestion, updateQuestion } from '@/lib/questions';
@@ -8,8 +10,9 @@ import type { QuestionCategory, QuestionType } from '@/types/question';
 import MarkdownEditor from '@/components/editor/MarkdownEditor';
 
 export default function EditQuestionPage() {
-  const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
+  const router = useRouter();
+  const params = useParams<{ id: string }>();
+  const id = params.id;
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [category, setCategory] = useState<QuestionCategory | undefined>(undefined);
@@ -24,14 +27,14 @@ export default function EditQuestionPage() {
 
   useEffect(() => {
     if (!getAccessToken()) {
-      navigate('/', { replace: true });
+      router.replace('/');
       return;
     }
     getQuestion(Number(id)).then(res => {
       if (res.success && res.data) {
         const q = res.data;
         if (q.status === 'CLOSED') {
-          navigate(`/questions/${id}`, { replace: true });
+          router.replace(`/questions/${id}`);
           return;
         }
         setTitle(q.title);
@@ -41,11 +44,11 @@ export default function EditQuestionPage() {
         setTags(q.tags);
         setAllowOneToOne(q.allowOneToOne);
       } else {
-        navigate('/', { replace: true });
+        router.replace('/');
       }
       setLoading(false);
     });
-  }, [id, navigate]);
+  }, [id, router]);
 
   function addTag() {
     const trimmed = tagInput.trim().toLowerCase().replace(/^#/, '');
@@ -85,7 +88,7 @@ export default function EditQuestionPage() {
     });
 
     if (res.success && res.data) {
-      navigate(`/questions/${id}`);
+      router.push(`/questions/${id}`);
     } else {
       setError(res.error?.message ?? '수정에 실패했습니다.');
       setSubmitting(false);
@@ -104,7 +107,7 @@ export default function EditQuestionPage() {
     <div className="page-root">
       <header className="page-header">
         <div style={{ margin: '0 auto', maxWidth: '720px', display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <Button type="link" onClick={() => navigate(-1)} style={{ padding: 0, height: 'auto', fontSize: '13px', color: 'var(--text-tertiary)' }}>
+          <Button type="link" onClick={() => router.back()} style={{ padding: 0, height: 'auto', fontSize: '13px', color: 'var(--text-tertiary)' }}>
             ← 돌아가기
           </Button>
           <span style={{ color: 'var(--border)', fontSize: '16px' }}>|</span>
@@ -231,7 +234,7 @@ export default function EditQuestionPage() {
 
           {/* 버튼 */}
           <div className="form-actions">
-            <Button onClick={() => navigate(-1)}>
+            <Button onClick={() => router.back()}>
               취소
             </Button>
             <Button

@@ -1,4 +1,6 @@
-import { Link } from 'react-router-dom';
+'use client';
+
+import Link from 'next/link';
 import { Flex, Tag, Typography } from 'antd';
 import { CATEGORY_META, QUESTION_TYPE_META, relativeTime } from '@/lib/questionMeta';
 import type { QuestionSummary } from '@/types/question';
@@ -43,7 +45,7 @@ export default function QuestionCard({ question }: Props) {
       : String(question.viewCount);
 
   return (
-    <Link to={`/questions/${question.id}`} className="card-link">
+    <Link href={`/questions/${question.id}`} className="card-link">
       {/* ── Left metric column (Reddit-style) ── */}
       <Flex
         vertical
