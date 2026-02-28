@@ -9,6 +9,7 @@ import { CATEGORY_META, QUESTION_TYPE_META, STATUS_META, relativeTime } from '@/
 import type { QuestionDetail } from '@/types/question';
 import type { UserProfile } from '@/types/user';
 import MarkdownRenderer from '@/components/editor/MarkdownRenderer';
+import AnswerList from '@/components/answer/AnswerList';
 
 export default function QuestionDetailPage() {
   const router = useRouter();
@@ -18,20 +19,17 @@ export default function QuestionDetailPage() {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [closing, setClosing] = useState(false);
+  const [answerKey, setAnswerKey] = useState(0);
 
   useEffect(() => {
     async function load() {
-      const qRes = await getQuestion(Number(id));
-      if (qRes.success && qRes.data) {
-        setQuestion(qRes.data);
-      }
+      const [qRes, uRes] = await Promise.all([
+        getQuestion(Number(id)),
+        getAccessToken() ? apiFetch<UserProfile>('/api/auth/me') : Promise.resolve({ success: false, data: null }),
+      ]);
 
-      if (getAccessToken()) {
-        const uRes = await apiFetch<UserProfile>('/api/auth/me');
-        if (uRes.success && uRes.data) {
-          setCurrentUser(uRes.data);
-        }
-      }
+      if (qRes.success && qRes.data) setQuestion(qRes.data);
+      if (uRes.success && uRes.data) setCurrentUser(uRes.data as UserProfile);
 
       setLoading(false);
     }
@@ -61,20 +59,20 @@ export default function QuestionDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-400 text-sm">불러오는 중...</p>
+      <div className="page-root" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p style={{ fontSize: '13px', color: 'var(--text-tertiary)' }}>불러오는 중...</p>
       </div>
     );
   }
 
   if (!question) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-3">
-        <p className="text-5xl">🔍</p>
-        <p className="text-gray-500 text-sm">질문을 찾을 수 없어요.</p>
+      <div className="page-root" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+        <p style={{ fontSize: '3rem' }}>🔍</p>
+        <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>질문을 찾을 수 없어요.</p>
         <button
           onClick={() => router.replace('/')}
-          className="text-sm text-blue-600 hover:underline"
+          style={{ fontSize: '13px', color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
         >
           홈으로 돌아가기
         </button>
@@ -88,30 +86,28 @@ export default function QuestionDetailPage() {
   const type = QUESTION_TYPE_META[question.questionType];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="sticky top-0 z-10 border-b border-gray-200 bg-white/90 backdrop-blur-sm px-6 py-3">
-        <div className="mx-auto flex max-w-3xl items-center justify-between">
-          <button
-            onClick={() => router.back()}
-            className="text-sm text-gray-500 hover:text-gray-900 transition-colors"
-          >
+    <div className="page-root">
+      <header className="page-header">
+        <div style={{ margin: '0 auto', maxWidth: '760px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <button className="page-back-btn" onClick={() => router.back()}>
             ← 목록으로
           </button>
 
           {isAuthor && (
-            <div className="flex items-center gap-2">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               {question.status !== 'CLOSED' && (
                 <>
                   <button
                     onClick={() => router.push(`/questions/${id}/edit`)}
-                    className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50 transition-colors"
+                    className="answer-action-btn"
                   >
                     수정
                   </button>
                   <button
                     onClick={handleClose}
                     disabled={closing}
-                    className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs text-amber-700 hover:bg-amber-100 transition-colors disabled:opacity-50"
+                    className="answer-action-btn answer-action-btn-warning"
+                    style={{ opacity: closing ? 0.6 : 1 }}
                   >
                     {closing ? '마감 중...' : '마감'}
                   </button>
@@ -120,7 +116,8 @@ export default function QuestionDetailPage() {
               <button
                 onClick={handleDelete}
                 disabled={deleting}
-                className="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs text-red-600 hover:bg-red-100 transition-colors disabled:opacity-50"
+                className="answer-action-btn answer-action-btn-danger"
+                style={{ opacity: deleting ? 0.6 : 1 }}
               >
                 {deleting ? '삭제 중...' : '삭제'}
               </button>
@@ -129,41 +126,54 @@ export default function QuestionDetailPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-6 py-8">
-        <article className="rounded-xl border border-gray-200 bg-white p-6 md:p-8">
-          {/* 배지 */}
-          <div className="flex flex-wrap items-center gap-2 mb-4">
+      <main style={{ margin: '0 auto', maxWidth: '760px', padding: '28px 24px' }}>
+        <article className="question-article">
+          {/* 배지 영역 */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px', marginBottom: '18px' }}>
             <span
-              className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset ${status.color}`}
+              className="badge"
+              style={status.style}
             >
               {status.label}
             </span>
-            <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium text-purple-700 bg-purple-50 ring-1 ring-inset ring-purple-600/20">
+            <span
+              className="badge"
+              style={{ background: 'var(--accent-subtle)', color: 'var(--accent)' }}
+            >
               {category.emoji} {category.label}
             </span>
-            <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium text-orange-700 bg-orange-50 ring-1 ring-inset ring-orange-600/20">
+            <span
+              className="badge"
+              style={{ background: 'var(--warning-bg)', color: 'var(--warning-text)' }}
+            >
               {type.emoji} {type.label}
             </span>
             {question.allowOneToOne && (
-              <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium text-teal-700 bg-teal-50 ring-1 ring-inset ring-teal-600/20">
+              <span
+                className="badge"
+                style={{ background: 'var(--status-open-bg)', color: 'var(--status-open)' }}
+              >
                 💬 1:1 가능
               </span>
             )}
           </div>
 
           {/* 제목 */}
-          <h1 className="text-2xl font-bold text-gray-900 leading-snug mb-4">
+          <h1 style={{
+            fontSize: '1.4rem',
+            fontWeight: 700,
+            color: 'var(--text-primary)',
+            lineHeight: 1.35,
+            marginBottom: '14px',
+          }}>
             {question.title}
           </h1>
 
           {/* 태그 */}
           {question.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mb-5">
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '18px' }}>
               {question.tags.map(tag => (
-                <span
-                  key={tag}
-                  className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full"
-                >
+                <span key={tag} className="tag-chip">
                   #{tag}
                 </span>
               ))}
@@ -171,7 +181,12 @@ export default function QuestionDetailPage() {
           )}
 
           {/* 메타 */}
-          <div className="flex items-center gap-3 text-xs text-gray-400 mb-6 pb-6 border-b border-gray-100">
+          <div
+            className="question-meta"
+            style={{ marginBottom: '24px', paddingBottom: '20px', borderBottom: '1px solid var(--border-faint)' }}
+          >
+            <span className="question-meta-author">{question.authorNickname}</span>
+            <span>·</span>
             <span>👁 {question.viewCount.toLocaleString()} 조회</span>
             <span>·</span>
             <span>{relativeTime(question.createdAt)}</span>
@@ -186,6 +201,21 @@ export default function QuestionDetailPage() {
           {/* 본문 */}
           <MarkdownRenderer content={question.body} />
         </article>
+
+        {/* 답변 섹션 */}
+        <div style={{ marginTop: '32px' }}>
+          <AnswerList
+            key={answerKey}
+            questionId={question.id}
+            questionStatus={question.status}
+            questionAuthorId={question.authorUserId}
+            currentUserId={currentUser?.id ?? null}
+            onAccepted={() => {
+              setQuestion(prev => prev ? { ...prev, status: 'SOLVED' } : prev);
+              setAnswerKey(k => k + 1);
+            }}
+          />
+        </div>
       </main>
     </div>
   );

@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import type { QuestionCategory, QuestionType, QuestionStatus } from '@/types/question';
 
 export const CATEGORY_META: Record<QuestionCategory, { label: string; emoji: string }> = {
@@ -23,10 +24,10 @@ export const QUESTION_TYPE_META: Record<QuestionType, { label: string; emoji: st
   FUTURE:      { label: '미래 기술',    emoji: '🔭' },
 };
 
-export const STATUS_META: Record<QuestionStatus, { label: string; color: string }> = {
-  OPEN:   { label: '답변 받는 중', color: 'text-green-700 bg-green-50 ring-green-600/20' },
-  SOLVED: { label: '해결됨',       color: 'text-blue-700 bg-blue-50 ring-blue-600/20' },
-  CLOSED: { label: '마감',         color: 'text-gray-600 bg-gray-50 ring-gray-500/20' },
+export const STATUS_META: Record<QuestionStatus, { label: string; style: CSSProperties }> = {
+  OPEN:   { label: '답변 받는 중', style: { color: 'var(--status-open)',   background: 'var(--status-open-bg)' } },
+  SOLVED: { label: '해결됨',       style: { color: 'var(--status-solved)', background: 'var(--status-solved-bg)' } },
+  CLOSED: { label: '마감',         style: { color: 'var(--status-closed)', background: 'var(--status-closed-bg)' } },
 };
 
 export function relativeTime(isoString: string): string {

@@ -14,6 +14,7 @@ import MarkdownRenderer from './MarkdownRenderer';
 interface Props {
   value: string;
   onChange: (value: string) => void;
+  onUpload?: (uploadId: number) => void;
   placeholder?: string;
   minRows?: number;
   required?: boolean;
@@ -21,7 +22,6 @@ interface Props {
 
 type Tab = 'write' | 'preview';
 
-// ── 툴바 액션 타입 ──────────────────────────────────────────────
 type ToolbarAction =
   | { type: 'wrap'; before: string; after: string; placeholder: string }
   | { type: 'block'; prefix: string; placeholder: string }
@@ -63,6 +63,7 @@ const TOOLBAR: { label: string; title: string; action: ToolbarAction }[] = [
 export default function MarkdownEditor({
   value,
   onChange,
+  onUpload,
   placeholder = '마크다운으로 작성하세요\n이미지는 붙여넣기, 드래그앤드롭, 또는 이미지 버튼으로 첨부할 수 있어요',
   minRows = 12,
   required = false,
@@ -73,7 +74,6 @@ export default function MarkdownEditor({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // ── 텍스트 삽입 헬퍼 ────────────────────────────────────────
   const insertText = useCallback(
     (insertFn: (current: string, selStart: number, selEnd: number) => [string, number, number]) => {
       const ta = textareaRef.current;
@@ -85,7 +85,6 @@ export default function MarkdownEditor({
 
       onChange(next);
 
-      // 커서 위치 복원 (다음 tick)
       requestAnimationFrame(() => {
         ta.focus();
         ta.setSelectionRange(nextStart, nextEnd);
@@ -94,7 +93,6 @@ export default function MarkdownEditor({
     [value, onChange]
   );
 
-  // ── 툴바 버튼 클릭 ──────────────────────────────────────────
   function handleToolbar(action: ToolbarAction) {
     insertText((cur, s, e) => {
       const selected = cur.slice(s, e);
@@ -115,18 +113,16 @@ export default function MarkdownEditor({
         return [next, ns, ne];
       }
 
-      // codeblock
       const lang = '';
       const inner = selected || '코드를 입력하세요';
       const block = `\`\`\`${lang}\n${inner}\n\`\`\``;
       const next = cur.slice(0, s) + block + cur.slice(e);
-      const ns = s + 3; // ``` 다음 위치 (언어 입력 위치)
+      const ns = s + 3;
       const ne = ns + lang.length;
       return [next, ns, ne];
     });
   }
 
-  // ── 이미지 업로드 & 마크다운 삽입 ──────────────────────────
   const handleImageUpload = useCallback(
     async (file: File) => {
       if (!file.type.startsWith('image/')) return;
@@ -140,16 +136,17 @@ export default function MarkdownEditor({
         return;
       }
 
+      onUpload?.(result.uploadId);
+
       insertText((cur, s, _e) => {
         const markdown = `![${result.originalFilename}](${result.fileUrl})`;
         const next = cur.slice(0, s) + markdown + cur.slice(s);
         return [next, s + markdown.length, s + markdown.length];
       });
     },
-    [insertText]
+    [insertText, onUpload]
   );
 
-  // ── 붙여넣기 이미지 감지 ────────────────────────────────────
   function handlePaste(e: ClipboardEvent<HTMLTextAreaElement>) {
     const items = Array.from(e.clipboardData.items);
     const imageItem = items.find(i => i.type.startsWith('image/'));
@@ -160,7 +157,6 @@ export default function MarkdownEditor({
     if (file) handleImageUpload(file);
   }
 
-  // ── 드래그앤드롭 ────────────────────────────────────────────
   function handleDragOver(e: DragEvent<HTMLTextAreaElement>) {
     e.preventDefault();
     setIsDragging(true);
@@ -175,7 +171,6 @@ export default function MarkdownEditor({
     if (file?.type.startsWith('image/')) handleImageUpload(file);
   }
 
-  // ── 파일 input 변경 ─────────────────────────────────────────
   function handleFileInput(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (file) handleImageUpload(file);
@@ -183,69 +178,70 @@ export default function MarkdownEditor({
   }
 
   return (
-    <div className="rounded-lg border border-gray-300 overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent">
+    <div className="editor-wrap">
       {/* 탭 + 툴바 헤더 */}
-      <div className="flex items-center justify-between bg-gray-50 border-b border-gray-200 px-2 py-1.5 gap-2 flex-wrap">
+      <div className="editor-header">
         {/* 탭 */}
-        <div className="flex">
+        <div style={{ display: 'flex', gap: '2px' }}>
           <button
             type="button"
             onClick={() => setTab('write')}
-            className={`px-3 py-1 text-xs rounded-md transition-colors font-medium ${
-              tab === 'write'
-                ? 'bg-white text-gray-900 shadow-sm border border-gray-200'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
+            className={`editor-tab ${tab === 'write' ? 'active' : ''}`}
           >
             작성
           </button>
           <button
             type="button"
             onClick={() => setTab('preview')}
-            className={`px-3 py-1 text-xs rounded-md transition-colors font-medium ${
-              tab === 'preview'
-                ? 'bg-white text-gray-900 shadow-sm border border-gray-200'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
+            className={`editor-tab ${tab === 'preview' ? 'active' : ''}`}
           >
             미리보기
           </button>
         </div>
 
-        {/* 툴바 (작성 탭에서만 표시) */}
+        {/* 툴바 */}
         {tab === 'write' && (
-          <div className="flex items-center gap-0.5 flex-wrap">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '2px', flexWrap: 'wrap' }}>
             {TOOLBAR.map(({ label, title, action }) => (
               <button
                 key={label}
                 type="button"
                 title={title}
                 onClick={() => handleToolbar(action)}
-                className="px-2 py-1 text-xs font-mono text-gray-600 hover:bg-gray-200 rounded transition-colors"
+                className="editor-toolbar-btn"
               >
                 {label}
               </button>
             ))}
 
-            {/* 구분선 */}
-            <span className="w-px h-4 bg-gray-300 mx-1" />
+            <span className="editor-divider" />
 
-            {/* 이미지 업로드 버튼 */}
             <button
               type="button"
               title="이미지 첨부"
               disabled={uploading}
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 hover:bg-gray-200 rounded transition-colors disabled:opacity-50"
+              className="editor-toolbar-btn"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', opacity: uploading ? 0.5 : 1 }}
             >
               {uploading ? (
                 <>
-                  <span className="inline-block h-3 w-3 rounded-full border-2 border-gray-400 border-t-transparent animate-spin" />
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      width: '12px',
+                      height: '12px',
+                      borderRadius: '50%',
+                      border: '2px solid var(--border-strong)',
+                      borderTopColor: 'var(--accent)',
+                      animation: 'spin 0.7s linear infinite',
+                    }}
+                  />
                   업로드 중
                 </>
               ) : (
                 <>
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg style={{ width: '13px', height: '13px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                       d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                     />
@@ -258,7 +254,7 @@ export default function MarkdownEditor({
               ref={fileInputRef}
               type="file"
               accept="image/jpeg,image/png,image/gif,image/webp"
-              className="hidden"
+              style={{ display: 'none' }}
               onChange={handleFileInput}
             />
           </div>
@@ -278,26 +274,26 @@ export default function MarkdownEditor({
           placeholder={placeholder}
           required={required}
           rows={minRows}
-          className={`w-full px-4 py-3 text-sm font-mono leading-relaxed resize-y outline-none bg-white text-gray-900 placeholder:text-gray-400 transition-colors ${
-            isDragging ? 'bg-blue-50' : ''
-          }`}
+          className="editor-textarea"
+          style={isDragging ? { backgroundColor: 'var(--accent-subtle)' } : undefined}
         />
       ) : (
-        <div className="min-h-[calc(var(--min-rows,12)*1.625rem+1.5rem)] px-4 py-3 bg-white"
-          style={{ '--min-rows': minRows } as React.CSSProperties}
+        <div
+          className="editor-preview"
+          style={{ minHeight: `calc(${minRows} * 1.7 * 13.5px + 28px)` }}
         >
           {value.trim() ? (
             <MarkdownRenderer content={value} />
           ) : (
-            <p className="text-sm text-gray-400">미리볼 내용이 없습니다.</p>
+            <p style={{ fontSize: '13px', color: 'var(--text-tertiary)' }}>미리볼 내용이 없습니다.</p>
           )}
         </div>
       )}
 
       {/* 하단 힌트 */}
       {tab === 'write' && (
-        <div className="border-t border-gray-100 bg-gray-50 px-4 py-1.5">
-          <p className="text-xs text-gray-400">
+        <div className="editor-footer">
+          <p style={{ fontSize: '11.5px', color: 'var(--text-tertiary)' }}>
             마크다운 지원 · 이미지는 붙여넣기(Ctrl+V) 또는 드래그앤드롭으로 첨부
           </p>
         </div>

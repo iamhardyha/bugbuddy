@@ -4,6 +4,28 @@ import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { saveTokens } from '@/lib/auth';
 
+function LoadingState() {
+  return (
+    <div
+      className="page-root"
+      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '14px' }}
+    >
+      <span
+        style={{
+          display: 'inline-block',
+          width: '28px',
+          height: '28px',
+          borderRadius: '50%',
+          border: '3px solid var(--border)',
+          borderTopColor: 'var(--accent)',
+          animation: 'spin 0.8s linear infinite',
+        }}
+      />
+      <p style={{ fontSize: '13.5px', color: 'var(--text-tertiary)' }}>로그인 처리 중...</p>
+    </div>
+  );
+}
+
 function OAuthCallbackHandler() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -21,22 +43,12 @@ function OAuthCallbackHandler() {
     router.replace('/');
   }, [router, searchParams]);
 
-  return (
-    <div className="flex min-h-screen items-center justify-center">
-      <p className="text-gray-500">로그인 처리 중...</p>
-    </div>
-  );
+  return <LoadingState />;
 }
 
 export default function OAuthCallbackPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-screen items-center justify-center">
-          <p className="text-gray-500">로그인 처리 중...</p>
-        </div>
-      }
-    >
+    <Suspense fallback={<LoadingState />}>
       <OAuthCallbackHandler />
     </Suspense>
   );

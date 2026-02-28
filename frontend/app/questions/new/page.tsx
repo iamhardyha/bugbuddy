@@ -17,6 +17,7 @@ export default function NewQuestionPage() {
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [allowOneToOne, setAllowOneToOne] = useState(false);
+  const [uploadIds, setUploadIds] = useState<number[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -60,6 +61,7 @@ export default function NewQuestionPage() {
       questionType,
       allowOneToOne,
       tags,
+      uploadIds,
     });
 
     if (res.success && res.data) {
@@ -71,25 +73,24 @@ export default function NewQuestionPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="sticky top-0 z-10 border-b border-gray-200 bg-white/90 backdrop-blur-sm px-6 py-3">
-        <div className="mx-auto flex max-w-3xl items-center gap-4">
-          <button
-            onClick={() => router.back()}
-            className="text-sm text-gray-500 hover:text-gray-900 transition-colors"
-          >
+    <div className="page-root">
+      <header className="page-header">
+        <div style={{ margin: '0 auto', maxWidth: '720px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <button className="page-back-btn" onClick={() => router.back()}>
             ← 돌아가기
           </button>
-          <h1 className="text-lg font-semibold text-gray-900">새 질문 작성</h1>
+          <span style={{ color: 'var(--border)', fontSize: '16px' }}>|</span>
+          <h1 className="page-title">새 질문 작성</h1>
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-6 py-8">
-        <form onSubmit={handleSubmit} className="space-y-6">
+      <main style={{ margin: '0 auto', maxWidth: '720px', padding: '32px 24px' }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+
           {/* 제목 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              제목 <span className="text-red-500">*</span>
+          <div className="form-field">
+            <label className="form-label">
+              제목 <span className="form-label-required">*</span>
             </label>
             <input
               type="text"
@@ -98,22 +99,22 @@ export default function NewQuestionPage() {
               value={title}
               onChange={e => setTitle(e.target.value)}
               placeholder="질문을 한 줄로 요약해주세요"
-              className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="form-input"
             />
-            <p className="mt-1 text-xs text-gray-400 text-right">{title.length}/120</p>
+            <span className="form-char-count">{title.length}/120</span>
           </div>
 
           {/* 카테고리 + 질문 유형 */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                카테고리 <span className="text-red-500">*</span>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div className="form-field">
+              <label className="form-label">
+                카테고리 <span className="form-label-required">*</span>
               </label>
               <select
                 required
                 value={category}
                 onChange={e => setCategory(e.target.value as QuestionCategory)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                className="form-select"
               >
                 <option value="">선택하세요</option>
                 {Object.entries(CATEGORY_META).map(([k, v]) => (
@@ -124,15 +125,15 @@ export default function NewQuestionPage() {
               </select>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                질문 유형 <span className="text-red-500">*</span>
+            <div className="form-field">
+              <label className="form-label">
+                질문 유형 <span className="form-label-required">*</span>
               </label>
               <select
                 required
                 value={questionType}
                 onChange={e => setQuestionType(e.target.value as QuestionType)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                className="form-select"
               >
                 <option value="">선택하세요</option>
                 {Object.entries(QUESTION_TYPE_META).map(([k, v]) => (
@@ -145,13 +146,14 @@ export default function NewQuestionPage() {
           </div>
 
           {/* 내용 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              내용 <span className="text-red-500">*</span>
+          <div className="form-field">
+            <label className="form-label">
+              내용 <span className="form-label-required">*</span>
             </label>
             <MarkdownEditor
               value={body}
               onChange={setBody}
+              onUpload={id => setUploadIds(prev => [...prev, id])}
               placeholder="문제 상황, 시도한 것, 에러 메시지 등을 상세히 적어주세요&#10;&#10;이미지는 붙여넣기(Ctrl+V) 또는 드래그앤드롭으로 첨부할 수 있어요"
               minRows={12}
               required
@@ -159,24 +161,21 @@ export default function NewQuestionPage() {
           </div>
 
           {/* 태그 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          <div className="form-field">
+            <label className="form-label">
               태그{' '}
-              <span className="text-gray-400 font-normal">
+              <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>
                 (최대 5개 · Enter 또는 쉼표로 추가)
               </span>
             </label>
-            <div className="flex flex-wrap gap-1.5 rounded-lg border border-gray-300 px-3 py-2 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent min-h-[44px] items-center">
+            <div className="tag-input-container">
               {tags.map(tag => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-0.5 text-xs text-blue-700"
-                >
+                <span key={tag} className="tag-chip">
                   #{tag}
                   <button
                     type="button"
+                    className="tag-chip-remove"
                     onClick={() => setTags(tags.filter(t => t !== tag))}
-                    className="hover:text-blue-900 ml-0.5"
                   >
                     ×
                   </button>
@@ -190,50 +189,47 @@ export default function NewQuestionPage() {
                   onKeyDown={handleTagKeyDown}
                   onBlur={addTag}
                   placeholder={tags.length === 0 ? '태그 입력...' : ''}
-                  className="flex-1 min-w-24 text-sm outline-none bg-transparent"
+                  className="tag-input"
                 />
               )}
             </div>
           </div>
 
           {/* 1:1 멘토링 허용 */}
-          <div className="flex items-center gap-3">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <button
               type="button"
               onClick={() => setAllowOneToOne(!allowOneToOne)}
-              className={`relative h-6 w-11 rounded-full transition-colors ${
-                allowOneToOne ? 'bg-blue-600' : 'bg-gray-200'
-              }`}
+              className={`toggle-track ${allowOneToOne ? 'toggle-on' : 'toggle-off'}`}
               aria-label="1:1 멘토링 허용 토글"
             >
-              <span
-                className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-                  allowOneToOne ? 'translate-x-5' : ''
-                }`}
-              />
+              <span className="toggle-thumb" />
             </button>
-            <span className="text-sm text-gray-700">1:1 멘토링 허용</span>
-            <span className="text-xs text-gray-400">(인증 멘토에게 1:1 채팅 요청 허용)</span>
+            <span style={{ fontSize: '13.5px', color: 'var(--text-primary)' }}>
+              1:1 멘토링 허용
+            </span>
+            <span style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>
+              (인증 멘토에게 1:1 채팅 요청 허용)
+            </span>
           </div>
 
           {/* 에러 메시지 */}
-          {error && (
-            <p className="text-sm text-red-600 bg-red-50 rounded-lg px-4 py-2.5">{error}</p>
-          )}
+          {error && <p className="error-banner">{error}</p>}
 
           {/* 버튼 */}
-          <div className="flex justify-end gap-3 pt-2">
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', paddingTop: '4px' }}>
             <button
               type="button"
               onClick={() => router.back()}
-              className="rounded-lg border border-gray-300 px-5 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              className="ghost-btn"
             >
               취소
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="accent-btn"
+              style={{ padding: '9px 22px', fontSize: '13.5px', opacity: submitting ? 0.6 : 1 }}
             >
               {submitting ? '등록 중...' : '질문 등록'}
             </button>
