@@ -6,6 +6,7 @@ import { getAccessToken } from '@/lib/auth';
 import { getQuestion, updateQuestion } from '@/lib/questions';
 import { CATEGORY_META, QUESTION_TYPE_META } from '@/lib/questionMeta';
 import type { QuestionCategory, QuestionType } from '@/types/question';
+import MarkdownEditor from '@/components/editor/MarkdownEditor';
 
 export default function EditQuestionPage() {
   const router = useRouter();
@@ -176,12 +177,11 @@ export default function EditQuestionPage() {
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
               내용 <span className="text-red-500">*</span>
             </label>
-            <textarea
-              required
+            <MarkdownEditor
               value={body}
-              onChange={e => setBody(e.target.value)}
-              rows={12}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
+              onChange={setBody}
+              minRows={12}
+              required
             />
           </div>
 

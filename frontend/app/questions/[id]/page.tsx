@@ -8,6 +8,7 @@ import { getAccessToken } from '@/lib/auth';
 import { CATEGORY_META, QUESTION_TYPE_META, STATUS_META, relativeTime } from '@/lib/questionMeta';
 import type { QuestionDetail } from '@/types/question';
 import type { UserProfile } from '@/types/user';
+import MarkdownRenderer from '@/components/editor/MarkdownRenderer';
 
 export default function QuestionDetailPage() {
   const router = useRouter();
@@ -183,9 +184,7 @@ export default function QuestionDetailPage() {
           </div>
 
           {/* 본문 */}
-          <div className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap font-mono">
-            {question.body}
-          </div>
+          <MarkdownRenderer content={question.body} />
         </article>
       </main>
     </div>

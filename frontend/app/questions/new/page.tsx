@@ -6,6 +6,7 @@ import { getAccessToken } from '@/lib/auth';
 import { createQuestion } from '@/lib/questions';
 import { CATEGORY_META, QUESTION_TYPE_META } from '@/lib/questionMeta';
 import type { QuestionCategory, QuestionType } from '@/types/question';
+import MarkdownEditor from '@/components/editor/MarkdownEditor';
 
 export default function NewQuestionPage() {
   const router = useRouter();
@@ -148,13 +149,12 @@ export default function NewQuestionPage() {
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
               내용 <span className="text-red-500">*</span>
             </label>
-            <textarea
-              required
+            <MarkdownEditor
               value={body}
-              onChange={e => setBody(e.target.value)}
-              placeholder="문제 상황, 시도한 것, 에러 메시지 등을 상세히 적어주세요"
-              rows={12}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
+              onChange={setBody}
+              placeholder="문제 상황, 시도한 것, 에러 메시지 등을 상세히 적어주세요&#10;&#10;이미지는 붙여넣기(Ctrl+V) 또는 드래그앤드롭으로 첨부할 수 있어요"
+              minRows={12}
+              required
             />
           </div>
 
