@@ -12,6 +12,13 @@ import java.util.Set;
 
 public interface AnswerReactionRepository extends JpaRepository<AnswerReaction, Long> {
 
+    @Query("SELECT r FROM AnswerReaction r WHERE r.answerId = :answerId AND r.voterUserId = :userId AND r.reactionType = :reactionType")
+    Optional<AnswerReaction> findByAnswerIdAndVoterUserIdAndReactionType(
+            @Param("answerId") Long answerId,
+            @Param("userId") Long userId,
+            @Param("reactionType") ReactionType reactionType
+    );
+
     @Query("SELECT r FROM AnswerReaction r WHERE r.deletedAt IS NULL AND r.answerId = :answerId AND r.voterUserId = :userId AND r.reactionType = :reactionType")
     Optional<AnswerReaction> findActiveByAnswerIdAndVoterUserIdAndReactionType(
             @Param("answerId") Long answerId,

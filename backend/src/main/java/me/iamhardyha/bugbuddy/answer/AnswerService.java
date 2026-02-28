@@ -173,19 +173,26 @@ public class AnswerService {
             throw new BugBuddyException(ErrorCode.ANSWER_SELF_REACTION);
         }
 
-        boolean alreadyReacted = answerReactionRepository
-                .findActiveByAnswerIdAndVoterUserIdAndReactionType(answerId, userId, ReactionType.HELPFUL)
-                .isPresent();
+        // soft-delete된 레코드 포함하여 조회 (유니크 제약 충돌 방지)
+        AnswerReaction reaction = answerReactionRepository
+                .findByAnswerIdAndVoterUserIdAndReactionType(answerId, userId, ReactionType.HELPFUL)
+                .orElse(null);
 
-        if (alreadyReacted) {
+        if (reaction != null && !reaction.isDeleted()) {
             throw new BugBuddyException(ErrorCode.ANSWER_REACTION_ALREADY_EXISTS);
         }
 
-        AnswerReaction reaction = new AnswerReaction();
-        reaction.setAnswerId(answerId);
-        reaction.setVoterUserId(userId);
-        reaction.setReactionType(ReactionType.HELPFUL);
-        answerReactionRepository.save(reaction);
+        if (reaction != null) {
+            // soft-delete된 레코드 복원
+            reaction.setDeletedAt(null);
+        } else {
+            // 최초 반응 생성
+            reaction = new AnswerReaction();
+            reaction.setAnswerId(answerId);
+            reaction.setVoterUserId(userId);
+            reaction.setReactionType(ReactionType.HELPFUL);
+            answerReactionRepository.save(reaction);
+        }
 
         long helpfulCount = answerReactionRepository
                 .countActiveByAnswerIdAndReactionType(answerId, ReactionType.HELPFUL);
