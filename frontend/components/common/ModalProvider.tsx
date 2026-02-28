@@ -1,14 +1,20 @@
-'use client';
-
 import {
   createContext,
   useCallback,
   useContext,
   useRef,
   useState,
-  type KeyboardEvent,
   type ReactNode,
 } from 'react';
+import { Modal, Button, Flex, Typography } from 'antd';
+import {
+  ExclamationCircleOutlined,
+  WarningOutlined,
+  InfoCircleOutlined,
+  CheckCircleOutlined,
+} from '@ant-design/icons';
+
+const { Title, Text } = Typography;
 
 // ── 타입 ────────────────────────────────────────────────────────────────────
 
@@ -38,29 +44,13 @@ interface ModalContextValue {
 
 const ModalContext = createContext<ModalContextValue | null>(null);
 
-// ── 아이콘 SVG ───────────────────────────────────────────────────────────────
+// ── 아이콘 ───────────────────────────────────────────────────────────────────
 
 const ICONS: Record<ModalVariant, ReactNode> = {
-  danger: (
-    <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-    </svg>
-  ),
-  warning: (
-    <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-    </svg>
-  ),
-  info: (
-    <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-    </svg>
-  ),
-  success: (
-    <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  ),
+  danger:  <ExclamationCircleOutlined style={{ fontSize: 22 }} />,
+  warning: <WarningOutlined style={{ fontSize: 22 }} />,
+  info:    <InfoCircleOutlined style={{ fontSize: 22 }} />,
+  success: <CheckCircleOutlined style={{ fontSize: 22 }} />,
 };
 
 // ── 내부 상태 타입 ────────────────────────────────────────────────────────────
@@ -123,77 +113,67 @@ export function ModalProvider({ children }: { children: ReactNode }) {
     [openModal]
   );
 
-  function handleKeyDown(e: KeyboardEvent<HTMLDivElement>) {
-    if (e.key === 'Escape') close(false);
-    if (e.key === 'Enter') close(true);
-  }
-
-  const confirmBtnStyle = modal
-    ? modal.variant === 'danger'
-      ? { background: 'var(--error-text)', color: '#fff', border: 'none' }
-      : modal.variant === 'warning'
-      ? { background: 'var(--warning-text)', color: '#fff', border: 'none' }
-      : modal.variant === 'success'
-      ? { background: 'var(--status-open)', color: '#fff', border: 'none' }
-      : undefined
-    : undefined;
+  /* 확인 버튼 variant별 스타일 */
+  const confirmBtnStyle =
+    modal?.variant === 'warning'
+      ? { background: 'var(--warning-text)', borderColor: 'var(--warning-text)' }
+      : modal?.variant === 'success'
+      ? { background: 'var(--status-open)', borderColor: 'var(--status-open)' }
+      : undefined;
 
   return (
     <ModalContext.Provider value={{ alert, confirm }}>
       {children}
-      {modal && (
-        <div
-          className="modal-overlay"
-          onClick={() => close(false)}
-          onKeyDown={handleKeyDown}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="modal-title"
-          tabIndex={-1}
-        >
-          <div
-            className="modal-card"
-            onClick={e => e.stopPropagation()}
-          >
+
+      <Modal
+        open={!!modal}
+        footer={null}
+        closable={false}
+        centered
+        width={420}
+        onCancel={() => close(false)}
+        destroyOnHidden
+        styles={{ body: { padding: 0 } }}
+      >
+        {modal && (
+          <Flex vertical align="center" style={{ padding: '28px 24px 20px' }}>
             {/* 아이콘 */}
             <div className={`modal-icon modal-icon-${modal.variant}`}>
               {ICONS[modal.variant]}
             </div>
 
             {/* 제목 */}
-            <p id="modal-title" className="modal-title">
+            <Title level={5} style={{ margin: '0 0 4px', textAlign: 'center' }}>
               {modal.title}
-            </p>
+            </Title>
 
             {/* 메시지 */}
             {modal.message && (
-              <p className="modal-message">{modal.message}</p>
+              <Text type="secondary" style={{ fontSize: 13, textAlign: 'center', marginBottom: 4 }}>
+                {modal.message}
+              </Text>
             )}
 
             {/* 버튼 */}
-            <div className="modal-actions">
+            <Flex gap={8} justify="center" style={{ marginTop: 20 }}>
               {modal.type === 'confirm' && (
-                <button
-                  className="ghost-btn"
-                  style={{ padding: '8px 18px' }}
-                  onClick={() => close(false)}
-                  autoFocus
-                >
+                <Button onClick={() => close(false)}>
                   {modal.cancelLabel}
-                </button>
+                </Button>
               )}
-              <button
-                className="accent-btn"
-                style={{ padding: '8px 18px', ...confirmBtnStyle }}
+              <Button
+                type="primary"
+                danger={modal.variant === 'danger'}
+                style={confirmBtnStyle}
                 onClick={() => close(true)}
                 autoFocus={modal.type === 'alert'}
               >
                 {modal.confirmLabel}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+              </Button>
+            </Flex>
+          </Flex>
+        )}
+      </Modal>
     </ModalContext.Provider>
   );
 }

@@ -1,7 +1,6 @@
-'use client';
-
-import { useState, useEffect, KeyboardEvent } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, type KeyboardEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button, Input, Select, Switch, Tag, Alert } from 'antd';
 import { getAccessToken } from '@/lib/auth';
 import { createQuestion } from '@/lib/questions';
 import { CATEGORY_META, QUESTION_TYPE_META } from '@/lib/questionMeta';
@@ -9,11 +8,11 @@ import type { QuestionCategory, QuestionType } from '@/types/question';
 import MarkdownEditor from '@/components/editor/MarkdownEditor';
 
 export default function NewQuestionPage() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
-  const [category, setCategory] = useState<QuestionCategory | ''>('');
-  const [questionType, setQuestionType] = useState<QuestionType | ''>('');
+  const [category, setCategory] = useState<QuestionCategory | undefined>(undefined);
+  const [questionType, setQuestionType] = useState<QuestionType | undefined>(undefined);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [allowOneToOne, setAllowOneToOne] = useState(false);
@@ -23,9 +22,9 @@ export default function NewQuestionPage() {
 
   useEffect(() => {
     if (!getAccessToken()) {
-      router.replace('/');
+      navigate('/', { replace: true });
     }
-  }, [router]);
+  }, [navigate]);
 
   function addTag() {
     const trimmed = tagInput.trim().toLowerCase().replace(/^#/, '');
@@ -50,6 +49,14 @@ export default function NewQuestionPage() {
       setError('카테고리와 질문 유형을 선택해주세요.');
       return;
     }
+    if (!title.trim()) {
+      setError('제목을 입력해주세요.');
+      return;
+    }
+    if (!body.trim()) {
+      setError('내용을 입력해주세요.');
+      return;
+    }
 
     setSubmitting(true);
     setError('');
@@ -65,7 +72,7 @@ export default function NewQuestionPage() {
     });
 
     if (res.success && res.data) {
-      router.push(`/questions/${res.data.id}`);
+      navigate(`/questions/${res.data.id}`);
     } else {
       setError(res.error?.message ?? '질문 등록에 실패했습니다.');
       setSubmitting(false);
@@ -76,9 +83,9 @@ export default function NewQuestionPage() {
     <div className="page-root">
       <header className="page-header">
         <div style={{ margin: '0 auto', maxWidth: '720px', display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <button className="page-back-btn" onClick={() => router.back()}>
+          <Button type="link" onClick={() => navigate(-1)} style={{ padding: 0, height: 'auto', fontSize: '13px', color: 'var(--text-tertiary)' }}>
             ← 돌아가기
-          </button>
+          </Button>
           <span style={{ color: 'var(--border)', fontSize: '16px' }}>|</span>
           <h1 className="page-title">새 질문 작성</h1>
         </div>
@@ -92,16 +99,13 @@ export default function NewQuestionPage() {
             <label className="form-label">
               제목 <span className="form-label-required">*</span>
             </label>
-            <input
-              type="text"
-              required
+            <Input
               maxLength={120}
+              showCount
               value={title}
               onChange={e => setTitle(e.target.value)}
               placeholder="질문을 한 줄로 요약해주세요"
-              className="form-input"
             />
-            <span className="form-char-count">{title.length}/120</span>
           </div>
 
           {/* 카테고리 + 질문 유형 */}
@@ -110,38 +114,32 @@ export default function NewQuestionPage() {
               <label className="form-label">
                 카테고리 <span className="form-label-required">*</span>
               </label>
-              <select
-                required
+              <Select<QuestionCategory>
                 value={category}
-                onChange={e => setCategory(e.target.value as QuestionCategory)}
-                className="form-select"
-              >
-                <option value="">선택하세요</option>
-                {Object.entries(CATEGORY_META).map(([k, v]) => (
-                  <option key={k} value={k}>
-                    {v.emoji} {v.label}
-                  </option>
-                ))}
-              </select>
+                onChange={v => setCategory(v)}
+                placeholder="선택하세요"
+                style={{ width: '100%' }}
+                options={Object.entries(CATEGORY_META).map(([k, v]) => ({
+                  label: `${v.emoji} ${v.label}`,
+                  value: k,
+                }))}
+              />
             </div>
 
             <div className="form-field">
               <label className="form-label">
                 질문 유형 <span className="form-label-required">*</span>
               </label>
-              <select
-                required
+              <Select<QuestionType>
                 value={questionType}
-                onChange={e => setQuestionType(e.target.value as QuestionType)}
-                className="form-select"
-              >
-                <option value="">선택하세요</option>
-                {Object.entries(QUESTION_TYPE_META).map(([k, v]) => (
-                  <option key={k} value={k}>
-                    {v.emoji} {v.label}
-                  </option>
-                ))}
-              </select>
+                onChange={v => setQuestionType(v)}
+                placeholder="선택하세요"
+                style={{ width: '100%' }}
+                options={Object.entries(QUESTION_TYPE_META).map(([k, v]) => ({
+                  label: `${v.emoji} ${v.label}`,
+                  value: k,
+                }))}
+              />
             </div>
           </div>
 
@@ -170,16 +168,14 @@ export default function NewQuestionPage() {
             </label>
             <div className="tag-input-container">
               {tags.map(tag => (
-                <span key={tag} className="tag-chip">
+                <Tag
+                  key={tag}
+                  closable
+                  onClose={() => setTags(tags.filter(t => t !== tag))}
+                  style={{ background: 'var(--tag-bg)', color: 'var(--tag-text)', border: 'none', borderRadius: 999, fontSize: '12px' }}
+                >
                   #{tag}
-                  <button
-                    type="button"
-                    className="tag-chip-remove"
-                    onClick={() => setTags(tags.filter(t => t !== tag))}
-                  >
-                    ×
-                  </button>
-                </span>
+                </Tag>
               ))}
               {tags.length < 5 && (
                 <input
@@ -197,14 +193,10 @@ export default function NewQuestionPage() {
 
           {/* 1:1 멘토링 허용 */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <button
-              type="button"
-              onClick={() => setAllowOneToOne(!allowOneToOne)}
-              className={`toggle-track ${allowOneToOne ? 'toggle-on' : 'toggle-off'}`}
-              aria-label="1:1 멘토링 허용 토글"
-            >
-              <span className="toggle-thumb" />
-            </button>
+            <Switch
+              checked={allowOneToOne}
+              onChange={setAllowOneToOne}
+            />
             <span style={{ fontSize: '13.5px', color: 'var(--text-primary)' }}>
               1:1 멘토링 허용
             </span>
@@ -214,25 +206,20 @@ export default function NewQuestionPage() {
           </div>
 
           {/* 에러 메시지 */}
-          {error && <p className="error-banner">{error}</p>}
+          {error && <Alert type="error" message={error} showIcon />}
 
           {/* 버튼 */}
           <div className="form-actions">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              className="ghost-btn"
-            >
+            <Button onClick={() => navigate(-1)}>
               취소
-            </button>
-            <button
-              type="submit"
-              disabled={submitting}
-              className="accent-btn"
-              style={{ opacity: submitting ? 0.6 : 1 }}
+            </Button>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={submitting}
             >
-              {submitting ? '등록 중...' : '질문 등록'}
-            </button>
+              질문 등록
+            </Button>
           </div>
         </form>
       </main>

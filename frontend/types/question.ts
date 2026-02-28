@@ -10,6 +10,8 @@ export type QuestionStatus = 'OPEN' | 'SOLVED' | 'CLOSED';
 
 export interface QuestionSummary {
   id: number;
+  authorUserId: number;
+  authorNickname: string;
   title: string;
   category: QuestionCategory;
   questionType: QuestionType;
@@ -33,6 +35,7 @@ export interface QuestionRequest {
   questionType: QuestionType;
   allowOneToOne?: boolean;
   tags?: string[];
+  uploadIds?: number[];
 }
 
 export interface Page<T> {

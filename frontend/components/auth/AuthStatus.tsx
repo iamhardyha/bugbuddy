@@ -1,16 +1,15 @@
-'use client';
-
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Button, Flex, Avatar, Skeleton, Typography } from 'antd';
 import LoginButton from './LoginButton';
 import { apiFetch } from '@/lib/api';
 import { getAccessToken, clearTokens } from '@/lib/auth';
 import type { UserProfile } from '@/types/user';
 
+const { Text } = Typography;
+
 export default function AuthStatus() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   useEffect(() => {
     if (!getAccessToken()) {
@@ -26,48 +25,32 @@ export default function AuthStatus() {
   function handleLogout() {
     clearTokens();
     setUser(null);
-    router.refresh();
+    window.location.reload();
   }
 
   if (loading) {
-    return (
-      <div
-        style={{
-          width: 120,
-          height: 32,
-          borderRadius: 8,
-          background: 'var(--bg-elevated)',
-          animation: 'skeleton-wave 1.6s ease-in-out infinite',
-        }}
-      />
-    );
+    return <Skeleton.Button active style={{ width: 120, height: 32, borderRadius: 8 }} />;
   }
 
   if (user) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        {/* Avatar */}
-        <div
+      <Flex align="center" gap={8}>
+        <Avatar
+          size={30}
           style={{
-            width: 30,
-            height: 30,
-            borderRadius: '50%',
             background: 'var(--accent-subtle)',
+            color: 'var(--accent)',
             border: '1.5px solid var(--accent-ring)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
             fontSize: 12,
             fontWeight: 700,
-            color: 'var(--accent)',
-            flexShrink: 0,
             letterSpacing: '-0.02em',
+            flexShrink: 0,
           }}
         >
           {user.nickname.charAt(0).toUpperCase()}
-        </div>
+        </Avatar>
 
-        <span
+        <Text
           style={{
             fontSize: 13,
             fontWeight: 500,
@@ -79,27 +62,17 @@ export default function AuthStatus() {
           }}
         >
           {user.nickname}
-        </span>
+        </Text>
 
-        <button
+        <Button
+          type="text"
+          size="small"
           onClick={handleLogout}
-          style={{
-            fontSize: 11.5,
-            color: 'var(--text-tertiary)',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            fontFamily: 'inherit',
-            padding: '4px 6px',
-            borderRadius: 5,
-            transition: 'color 0.12s ease',
-          }}
-          onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)')}
-          onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = 'var(--text-tertiary)')}
+          style={{ fontSize: 11.5, color: 'var(--text-tertiary)', padding: '0 6px' }}
         >
           로그아웃
-        </button>
-      </div>
+        </Button>
+      </Flex>
     );
   }
 

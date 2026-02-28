@@ -1,5 +1,3 @@
-'use client';
-
 import {
   useRef,
   useState,
@@ -8,8 +6,12 @@ import {
   type ClipboardEvent,
   type ChangeEvent,
 } from 'react';
+import { Button, Flex, Segmented, Typography } from 'antd';
+import { PictureOutlined, LoadingOutlined } from '@ant-design/icons';
 import { uploadImage } from '@/lib/uploads';
 import MarkdownRenderer from './MarkdownRenderer';
+
+const { Text } = Typography;
 
 interface Props {
   value: string;
@@ -27,26 +29,30 @@ type ToolbarAction =
   | { type: 'block'; prefix: string; placeholder: string }
   | { type: 'codeblock' };
 
-const TOOLBAR: { label: string; title: string; action: ToolbarAction }[] = [
+const TOOLBAR: { label: string; title: string; action: ToolbarAction; style?: React.CSSProperties }[] = [
   {
     label: 'B',
     title: '굵게 (Bold)',
     action: { type: 'wrap', before: '**', after: '**', placeholder: '굵은 텍스트' },
+    style: { fontWeight: 700 },
   },
   {
     label: 'I',
     title: '기울임 (Italic)',
     action: { type: 'wrap', before: '*', after: '*', placeholder: '기울임 텍스트' },
+    style: { fontStyle: 'italic' },
   },
   {
     label: '`코드`',
     title: '인라인 코드',
     action: { type: 'wrap', before: '`', after: '`', placeholder: '코드' },
+    style: { fontFamily: 'var(--font-jetbrains-mono)', fontSize: 11 },
   },
   {
     label: '```',
     title: '코드 블록',
     action: { type: 'codeblock' },
+    style: { fontFamily: 'var(--font-jetbrains-mono)', fontSize: 11 },
   },
   {
     label: '링크',
@@ -182,74 +188,44 @@ export default function MarkdownEditor({
       {/* 탭 + 툴바 헤더 */}
       <div className="editor-header">
         {/* 탭 */}
-        <div style={{ display: 'flex', gap: '2px' }}>
-          <button
-            type="button"
-            onClick={() => setTab('write')}
-            className={`editor-tab ${tab === 'write' ? 'active' : ''}`}
-          >
-            작성
-          </button>
-          <button
-            type="button"
-            onClick={() => setTab('preview')}
-            className={`editor-tab ${tab === 'preview' ? 'active' : ''}`}
-          >
-            미리보기
-          </button>
-        </div>
+        <Segmented
+          value={tab}
+          onChange={v => setTab(v as Tab)}
+          size="small"
+          options={[
+            { label: '작성', value: 'write' },
+            { label: '미리보기', value: 'preview' },
+          ]}
+        />
 
         {/* 툴바 */}
         {tab === 'write' && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '2px', flexWrap: 'wrap' }}>
-            {TOOLBAR.map(({ label, title, action }) => (
-              <button
+          <Flex align="center" gap={2} wrap>
+            {TOOLBAR.map(({ label, title, action, style }) => (
+              <Button
                 key={label}
-                type="button"
+                type="text"
+                size="small"
                 title={title}
                 onClick={() => handleToolbar(action)}
-                className="editor-toolbar-btn"
+                style={style}
               >
                 {label}
-              </button>
+              </Button>
             ))}
 
-            <span className="editor-divider" />
+            <div className="editor-divider" />
 
-            <button
-              type="button"
+            <Button
+              type="text"
+              size="small"
               title="이미지 첨부"
               disabled={uploading}
               onClick={() => fileInputRef.current?.click()}
-              className="editor-toolbar-btn"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', opacity: uploading ? 0.5 : 1 }}
+              icon={uploading ? <LoadingOutlined spin /> : <PictureOutlined />}
             >
-              {uploading ? (
-                <>
-                  <span
-                    style={{
-                      display: 'inline-block',
-                      width: '12px',
-                      height: '12px',
-                      borderRadius: '50%',
-                      border: '2px solid var(--border-strong)',
-                      borderTopColor: 'var(--accent)',
-                      animation: 'spin 0.7s linear infinite',
-                    }}
-                  />
-                  업로드 중
-                </>
-              ) : (
-                <>
-                  <svg style={{ width: '13px', height: '13px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
-                  이미지
-                </>
-              )}
-            </button>
+              이미지
+            </Button>
             <input
               ref={fileInputRef}
               type="file"
@@ -257,7 +233,7 @@ export default function MarkdownEditor({
               style={{ display: 'none' }}
               onChange={handleFileInput}
             />
-          </div>
+          </Flex>
         )}
       </div>
 
@@ -285,7 +261,7 @@ export default function MarkdownEditor({
           {value.trim() ? (
             <MarkdownRenderer content={value} />
           ) : (
-            <p style={{ fontSize: '13px', color: 'var(--text-tertiary)' }}>미리볼 내용이 없습니다.</p>
+            <Text type="secondary" style={{ fontSize: '13px' }}>미리볼 내용이 없습니다.</Text>
           )}
         </div>
       )}
@@ -293,9 +269,9 @@ export default function MarkdownEditor({
       {/* 하단 힌트 */}
       {tab === 'write' && (
         <div className="editor-footer">
-          <p style={{ fontSize: '11.5px', color: 'var(--text-tertiary)' }}>
+          <Text type="secondary" style={{ fontSize: '11.5px' }}>
             마크다운 지원 · 이미지는 붙여넣기(Ctrl+V) 또는 드래그앤드롭으로 첨부
-          </p>
+          </Text>
         </div>
       )}
     </div>

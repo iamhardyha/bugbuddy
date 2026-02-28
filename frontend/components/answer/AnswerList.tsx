@@ -1,6 +1,14 @@
-'use client';
-
 import { useEffect, useState } from 'react';
+import { Button, Flex, Typography, Tag, Divider } from 'antd';
+import {
+  CheckCircleFilled,
+  LikeFilled,
+  LikeOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  CheckOutlined,
+  MessageOutlined,
+} from '@ant-design/icons';
 import { getAccessToken } from '@/lib/auth';
 import {
   getAnswers,
@@ -17,6 +25,8 @@ import type { QuestionStatus } from '@/types/question';
 import MarkdownRenderer from '@/components/editor/MarkdownRenderer';
 import MarkdownEditor from '@/components/editor/MarkdownEditor';
 import { useModal } from '@/components/common/ModalProvider';
+
+const { Title, Text } = Typography;
 
 interface Props {
   questionId: number;
@@ -57,7 +67,6 @@ export default function AnswerList({
       if (res.success && res.data) {
         const content = res.data.content;
         setAnswers(content);
-        // 서버에서 내려온 myHelpful로 초기 반응 상태 동기화
         setReacted(new Set(content.filter(a => a.myHelpful).map(a => a.id)));
       }
       setLoading(false);
@@ -153,9 +162,9 @@ export default function AnswerList({
 
   if (loading) {
     return (
-      <div style={{ padding: '32px 0', textAlign: 'center', fontSize: '13px', color: 'var(--text-tertiary)' }}>
-        답변 불러오는 중...
-      </div>
+      <Flex justify="center" style={{ padding: '32px 0' }}>
+        <Text type="secondary" style={{ fontSize: '13px' }}>답변 불러오는 중...</Text>
+      </Flex>
     );
   }
 
@@ -166,36 +175,37 @@ export default function AnswerList({
   });
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <Flex vertical gap={24}>
       {/* 답변 헤더 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <h2 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)' }}>답변</h2>
-        <span
-          className="badge badge-neutral"
-          style={{ fontSize: '11.5px', padding: '2px 8px' }}
-        >
+      <Flex align="center" gap={10}>
+        <Title level={5} style={{ margin: 0, color: 'var(--text-primary)' }}>답변</Title>
+        <Tag style={{ fontSize: '11.5px', padding: '2px 8px', background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: 'none', borderRadius: 999 }}>
           {answers.length}
-        </span>
-      </div>
+        </Tag>
+      </Flex>
 
       {/* 답변 목록 */}
       {sorted.length === 0 ? (
-        <div
+        <Flex
+          vertical
+          align="center"
+          justify="center"
           style={{
             borderRadius: '12px',
             border: '1px dashed var(--border)',
             background: 'var(--bg-subtle)',
             padding: '48px 24px',
-            textAlign: 'center',
           }}
         >
-          <p style={{ fontSize: '2rem', marginBottom: '8px' }}>💬</p>
-          <p style={{ fontSize: '13px', color: 'var(--text-tertiary)' }}>
+          <Text style={{ fontSize: '2rem', marginBottom: '8px', display: 'block' }}>
+            <MessageOutlined />
+          </Text>
+          <Text type="secondary" style={{ fontSize: '13px' }}>
             아직 답변이 없어요. 첫 번째 답변을 남겨보세요!
-          </p>
-        </div>
+          </Text>
+        </Flex>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <Flex vertical gap={16}>
           {sorted.map(answer => (
             <AnswerCard
               key={answer.id}
@@ -217,39 +227,41 @@ export default function AnswerList({
               onHelpful={() => handleHelpful(answer)}
             />
           ))}
-        </div>
+        </Flex>
       )}
 
       {/* 답변 작성 폼 */}
       {canWrite ? (
         <div className="answer-write-card">
-          <h3 style={{ fontSize: '13.5px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '16px' }}>
+          <Title level={5} style={{ margin: '0 0 16px', color: 'var(--text-primary)', fontWeight: 600 }}>
             답변 작성
-          </h3>
-          <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <MarkdownEditor
-              value={writeBody}
-              onChange={setWriteBody}
-              onUpload={id => setWriteUploadIds(prev => [...prev, id])}
-              placeholder="답변을 마크다운으로 작성하세요&#10;이미지는 붙여넣기(Ctrl+V) 또는 드래그앤드롭으로 첨부할 수 있어요"
-              minRows={8}
-              required
-            />
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <button
-                type="submit"
-                disabled={submitting || !writeBody.trim()}
-                className="accent-btn"
-                style={{ padding: '9px 20px', fontSize: '13px', opacity: (submitting || !writeBody.trim()) ? 0.5 : 1 }}
-              >
-                {submitting ? '등록 중...' : '답변 등록'}
-              </button>
-            </div>
+          </Title>
+          <form onSubmit={handleCreate}>
+            <Flex vertical gap={14}>
+              <MarkdownEditor
+                value={writeBody}
+                onChange={setWriteBody}
+                onUpload={id => setWriteUploadIds(prev => [...prev, id])}
+                placeholder="답변을 마크다운으로 작성하세요&#10;이미지는 붙여넣기(Ctrl+V) 또는 드래그앤드롭으로 첨부할 수 있어요"
+                minRows={8}
+                required
+              />
+              <Flex justify="flex-end">
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={submitting}
+                  disabled={!writeBody.trim()}
+                >
+                  답변 등록
+                </Button>
+              </Flex>
+            </Flex>
           </form>
         </div>
       ) : !isLoggedIn ? (
         <div className="answer-login-card">
-          <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+          <Text style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
             답변을 작성하려면{' '}
             <a
               href="http://localhost:8080/oauth2/authorization/github"
@@ -260,10 +272,10 @@ export default function AnswerList({
               로그인
             </a>
             이 필요해요.
-          </p>
+          </Text>
         </div>
       ) : null}
-    </div>
+    </Flex>
   );
 }
 
@@ -311,53 +323,44 @@ function AnswerCard({
   const canReact = currentUserId !== null && !isOwn;
 
   return (
-    <article
-      className={`answer-card ${answer.accepted ? 'answer-card-accepted' : ''}`}
-    >
+    <article className={`answer-card ${answer.accepted ? 'answer-card-accepted' : ''}`}>
       {/* 채택 배지 */}
       {answer.accepted && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '16px', color: 'var(--status-open)' }}>
-          <svg style={{ width: '16px', height: '16px' }} fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fillRule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
-              clipRule="evenodd"
-            />
-          </svg>
-          <span style={{ fontSize: '12px', fontWeight: 600 }}>채택된 답변</span>
-        </div>
+        <Flex align="center" gap={6} style={{ marginBottom: '16px', color: 'var(--status-open)' }}>
+          <CheckCircleFilled style={{ fontSize: '16px' }} />
+          <Text style={{ fontSize: '12px', fontWeight: 600, color: 'var(--status-open)' }}>채택된 답변</Text>
+        </Flex>
       )}
 
       {/* 메타 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
+      <Flex align="center" gap={8} wrap style={{ marginBottom: '16px' }}>
         {answer.authorSnapshotRole === 'MENTOR' && (
-          <span
-            className="badge"
-            style={{ background: 'var(--accent-subtle)', color: 'var(--accent)', fontSize: '11px' }}
+          <Tag
+            style={{ background: 'var(--accent-subtle)', color: 'var(--accent)', fontSize: '11px', border: 'none' }}
           >
             🎓 멘토
-          </span>
+          </Tag>
         )}
-        <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+        <Text strong style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
           {answer.authorNickname}
-        </span>
-        <span style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>·</span>
-        <span style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>
+        </Text>
+        <Text type="secondary" style={{ fontSize: '12px' }}>·</Text>
+        <Text type="secondary" style={{ fontSize: '12px' }}>
           {relativeTime(answer.createdAt)}
-        </span>
+        </Text>
         {answer.updatedAt !== answer.createdAt && (
           <>
-            <span style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>·</span>
-            <span style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>
+            <Text type="secondary" style={{ fontSize: '12px' }}>·</Text>
+            <Text type="secondary" style={{ fontSize: '12px' }}>
               수정됨 {relativeTime(answer.updatedAt)}
-            </span>
+            </Text>
           </>
         )}
-      </div>
+      </Flex>
 
       {/* 본문 or 수정 폼 */}
       {isEditing ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <Flex vertical gap={12}>
           <MarkdownEditor
             value={editBody}
             onChange={onEditBodyChange}
@@ -365,91 +368,85 @@ function AnswerCard({
             minRows={6}
             required
           />
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-            <button
-              type="button"
-              onClick={onCancelEdit}
-              className="ghost-btn"
-              style={{ padding: '6px 16px', fontSize: '12px' }}
-            >
+          <Flex justify="flex-end" gap={8}>
+            <Button onClick={onCancelEdit} size="small">
               취소
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              type="primary"
+              size="small"
               onClick={onUpdate}
-              disabled={editSubmitting || !editBody.trim()}
-              className="accent-btn"
-              style={{ padding: '6px 16px', fontSize: '12px', opacity: (editSubmitting || !editBody.trim()) ? 0.5 : 1 }}
+              loading={editSubmitting}
+              disabled={!editBody.trim()}
             >
-              {editSubmitting ? '저장 중...' : '저장'}
-            </button>
-          </div>
-        </div>
+              저장
+            </Button>
+          </Flex>
+        </Flex>
       ) : (
         <MarkdownRenderer content={answer.body} />
       )}
 
       {/* 액션 바 */}
       {!isEditing && (
-        <div className="answer-action-bar">
-          {/* 도움됐어요 */}
-          <button
-            type="button"
-            onClick={canReact ? onHelpful : undefined}
-            disabled={!canReact}
-            className={`helpful-btn ${isReacted ? 'reacted' : ''}`}
-            title={!canReact && currentUserId !== null ? '본인 답변에는 반응할 수 없어요' : undefined}
-          >
-            <svg
-              style={{ width: '14px', height: '14px' }}
-              fill={isReacted ? 'currentColor' : 'none'}
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+        <>
+          <Divider style={{ margin: '14px 0 10px', borderColor: 'var(--border-faint)' }} />
+          <Flex align="center" justify="space-between" wrap gap={8}>
+            {/* 도움됐어요 */}
+            <Button
+              variant="outlined"
+              size="small"
+              icon={isReacted ? <LikeFilled /> : <LikeOutlined />}
+              onClick={canReact ? onHelpful : undefined}
+              disabled={!canReact}
+              title={!canReact && currentUserId !== null ? '본인 답변에는 반응할 수 없어요' : undefined}
+              style={isReacted ? { color: 'var(--accent)', borderColor: 'var(--accent)' } : undefined}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"
-              />
-            </svg>
-            도움됐어요
-            {answer.helpfulCount > 0 && (
-              <span style={{ fontWeight: 700 }}>{answer.helpfulCount}</span>
-            )}
-          </button>
+              도움됐어요
+              {answer.helpfulCount > 0 && (
+                <Text strong style={{ marginLeft: 4, fontSize: '12px', color: 'inherit' }}>
+                  {answer.helpfulCount}
+                </Text>
+              )}
+            </Button>
 
-          {/* 채택 + 수정/삭제 */}
-          <div className="answer-action-bar-right">
-            {canAccept && (
-              <button
-                type="button"
-                onClick={onAccept}
-                className="answer-action-btn answer-action-btn-success"
-              >
-                ✓ 채택
-              </button>
-            )}
-            {isOwn && (
-              <>
-                <button
-                  type="button"
-                  onClick={onStartEdit}
-                  className="answer-action-btn"
+            {/* 채택 + 수정/삭제 */}
+            <Flex gap={8}>
+              {canAccept && (
+                <Button
+                  variant="outlined"
+                  size="small"
+                  icon={<CheckOutlined />}
+                  onClick={onAccept}
+                  style={{ color: 'var(--status-open)', borderColor: 'var(--status-open)' }}
                 >
-                  수정
-                </button>
-                <button
-                  type="button"
-                  onClick={onDelete}
-                  className="answer-action-btn answer-action-btn-danger"
-                >
-                  삭제
-                </button>
-              </>
-            )}
-          </div>
-        </div>
+                  채택
+                </Button>
+              )}
+              {isOwn && (
+                <>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    icon={<EditOutlined />}
+                    onClick={onStartEdit}
+                  >
+                    수정
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    danger
+                    icon={<DeleteOutlined />}
+                    onClick={onDelete}
+                  >
+                    삭제
+                  </Button>
+                </>
+              )}
+            </Flex>
+          </Flex>
+        </>
       )}
     </article>
   );

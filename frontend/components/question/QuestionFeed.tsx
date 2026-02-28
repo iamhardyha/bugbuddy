@@ -1,27 +1,28 @@
-'use client';
-
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useNavigate } from 'react-router-dom';
+import { Select, Button, Flex, Skeleton, Typography } from 'antd';
 import QuestionCard from './QuestionCard';
 import { getQuestions } from '@/lib/questions';
 import { getAccessToken } from '@/lib/auth';
-import { CATEGORY_META, QUESTION_TYPE_META } from '@/lib/questionMeta';
+import { QUESTION_TYPE_META } from '@/lib/questionMeta';
 import type { QuestionSummary, QuestionCategory, QuestionType, QuestionStatus } from '@/types/question';
+
+const { Text } = Typography;
 
 const ALL = 'ALL' as const;
 type CategoryFilter = QuestionCategory | typeof ALL;
 
 const CATEGORIES: { value: CategoryFilter; label: string; emoji: string }[] = [
-  { value: ALL,         label: '전체',       emoji: '◎' },
-  { value: 'BACKEND',   label: '백엔드',     emoji: '🧩' },
-  { value: 'FRONTEND',  label: '프론트엔드', emoji: '🎨' },
-  { value: 'DEVOPS',    label: 'DevOps',     emoji: '🛠' },
-  { value: 'MOBILE',    label: '모바일',     emoji: '📱' },
-  { value: 'AI_DATA',   label: 'AI / 데이터', emoji: '🤖' },
+  { value: ALL,         label: '전체',         emoji: '◎' },
+  { value: 'BACKEND',   label: '백엔드',       emoji: '🧩' },
+  { value: 'FRONTEND',  label: '프론트엔드',   emoji: '🎨' },
+  { value: 'DEVOPS',    label: 'DevOps',       emoji: '🛠' },
+  { value: 'MOBILE',    label: '모바일',       emoji: '📱' },
+  { value: 'AI_DATA',   label: 'AI / 데이터',  emoji: '🤖' },
   { value: 'CS_ALGO',   label: 'CS / 알고리즘', emoji: '🧪' },
-  { value: 'CAREER',    label: '커리어',     emoji: '🚀' },
-  { value: 'FUTURE',    label: '미래 고민',  emoji: '🌱' },
-  { value: 'ETC',       label: '기타',       emoji: '🐞' },
+  { value: 'CAREER',    label: '커리어',       emoji: '🚀' },
+  { value: 'FUTURE',    label: '미래 고민',    emoji: '🌱' },
+  { value: 'ETC',       label: '기타',         emoji: '🐞' },
 ];
 
 const CATEGORY_ACCENT: Partial<Record<CategoryFilter, string>> = {
@@ -38,7 +39,7 @@ const CATEGORY_ACCENT: Partial<Record<CategoryFilter, string>> = {
 };
 
 export default function QuestionFeed() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [category, setCategory] = useState<CategoryFilter>(ALL);
   const [questionType, setQuestionType] = useState<QuestionType | ''>('');
   const [status, setStatus] = useState<QuestionStatus | ''>('');
@@ -91,12 +92,13 @@ export default function QuestionFeed() {
   }
 
   return (
-    <div className="flex gap-0 pt-6 lg:gap-6">
+    <Flex gap={0} style={{ paddingTop: 24 }} className="lg:gap-6">
       {/* ── Left Sidebar ──────────────────────────────── */}
       <aside className="hidden lg:block" style={{ width: 210, flexShrink: 0 }}>
         <div style={{ position: 'sticky', top: 72 }}>
-          <p
+          <Text
             style={{
+              display: 'block',
               fontSize: 10.5,
               fontWeight: 700,
               letterSpacing: '0.1em',
@@ -107,7 +109,7 @@ export default function QuestionFeed() {
             }}
           >
             카테고리
-          </p>
+          </Text>
 
           {CATEGORIES.map(c => {
             const isActive = category === c.value;
@@ -118,7 +120,6 @@ export default function QuestionFeed() {
                 onClick={() => setCategory(c.value)}
                 className={`nav-btn ${isActive ? 'active' : ''}`}
               >
-                {/* Active indicator bar */}
                 {isActive && (
                   <span
                     style={{
@@ -139,27 +140,16 @@ export default function QuestionFeed() {
             );
           })}
 
-          {/* Divider */}
-          <div
-            style={{
-              margin: '16px 12px',
-              height: 1,
-              background: 'var(--border-faint)',
-            }}
-          />
+          <div style={{ margin: '16px 12px', height: 1, background: 'var(--border-faint)' }} />
 
           {isLoggedIn && (
-            <button
-              onClick={() => router.push('/questions/new')}
-              className="accent-btn"
-              style={{ width: 'calc(100% - 24px)', margin: '0 12px', justifyContent: 'center' }}
+            <Button
+              type="primary"
+              onClick={() => navigate('/questions/new')}
+              style={{ width: 'calc(100% - 24px)', margin: '0 12px' }}
             >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              질문하기
-            </button>
+              + 질문하기
+            </Button>
           )}
         </div>
       </aside>
@@ -167,86 +157,49 @@ export default function QuestionFeed() {
       {/* ── Main Content ──────────────────────────────── */}
       <div style={{ flex: 1, minWidth: 0 }}>
 
-        {/* Mobile category scroll */}
-        <div
-          className="flex lg:hidden overflow-x-auto pb-1"
-          style={{ gap: 6, marginBottom: 12 }}
-        >
-          {CATEGORIES.map(c => {
-            const isActive = category === c.value;
-            return (
-              <button
-                key={c.value}
-                onClick={() => setCategory(c.value)}
-                style={{
-                  flexShrink: 0,
-                  padding: '5px 14px',
-                  borderRadius: 20,
-                  border: '1px solid',
-                  borderColor: isActive ? 'var(--accent)' : 'var(--border)',
-                  background: isActive ? 'var(--accent-subtle)' : 'transparent',
-                  color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
-                  fontSize: 12.5,
-                  fontWeight: isActive ? 600 : 400,
-                  fontFamily: 'inherit',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  transition: 'all 0.12s ease',
-                }}
-              >
-                {c.emoji} {c.label}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Filter bar */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            marginBottom: 14,
-            flexWrap: 'wrap',
-          }}
-        >
-          <select
+          {/* Filter bar */}
+        <Flex align="center" gap={8} wrap style={{ marginBottom: 14 }}>
+          <Select<QuestionType | ''>
             value={questionType}
-            onChange={e => setQuestionType(e.target.value as QuestionType | '')}
-            className="theme-select"
-          >
-            <option value="">유형 전체</option>
-            {Object.entries(QUESTION_TYPE_META).map(([k, v]) => (
-              <option key={k} value={k}>{v.label}</option>
-            ))}
-          </select>
+            onChange={v => setQuestionType(v)}
+            style={{ width: 130 }}
+            size="small"
+            options={[
+              { label: '유형 전체', value: '' },
+              ...Object.entries(QUESTION_TYPE_META).map(([k, v]) => ({ label: v.label, value: k })),
+            ]}
+          />
 
-          <select
+          <Select<QuestionStatus | ''>
             value={status}
-            onChange={e => setStatus(e.target.value as QuestionStatus | '')}
-            className="theme-select"
-          >
-            <option value="">상태 전체</option>
-            <option value="OPEN">답변 받는 중</option>
-            <option value="SOLVED">해결됨</option>
-            <option value="CLOSED">마감</option>
-          </select>
+            onChange={v => setStatus(v)}
+            style={{ width: 130 }}
+            size="small"
+            options={[
+              { label: '상태 전체', value: '' },
+              { label: '답변 받는 중', value: 'OPEN' },
+              { label: '해결됨', value: 'SOLVED' },
+              { label: '마감', value: 'CLOSED' },
+            ]}
+          />
 
           <div style={{ flex: 1 }} />
 
           {/* Mobile ask button */}
           {isLoggedIn && (
-            <button
-              onClick={() => router.push('/questions/new')}
-              className="accent-btn lg:hidden"
+            <Button
+              type="primary"
+              size="small"
+              onClick={() => navigate('/questions/new')}
+              className="lg:hidden"
             >
               + 질문하기
-            </button>
+            </Button>
           )}
 
           {/* Question count hint */}
           {!loading && (
-            <span
+            <Text
               style={{
                 fontSize: 12,
                 color: 'var(--text-tertiary)',
@@ -254,86 +207,70 @@ export default function QuestionFeed() {
               }}
             >
               {questions.length}개
-            </span>
+            </Text>
           )}
-        </div>
+        </Flex>
 
         {/* List */}
         {loading ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+          <Flex vertical gap={7}>
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="skeleton" style={{ height: 90 }} />
+              <Skeleton key={i} active paragraph={{ rows: 2 }} style={{ padding: '12px 16px', borderRadius: 8, background: 'var(--bg-surface)' }} />
             ))}
-          </div>
+          </Flex>
         ) : questions.length === 0 ? (
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '80px 0',
-              gap: 10,
-            }}
+          <Flex
+            vertical
+            align="center"
+            justify="center"
+            gap={10}
+            style={{ padding: '80px 0' }}
           >
-            <span style={{ fontSize: 36, lineHeight: 1 }}>◎</span>
-            <p style={{ margin: 0, fontSize: 14, color: 'var(--text-tertiary)' }}>
+            <Text style={{ fontSize: 36, lineHeight: 1, display: 'block' }}>◎</Text>
+            <Text type="secondary" style={{ fontSize: 14 }}>
               아직 질문이 없어요.
-            </p>
+            </Text>
             {isLoggedIn && (
-              <button
-                onClick={() => router.push('/questions/new')}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: 13,
-                  color: 'var(--accent)',
-                  cursor: 'pointer',
-                  fontFamily: 'inherit',
-                }}
-              >
+              <Button type="link" onClick={() => navigate('/questions/new')} style={{ fontSize: 13 }}>
                 첫 질문을 작성해보세요 →
-              </button>
+              </Button>
             )}
-          </div>
+          </Flex>
         ) : (
           <>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+            <Flex vertical gap={7}>
               {questions.map(q => (
                 <QuestionCard key={q.id} question={q} />
               ))}
-            </div>
+            </Flex>
 
             {hasMore && (
-              <div style={{ textAlign: 'center', padding: '20px 0 8px' }}>
-                <button
-                  onClick={handleLoadMore}
-                  disabled={loadingMore}
-                  className="ghost-btn"
-                >
-                  {loadingMore ? '불러오는 중…' : '더 보기'}
-                </button>
-              </div>
+              <Flex justify="center" style={{ padding: '20px 0 8px' }}>
+                <Button onClick={handleLoadMore} loading={loadingMore}>
+                  더 보기
+                </Button>
+              </Flex>
             )}
 
             {!hasMore && questions.length > 5 && (
-              <p
+              <Text
+                type="secondary"
                 style={{
+                  display: 'block',
                   textAlign: 'center',
                   padding: '20px 0 8px',
                   fontSize: 12,
-                  color: 'var(--text-tertiary)',
                   fontFamily: 'var(--font-jetbrains-mono)',
                 }}
               >
                 — 모든 질문을 봤어요 —
-              </p>
+              </Text>
             )}
           </>
         )}
 
         <div style={{ height: 48 }} />
       </div>
-    </div>
+    </Flex>
   );
 }

@@ -1,6 +1,9 @@
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
+import { Flex, Tag, Typography } from 'antd';
 import { CATEGORY_META, QUESTION_TYPE_META, relativeTime } from '@/lib/questionMeta';
 import type { QuestionSummary } from '@/types/question';
+
+const { Text } = Typography;
 
 /* Status config with CSS variable references */
 const STATUS: Record<string, { label: string; color: string; bg: string }> = {
@@ -40,16 +43,15 @@ export default function QuestionCard({ question }: Props) {
       : String(question.viewCount);
 
   return (
-    <Link href={`/questions/${question.id}`} className="card-link">
+    <Link to={`/questions/${question.id}`} className="card-link">
       {/* ── Left metric column (Reddit-style) ── */}
-      <div
+      <Flex
+        vertical
+        align="center"
+        justify="center"
         style={{
           width: 60,
           flexShrink: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
           padding: '14px 6px',
           borderRight: '1px solid var(--border-faint)',
           background: 'var(--bg-subtle)',
@@ -67,7 +69,7 @@ export default function QuestionCard({ question }: Props) {
           }}
         />
         {/* View count */}
-        <span
+        <Text
           style={{
             fontFamily: 'var(--font-jetbrains-mono)',
             fontSize: 12,
@@ -77,8 +79,8 @@ export default function QuestionCard({ question }: Props) {
           }}
         >
           {views}
-        </span>
-        <span
+        </Text>
+        <Text
           style={{
             fontSize: 9.5,
             color: 'var(--text-tertiary)',
@@ -87,34 +89,25 @@ export default function QuestionCard({ question }: Props) {
           }}
         >
           views
-        </span>
-      </div>
+        </Text>
+      </Flex>
 
       {/* ── Content ── */}
       <div style={{ flex: 1, minWidth: 0, padding: '12px 16px 11px' }}>
         {/* Meta row */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 5,
-            flexWrap: 'wrap',
-            marginBottom: 7,
-          }}
-        >
+        <Flex align="center" gap={5} wrap style={{ marginBottom: 7 }}>
           {/* Status badge */}
-          <span
+          <Tag
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: 5,
-              padding: '2px 7px',
               borderRadius: 20,
               background: status.bg,
               color: status.color,
               fontSize: 10.5,
               fontWeight: 600,
-              letterSpacing: '0.01em',
+              border: 'none',
               flexShrink: 0,
             }}
           >
@@ -124,60 +117,73 @@ export default function QuestionCard({ question }: Props) {
                 height: 5,
                 borderRadius: '50%',
                 background: status.color,
+                display: 'inline-block',
                 flexShrink: 0,
               }}
             />
             {status.label}
-          </span>
+          </Tag>
 
           {/* Category */}
-          <span
+          <Tag
             style={{
-              padding: '2px 7px',
               borderRadius: 5,
               background: 'var(--bg-elevated)',
               color: 'var(--text-secondary)',
               fontSize: 10.5,
               fontWeight: 500,
+              border: 'none',
             }}
           >
             {category.emoji} {category.label}
-          </span>
+          </Tag>
 
           {/* Type */}
-          <span
+          <Tag
             style={{
-              padding: '2px 7px',
               borderRadius: 5,
               background: 'var(--bg-elevated)',
               color: 'var(--text-secondary)',
               fontSize: 10.5,
               fontWeight: 500,
+              border: 'none',
             }}
           >
             {type.label}
-          </span>
+          </Tag>
 
           {/* 1:1 badge */}
           {question.allowOneToOne && (
-            <span
+            <Tag
               style={{
-                padding: '2px 7px',
                 borderRadius: 5,
                 background: 'var(--status-open-bg)',
                 color: 'var(--status-open)',
                 fontSize: 10.5,
                 fontWeight: 600,
+                border: 'none',
               }}
             >
               1:1 가능
-            </span>
+            </Tag>
           )}
 
-          {/* Time — pushed to right */}
-          <span
+          {/* Author nickname */}
+          <Text
             style={{
               marginLeft: 'auto',
+              fontSize: 11,
+              color: 'var(--text-secondary)',
+              fontWeight: 500,
+              flexShrink: 0,
+            }}
+          >
+            {question.authorNickname}
+          </Text>
+
+          {/* Time */}
+          <Text
+            style={{
               fontSize: 11,
               color: 'var(--text-tertiary)',
               fontFamily: 'var(--font-jetbrains-mono)',
@@ -185,54 +191,46 @@ export default function QuestionCard({ question }: Props) {
             }}
           >
             {relativeTime(question.createdAt)}
-          </span>
-        </div>
+          </Text>
+        </Flex>
 
         {/* Title */}
-        <h3
+        <Text
           style={{
-            margin: 0,
+            display: '-webkit-box',
             fontSize: 14.5,
             fontWeight: 600,
             lineHeight: 1.48,
             color: 'var(--text-primary)',
             letterSpacing: '-0.01em',
-            display: '-webkit-box',
             WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical' as const,
             overflow: 'hidden',
           }}
         >
           {question.title}
-        </h3>
+        </Text>
 
         {/* Tags */}
         {question.tags.length > 0 && (
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 5,
-              marginTop: 9,
-            }}
-          >
+          <Flex wrap gap={5} style={{ marginTop: 9 }}>
             {question.tags.slice(0, 5).map(tag => (
-              <span
+              <Tag
                 key={tag}
                 style={{
-                  padding: '1.5px 6px',
                   borderRadius: 4,
                   background: 'var(--tag-bg)',
                   color: 'var(--tag-text)',
                   fontSize: 11,
                   fontFamily: 'var(--font-jetbrains-mono)',
                   fontWeight: 500,
+                  border: 'none',
                 }}
               >
                 #{tag}
-              </span>
+              </Tag>
             ))}
-          </div>
+          </Flex>
         )}
       </div>
 
