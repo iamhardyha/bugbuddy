@@ -8,13 +8,39 @@ export default function LoginButton() {
   return (
     <a
       href={GITHUB_LOGIN_URL}
-      className="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-gray-700"
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 7,
+        padding: '7px 14px',
+        borderRadius: 8,
+        border: '1px solid var(--border)',
+        background: 'var(--bg-elevated)',
+        color: 'var(--text-primary)',
+        fontSize: 13,
+        fontWeight: 500,
+        textDecoration: 'none',
+        transition: 'all 0.15s ease',
+        flexShrink: 0,
+      }}
+      onMouseEnter={e => {
+        const el = e.currentTarget as HTMLAnchorElement;
+        el.style.borderColor = 'var(--border-strong)';
+        el.style.background = 'var(--bg-hover)';
+      }}
+      onMouseLeave={e => {
+        const el = e.currentTarget as HTMLAnchorElement;
+        el.style.borderColor = 'var(--border)';
+        el.style.background = 'var(--bg-elevated)';
+      }}
     >
       <svg
-        className="h-5 w-5"
-        fill="currentColor"
+        width="15"
+        height="15"
         viewBox="0 0 24 24"
+        fill="currentColor"
         aria-hidden="true"
+        style={{ flexShrink: 0 }}
       >
         <path
           fillRule="evenodd"
@@ -22,7 +48,7 @@ export default function LoginButton() {
           clipRule="evenodd"
         />
       </svg>
-      GitHub으로 로그인
+      GitHub 로그인
     </a>
   );
 }
