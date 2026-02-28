@@ -25,6 +25,12 @@ public enum ErrorCode {
 
     // 답변
     ANSWER_NOT_FOUND(HttpStatus.NOT_FOUND, "답변을 찾을 수 없습니다."),
+    ANSWER_FORBIDDEN(HttpStatus.FORBIDDEN, "답변 수정/삭제 권한이 없습니다."),
+    ANSWER_ACCEPT_FORBIDDEN(HttpStatus.FORBIDDEN, "답변 채택은 질문 작성자만 가능합니다."),
+    ANSWER_SELF_REACTION(HttpStatus.BAD_REQUEST, "자신의 답변에는 반응할 수 없습니다."),
+    ANSWER_REACTION_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 반응한 답변입니다."),
+    ANSWER_REACTION_NOT_FOUND(HttpStatus.NOT_FOUND, "반응을 찾을 수 없습니다."),
+    QUESTION_ALREADY_SOLVED(HttpStatus.BAD_REQUEST, "이미 채택된 답변이 있는 질문입니다."),
 
     // 채팅
     CHAT_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "채팅방을 찾을 수 없습니다."),
