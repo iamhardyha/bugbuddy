@@ -840,3 +840,161 @@ body {
 }
 .md-prose tbody tr:last-child td { border-bottom: none; }
 .md-prose tbody tr:hover td { background: var(--bg-hover); }
+
+/* ─── Responsive Layout Wrappers ────────────────── */
+.home-header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.home-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.form-page-main {
+  margin: 0 auto;
+  max-width: 720px;
+  padding: 32px 24px;
+}
+
+.detail-page-main {
+  margin: 0 auto;
+  max-width: 760px;
+  padding: 28px 24px;
+}
+
+/* ─── Responsive Form ─────────────────────────────── */
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.form-actions .accent-btn {
+  padding: 9px 22px;
+  font-size: 13.5px;
+}
+
+/* ─── Answer Action Bar ──────────────────────────── */
+.answer-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-faint);
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.answer-action-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* ─── Answer Write / Login Card ─────────────────── */
+.answer-write-card {
+  border-radius: 12px;
+  border: 1px solid var(--border-faint);
+  background: var(--bg-surface);
+  padding: 24px;
+}
+
+.answer-login-card {
+  border-radius: 12px;
+  border: 1px solid var(--border-faint);
+  background: var(--bg-subtle);
+  padding: 32px 24px;
+  text-align: center;
+}
+
+/* ─── Mobile ≤ 639px ─────────────────────────────── */
+@media (max-width: 639px) {
+  .page-header {
+    padding: 10px 16px;
+  }
+
+  .home-header-inner {
+    padding: 0 12px;
+    height: 52px;
+    gap: 8px;
+  }
+
+  .home-main {
+    padding: 0 12px;
+  }
+
+  .form-page-main {
+    padding: 20px 16px;
+  }
+
+  .detail-page-main {
+    padding: 20px 16px;
+  }
+
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .form-actions .ghost-btn,
+  .form-actions .accent-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 11px 20px;
+    font-size: 14px;
+  }
+
+  .question-article {
+    padding: 18px 16px;
+    border-radius: 10px;
+  }
+
+  .answer-card {
+    padding: 16px;
+  }
+
+  .answer-write-card {
+    padding: 16px;
+    border-radius: 10px;
+  }
+
+  .answer-login-card {
+    padding: 24px 16px;
+    border-radius: 10px;
+  }
+
+  .modal-card {
+    padding: 22px 20px 18px;
+    border-radius: 12px;
+  }
+
+  .answer-action-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .answer-action-bar-right {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

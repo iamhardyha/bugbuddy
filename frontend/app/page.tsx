@@ -17,17 +17,7 @@ export default function Home() {
           background: 'var(--header-bg)',
         }}
       >
-        <div
-          style={{
-            maxWidth: 1200,
-            margin: '0 auto',
-            padding: '0 24px',
-            height: 56,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-          }}
-        >
+        <div className="home-header-inner">
           {/* Wordmark */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 9, flexShrink: 0 }}>
             <div
@@ -67,7 +57,7 @@ export default function Home() {
       </header>
 
       {/* Body */}
-      <main style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
+      <main className="home-main">
         <QuestionFeed />
       </main>
     </div>

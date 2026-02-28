@@ -222,14 +222,7 @@ export default function AnswerList({
 
       {/* 답변 작성 폼 */}
       {canWrite ? (
-        <div
-          style={{
-            borderRadius: '12px',
-            border: '1px solid var(--border-faint)',
-            background: 'var(--bg-surface)',
-            padding: '24px',
-          }}
-        >
+        <div className="answer-write-card">
           <h3 style={{ fontSize: '13.5px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '16px' }}>
             답변 작성
           </h3>
@@ -255,15 +248,7 @@ export default function AnswerList({
           </form>
         </div>
       ) : !isLoggedIn ? (
-        <div
-          style={{
-            borderRadius: '12px',
-            border: '1px solid var(--border-faint)',
-            background: 'var(--bg-subtle)',
-            padding: '32px 24px',
-            textAlign: 'center',
-          }}
-        >
+        <div className="answer-login-card">
           <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
             답변을 작성하려면{' '}
             <a
@@ -406,16 +391,7 @@ function AnswerCard({
 
       {/* 액션 바 */}
       {!isEditing && (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginTop: '20px',
-            paddingTop: '16px',
-            borderTop: '1px solid var(--border-faint)',
-          }}
-        >
+        <div className="answer-action-bar">
           {/* 도움됐어요 */}
           <button
             type="button"
@@ -444,7 +420,7 @@ function AnswerCard({
           </button>
 
           {/* 채택 + 수정/삭제 */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div className="answer-action-bar-right">
             {canAccept && (
               <button
                 type="button"

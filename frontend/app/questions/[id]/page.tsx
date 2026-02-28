@@ -140,7 +140,7 @@ export default function QuestionDetailPage() {
         </div>
       </header>
 
-      <main style={{ margin: '0 auto', maxWidth: '760px', padding: '28px 24px' }}>
+      <main className="detail-page-main">
         <article className="question-article">
           {/* 배지 영역 */}
           <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px', marginBottom: '18px' }}>

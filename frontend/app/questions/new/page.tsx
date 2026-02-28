@@ -84,7 +84,7 @@ export default function NewQuestionPage() {
         </div>
       </header>
 
-      <main style={{ margin: '0 auto', maxWidth: '720px', padding: '32px 24px' }}>
+      <main className="form-page-main">
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
           {/* 제목 */}
@@ -105,7 +105,7 @@ export default function NewQuestionPage() {
           </div>
 
           {/* 카테고리 + 질문 유형 */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div className="form-grid-2">
             <div className="form-field">
               <label className="form-label">
                 카테고리 <span className="form-label-required">*</span>
@@ -217,7 +217,7 @@ export default function NewQuestionPage() {
           {error && <p className="error-banner">{error}</p>}
 
           {/* 버튼 */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', paddingTop: '4px' }}>
+          <div className="form-actions">
             <button
               type="button"
               onClick={() => router.back()}
@@ -229,7 +229,7 @@ export default function NewQuestionPage() {
               type="submit"
               disabled={submitting}
               className="accent-btn"
-              style={{ padding: '9px 22px', fontSize: '13.5px', opacity: submitting ? 0.6 : 1 }}
+              style={{ opacity: submitting ? 0.6 : 1 }}
             >
               {submitting ? '등록 중...' : '질문 등록'}
             </button>
