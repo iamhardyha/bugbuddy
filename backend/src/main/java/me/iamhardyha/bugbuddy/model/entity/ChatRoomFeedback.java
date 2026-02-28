@@ -31,9 +31,9 @@ public class ChatRoomFeedback extends BaseSoftDeleteEntity {
     @Column(name = "rater_user_id", nullable = false)
     private Long raterUserId;
 
-    /** Rating: true=positive (1), false=negative (0). */
+    /** Rating: 1~5점 별점. */
     @Column(name = "rating", nullable = false)
-    private boolean rating;
+    private int rating;
 
     @Column(name = "comment", length = 500)
     private String comment;

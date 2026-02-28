@@ -67,6 +67,24 @@ public class UserEntity extends BaseSoftDeleteEntity {
     @Builder.Default
     private int level = 1;
 
+    /** 멘토 별점 평균 (1.00 ~ 5.00). 별점 없으면 null. */
+    @Column(name = "mentor_avg_rating", precision = 3, scale = 2)
+    private java.math.BigDecimal mentorAvgRating;
+
+    /** 멘토 별점 수. */
+    @Column(name = "mentor_rating_count", nullable = false)
+    @Builder.Default
+    private int mentorRatingCount = 0;
+
+    /** 운영자 승인 신고 누적 카운트. */
+    @Column(name = "report_count", nullable = false)
+    @Builder.Default
+    private int reportCount = 0;
+
+    /** 일시정지 기간. null이면 정지 없음. */
+    @Column(name = "suspended_until")
+    private Instant suspendedUntil;
+
     @Column(name = "deactivated_at")
     private Instant deactivatedAt;
 }
