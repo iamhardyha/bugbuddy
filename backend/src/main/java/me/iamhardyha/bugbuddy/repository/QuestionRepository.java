@@ -33,6 +33,12 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     @Query("SELECT q FROM Question q WHERE q.deletedAt IS NULL AND q.id = :id")
     Optional<Question> findActiveById(@Param("id") Long id);
 
+    @Query("SELECT q FROM Question q WHERE q.deletedAt IS NULL AND q.authorUserId = :authorUserId ORDER BY q.createdAt DESC")
+    Page<Question> findAllActiveByAuthorUserId(@Param("authorUserId") Long authorUserId, Pageable pageable);
+
+    @Query("SELECT COUNT(q) FROM Question q WHERE q.deletedAt IS NULL AND q.authorUserId = :authorUserId")
+    long countAllActiveByAuthorUserId(@Param("authorUserId") Long authorUserId);
+
     @Modifying
     @Query("UPDATE Question q SET q.viewCount = q.viewCount + 1 WHERE q.id = :id")
     void incrementViewCount(@Param("id") Long id);

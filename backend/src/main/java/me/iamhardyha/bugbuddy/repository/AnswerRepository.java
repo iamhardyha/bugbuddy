@@ -19,4 +19,13 @@ public interface AnswerRepository extends JpaRepository<Answer, Long> {
 
     @Query("SELECT a FROM Answer a WHERE a.deletedAt IS NULL AND a.questionId = :questionId AND a.accepted = true")
     Optional<Answer> findAcceptedByQuestionId(@Param("questionId") Long questionId);
+
+    @Query("SELECT a FROM Answer a WHERE a.deletedAt IS NULL AND a.authorUserId = :authorUserId ORDER BY a.createdAt DESC")
+    Page<Answer> findAllActiveByAuthorUserId(@Param("authorUserId") Long authorUserId, Pageable pageable);
+
+    @Query("SELECT COUNT(a) FROM Answer a WHERE a.deletedAt IS NULL AND a.authorUserId = :authorUserId")
+    long countAllActiveByAuthorUserId(@Param("authorUserId") Long authorUserId);
+
+    @Query("SELECT COUNT(a) FROM Answer a WHERE a.deletedAt IS NULL AND a.authorUserId = :authorUserId AND a.accepted = true")
+    long countAllAcceptedByAuthorUserId(@Param("authorUserId") Long authorUserId);
 }

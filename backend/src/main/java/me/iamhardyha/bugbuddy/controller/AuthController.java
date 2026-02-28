@@ -7,7 +7,7 @@ import me.iamhardyha.bugbuddy.global.exception.BugBuddyException;
 import me.iamhardyha.bugbuddy.global.response.ApiResponse;
 import me.iamhardyha.bugbuddy.global.response.ErrorCode;
 import me.iamhardyha.bugbuddy.model.entity.UserEntity;
-import me.iamhardyha.bugbuddy.service.UserService;
+import me.iamhardyha.bugbuddy.user.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;

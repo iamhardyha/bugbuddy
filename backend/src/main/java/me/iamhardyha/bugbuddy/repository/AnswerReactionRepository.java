@@ -35,4 +35,7 @@ public interface AnswerReactionRepository extends JpaRepository<AnswerReaction, 
             @Param("reactionType") ReactionType reactionType,
             @Param("answerIds") Collection<Long> answerIds
     );
+
+    @Query("SELECT COUNT(r) FROM AnswerReaction r WHERE r.deletedAt IS NULL AND r.reactionType = :reactionType AND r.answerId IN (SELECT a.id FROM Answer a WHERE a.deletedAt IS NULL AND a.authorUserId = :authorUserId)")
+    long countHelpfulReceivedByAuthorUserId(@Param("authorUserId") Long authorUserId, @Param("reactionType") ReactionType reactionType);
 }
