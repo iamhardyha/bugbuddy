@@ -52,12 +52,12 @@ export default function QuestionCard({ question }: Props) {
         align="center"
         justify="center"
         style={{
-          width: 60,
+          width: 64,
           flexShrink: 0,
-          padding: '14px 6px',
+          padding: '16px 8px',
           borderRight: '1px solid var(--border-faint)',
           background: 'var(--bg-subtle)',
-          gap: 6,
+          gap: 8,
         }}
       >
         {/* Category color stripe */}
@@ -95,9 +95,9 @@ export default function QuestionCard({ question }: Props) {
       </Flex>
 
       {/* ── Content ── */}
-      <div style={{ flex: 1, minWidth: 0, padding: '12px 16px 11px' }}>
+      <div style={{ flex: 1, minWidth: 0, padding: '14px 20px 13px' }}>
         {/* Meta row */}
-        <Flex align="center" gap={5} wrap style={{ marginBottom: 7 }}>
+        <Flex align="center" gap={6} wrap style={{ marginBottom: 9 }}>
           {/* Status badge */}
           <Tag
             style={{
@@ -215,7 +215,7 @@ export default function QuestionCard({ question }: Props) {
 
         {/* Tags */}
         {question.tags.length > 0 && (
-          <Flex wrap gap={5} style={{ marginTop: 9 }}>
+          <Flex wrap gap={5} style={{ marginTop: 11 }}>
             {question.tags.slice(0, 5).map(tag => (
               <Tag
                 key={tag}

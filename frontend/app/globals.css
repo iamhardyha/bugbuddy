@@ -134,7 +134,7 @@ body {
   align-items: center;
   gap: 10px;
   width: 100%;
-  padding: 8px 12px;
+  padding: 9px 12px;
   border-radius: 8px;
   border: none;
   background: transparent;
@@ -647,6 +647,10 @@ body {
 }
 .mobile-cat-bar::-webkit-scrollbar { display: none; }
 
+@media (min-width: 1024px) {
+  .mobile-cat-bar { display: none; }
+}
+
 .mobile-cat-btn {
   white-space: nowrap;
   flex-shrink: 0;
@@ -673,12 +677,11 @@ body {
 
 /* ─── Feed Layout ────────────────────────────────── */
 .feed-root {
-  padding-top: 24px;
-  gap: 32px;
+  gap: 40px;
 }
 
 .feed-sidebar {
-  width: 210px;
+  width: 220px;
   flex-shrink: 0;
 }
 
@@ -696,7 +699,7 @@ body {
 .home-main {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 32px 24px 0;
 }
 
 .form-page-main {
@@ -756,11 +759,10 @@ body {
   }
 
   .home-main {
-    padding: 0 12px;
+    padding: 20px 12px 0;
   }
 
   .feed-root {
-    padding-top: 14px;
     gap: 0;
   }
 

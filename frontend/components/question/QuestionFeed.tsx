@@ -97,22 +97,7 @@ export default function QuestionFeed() {
     <Flex className="feed-root">
       {/* ── Left Sidebar ──────────────────────────────── */}
       <aside className="hidden lg:block feed-sidebar">
-        <div style={{ position: 'sticky', top: 72 }}>
-          <Text
-            style={{
-              display: 'block',
-              fontSize: 10.5,
-              fontWeight: 700,
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase',
-              color: 'var(--text-tertiary)',
-              padding: '0 12px',
-              marginBottom: 6,
-            }}
-          >
-            카테고리
-          </Text>
-
+        <div style={{ position: 'sticky', top: 80 }}>
           {CATEGORIES.map(c => {
             const isActive = category === c.value;
             const accent = CATEGORY_ACCENT[c.value] ?? 'var(--accent)';
@@ -157,7 +142,7 @@ export default function QuestionFeed() {
       </aside>
 
       {/* ── Main Content ──────────────────────────────── */}
-      <div style={{ flex: 1, minWidth: 0 }}>
+      <div style={{ flex: 1, minWidth: 0, paddingTop: 20, paddingBottom: 48 }}>
 
         {/* Mobile category bar */}
         <div className="mobile-cat-bar lg:hidden">
@@ -173,7 +158,7 @@ export default function QuestionFeed() {
         </div>
 
         {/* Filter bar */}
-        <Flex align="center" gap={8} wrap style={{ marginBottom: 14 }}>
+        <Flex align="center" gap={8} wrap style={{ marginBottom: 20 }}>
           <Select<QuestionType | ''>
             value={questionType}
             onChange={v => setQuestionType(v)}
@@ -212,18 +197,6 @@ export default function QuestionFeed() {
             </Button>
           )}
 
-          {/* Question count hint */}
-          {!loading && (
-            <Text
-              style={{
-                fontSize: 12,
-                color: 'var(--text-tertiary)',
-                fontFamily: 'var(--font-jetbrains-mono)',
-              }}
-            >
-              {questions.length}개
-            </Text>
-          )}
         </Flex>
 
         {/* List */}
@@ -253,7 +226,7 @@ export default function QuestionFeed() {
           </Flex>
         ) : (
           <>
-            <Flex vertical gap={7}>
+            <Flex vertical gap={12}>
               {questions.map(q => (
                 <QuestionCard key={q.id} question={q} />
               ))}
