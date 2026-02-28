@@ -53,6 +53,7 @@ export default function AuthStatus() {
         </Avatar>
 
         <Text
+          className="auth-nickname"
           style={{
             fontSize: 13,
             fontWeight: 500,

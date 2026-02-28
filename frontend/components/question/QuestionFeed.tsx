@@ -94,9 +94,9 @@ export default function QuestionFeed() {
   }
 
   return (
-    <Flex gap={0} style={{ paddingTop: 24 }} className="lg:gap-6">
+    <Flex className="feed-root">
       {/* ── Left Sidebar ──────────────────────────────── */}
-      <aside className="hidden lg:block" style={{ width: 210, flexShrink: 0 }}>
+      <aside className="hidden lg:block feed-sidebar">
         <div style={{ position: 'sticky', top: 72 }}>
           <Text
             style={{
@@ -159,7 +159,20 @@ export default function QuestionFeed() {
       {/* ── Main Content ──────────────────────────────── */}
       <div style={{ flex: 1, minWidth: 0 }}>
 
-          {/* Filter bar */}
+        {/* Mobile category bar */}
+        <div className="mobile-cat-bar lg:hidden">
+          {CATEGORIES.map(c => (
+            <button
+              key={c.value}
+              onClick={() => setCategory(c.value)}
+              className={`mobile-cat-btn${category === c.value ? ' active' : ''}`}
+            >
+              {c.emoji} {c.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Filter bar */}
         <Flex align="center" gap={8} wrap style={{ marginBottom: 14 }}>
           <Select<QuestionType | ''>
             value={questionType}

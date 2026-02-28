@@ -625,6 +625,63 @@ body {
 .md-prose tbody tr:last-child td { border-bottom: none; }
 .md-prose tbody tr:hover td { background: var(--bg-hover); }
 
+/* ─── Wordmark ───────────────────────────────────── */
+.wordmark-link {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+.wordmark-link:hover { opacity: 0.82; }
+
+/* ─── Mobile Category Bar ────────────────────────── */
+.mobile-cat-bar {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 2px 0 10px;
+  margin-bottom: 4px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.mobile-cat-bar::-webkit-scrollbar { display: none; }
+
+.mobile-cat-btn {
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding: 5px 13px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+.mobile-cat-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+.mobile-cat-btn.active {
+  background: var(--accent-subtle);
+  color: var(--accent);
+  border-color: var(--accent-ring);
+  font-weight: 600;
+}
+
+/* ─── Feed Layout ────────────────────────────────── */
+.feed-root {
+  padding-top: 24px;
+  gap: 32px;
+}
+
+.feed-sidebar {
+  width: 210px;
+  flex-shrink: 0;
+}
+
 /* ─── Responsive Layout Wrappers ────────────────── */
 .home-header-inner {
   max-width: 1200px;
@@ -702,6 +759,11 @@ body {
     padding: 0 12px;
   }
 
+  .feed-root {
+    padding-top: 14px;
+    gap: 0;
+  }
+
   .form-page-main {
     padding: 20px 16px;
   }
@@ -742,5 +804,8 @@ body {
     border-radius: 10px;
   }
 
-
+  /* AuthStatus: 모바일에서 닉네임 숨김 */
+  .auth-nickname {
+    display: none;
+  }
 }

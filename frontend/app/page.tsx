@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import AuthStatus from '@/components/auth/AuthStatus';
 import QuestionFeed from '@/components/question/QuestionFeed';
 import ThemeToggle from '@/components/common/ThemeToggle';
@@ -19,7 +20,7 @@ export default function Home() {
       >
         <div className="home-header-inner">
           {/* Wordmark */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 9, flexShrink: 0 }}>
+          <Link href="/" className="wordmark-link">
             <div
               style={{
                 width: 30,
@@ -47,7 +48,7 @@ export default function Home() {
             >
               버그버디
             </span>
-          </div>
+          </Link>
 
           <div style={{ flex: 1 }} />
 
