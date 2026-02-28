@@ -9,22 +9,26 @@ public record AnswerResponse(
         Long id,
         Long questionId,
         Long authorUserId,
+        String authorNickname,
         String body,
         SnapshotRole authorSnapshotRole,
         boolean accepted,
         long helpfulCount,
+        boolean myHelpful,
         Instant createdAt,
         Instant updatedAt
 ) {
-    public static AnswerResponse of(Answer answer, long helpfulCount) {
+    public static AnswerResponse of(Answer answer, long helpfulCount, boolean myHelpful, String authorNickname) {
         return new AnswerResponse(
                 answer.getId(),
                 answer.getQuestionId(),
                 answer.getAuthorUserId(),
+                authorNickname,
                 answer.getBody(),
                 answer.getAuthorSnapshotRole(),
                 answer.isAccepted(),
                 helpfulCount,
+                myHelpful,
                 answer.getCreatedAt(),
                 answer.getUpdatedAt()
         );

@@ -9,18 +9,25 @@ import me.iamhardyha.bugbuddy.model.entity.Answer;
 import me.iamhardyha.bugbuddy.model.entity.AnswerReaction;
 import me.iamhardyha.bugbuddy.model.entity.Question;
 import me.iamhardyha.bugbuddy.model.entity.UserEntity;
+import me.iamhardyha.bugbuddy.model.entity.UserEntity;
 import me.iamhardyha.bugbuddy.model.enums.MentorStatus;
 import me.iamhardyha.bugbuddy.model.enums.QuestionStatus;
 import me.iamhardyha.bugbuddy.model.enums.ReactionType;
+import me.iamhardyha.bugbuddy.model.enums.ReferenceType;
 import me.iamhardyha.bugbuddy.model.enums.SnapshotRole;
 import me.iamhardyha.bugbuddy.repository.AnswerReactionRepository;
 import me.iamhardyha.bugbuddy.repository.AnswerRepository;
 import me.iamhardyha.bugbuddy.repository.QuestionRepository;
 import me.iamhardyha.bugbuddy.repository.UserRepository;
+import me.iamhardyha.bugbuddy.upload.UploadService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 @Service
 @Transactional(readOnly = true)
@@ -30,17 +37,20 @@ public class AnswerService {
     private final AnswerReactionRepository answerReactionRepository;
     private final QuestionRepository questionRepository;
     private final UserRepository userRepository;
+    private final UploadService uploadService;
 
     public AnswerService(
             AnswerRepository answerRepository,
             AnswerReactionRepository answerReactionRepository,
             QuestionRepository questionRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            UploadService uploadService
     ) {
         this.answerRepository = answerRepository;
         this.answerReactionRepository = answerReactionRepository;
         this.questionRepository = questionRepository;
         this.userRepository = userRepository;
+        this.uploadService = uploadService;
     }
 
     @Transactional
@@ -66,19 +76,30 @@ public class AnswerService {
         answer.setAuthorSnapshotRole(snapshotRole);
 
         Answer saved = answerRepository.save(answer);
-        return AnswerResponse.of(saved, 0L);
+        uploadService.linkUploads(request.uploadIds(), userId, ReferenceType.ANSWER, saved.getId());
+        return AnswerResponse.of(saved, 0L, false, user.getNickname());
     }
 
-    public Page<AnswerResponse> findAllByQuestion(Long questionId, Pageable pageable) {
+    public Page<AnswerResponse> findAllByQuestion(Long questionId, Long currentUserId, Pageable pageable) {
         questionRepository.findActiveById(questionId)
                 .orElseThrow(() -> new BugBuddyException(ErrorCode.QUESTION_NOT_FOUND));
 
-        return answerRepository.findAllActiveByQuestionId(questionId, pageable)
-                .map(a -> {
-                    long helpfulCount = answerReactionRepository
-                            .countActiveByAnswerIdAndReactionType(a.getId(), ReactionType.HELPFUL);
-                    return AnswerResponse.of(a, helpfulCount);
-                });
+        Page<Answer> answers = answerRepository.findAllActiveByQuestionId(questionId, pageable);
+
+        // 로그인한 유저의 반응 여부를 한 번의 쿼리로 일괄 조회
+        Set<Long> reactedIds = currentUserId != null && !answers.isEmpty()
+                ? answerReactionRepository.findReactedAnswerIds(
+                        currentUserId,
+                        ReactionType.HELPFUL,
+                        answers.stream().map(Answer::getId).toList())
+                : Collections.emptySet();
+
+        return answers.map(a -> {
+            long helpfulCount = answerReactionRepository
+                    .countActiveByAnswerIdAndReactionType(a.getId(), ReactionType.HELPFUL);
+            boolean myHelpful = reactedIds.contains(a.getId());
+            return AnswerResponse.of(a, helpfulCount, myHelpful, getNickname(a.getAuthorUserId()));
+        });
     }
 
     @Transactional
@@ -93,10 +114,14 @@ public class AnswerService {
         }
 
         answer.setBody(request.body());
+        uploadService.linkUploads(request.uploadIds(), userId, ReferenceType.ANSWER, answerId);
 
         long helpfulCount = answerReactionRepository
                 .countActiveByAnswerIdAndReactionType(answerId, ReactionType.HELPFUL);
-        return AnswerResponse.of(answer, helpfulCount);
+        boolean myHelpful = answerReactionRepository
+                .findActiveByAnswerIdAndVoterUserIdAndReactionType(answerId, userId, ReactionType.HELPFUL)
+                .isPresent();
+        return AnswerResponse.of(answer, helpfulCount, myHelpful, getNickname(answer.getAuthorUserId()));
     }
 
     @Transactional
@@ -133,7 +158,8 @@ public class AnswerService {
 
         long helpfulCount = answerReactionRepository
                 .countActiveByAnswerIdAndReactionType(answerId, ReactionType.HELPFUL);
-        return AnswerResponse.of(answer, helpfulCount);
+        // 채택하는 사람은 질문 작성자이므로 myHelpful은 항상 false
+        return AnswerResponse.of(answer, helpfulCount, false, getNickname(answer.getAuthorUserId()));
     }
 
     @Transactional
@@ -163,7 +189,7 @@ public class AnswerService {
 
         long helpfulCount = answerReactionRepository
                 .countActiveByAnswerIdAndReactionType(answerId, ReactionType.HELPFUL);
-        return AnswerResponse.of(answer, helpfulCount);
+        return AnswerResponse.of(answer, helpfulCount, true, getNickname(answer.getAuthorUserId()));
     }
 
     @Transactional
@@ -181,7 +207,7 @@ public class AnswerService {
 
         long helpfulCount = answerReactionRepository
                 .countActiveByAnswerIdAndReactionType(answerId, ReactionType.HELPFUL);
-        return AnswerResponse.of(answer, helpfulCount);
+        return AnswerResponse.of(answer, helpfulCount, false, getNickname(answer.getAuthorUserId()));
     }
 
     private Answer findActiveAnswerInQuestion(Long answerId, Long questionId) {
@@ -193,5 +219,11 @@ public class AnswerService {
         }
 
         return answer;
+    }
+
+    private String getNickname(Long userId) {
+        return userRepository.findById(userId)
+                .map(UserEntity::getNickname)
+                .orElse("알 수 없음");
     }
 }

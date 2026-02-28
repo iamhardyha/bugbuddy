@@ -55,7 +55,10 @@ export default function AnswerList({
   useEffect(() => {
     getAnswers(questionId).then(res => {
       if (res.success && res.data) {
-        setAnswers(res.data.content);
+        const content = res.data.content;
+        setAnswers(content);
+        // 서버에서 내려온 myHelpful로 초기 반응 상태 동기화
+        setReacted(new Set(content.filter(a => a.myHelpful).map(a => a.id)));
       }
       setLoading(false);
     });

@@ -37,10 +37,12 @@ public class AnswerController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<AnswerResponse>>> findAll(
+            Authentication authentication,
             @PathVariable Long questionId,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-        Page<AnswerResponse> response = answerService.findAllByQuestion(questionId, pageable);
+        Long currentUserId = authentication != null ? (Long) authentication.getPrincipal() : null;
+        Page<AnswerResponse> response = answerService.findAllByQuestion(questionId, currentUserId, pageable);
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
