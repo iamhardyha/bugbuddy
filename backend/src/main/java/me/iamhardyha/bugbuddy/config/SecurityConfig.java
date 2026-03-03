@@ -64,11 +64,13 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/refresh", "/oauth2/**", "/login/**").permitAll()
+                        .requestMatchers("/ws/**").permitAll()  // WebSocket 핸드셰이크는 STOMP 레벨에서 JWT 인증
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/questions", "/api/questions/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/users/{userId}", "/api/users/{userId}/questions", "/api/users/{userId}/answers", "/api/users/{userId}/stats").permitAll()
                         .requestMatchers("/api/auth/me", "/api/questions/**", "/api/uploads/**").authenticated()
                         .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/users/me").authenticated()
                         .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/users/me").authenticated()
+                        .requestMatchers("/api/chat/**").authenticated()
                         .anyRequest().permitAll()
                 )
                 .oauth2Login(oauth2 -> oauth2

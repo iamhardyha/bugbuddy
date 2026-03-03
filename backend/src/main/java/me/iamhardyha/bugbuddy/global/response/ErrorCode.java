@@ -35,6 +35,12 @@ public enum ErrorCode {
     // 채팅
     CHAT_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "채팅방을 찾을 수 없습니다."),
     CHAT_ROOM_ACCESS_DENIED(HttpStatus.FORBIDDEN, "채팅방 접근 권한이 없습니다."),
+    CHAT_ROOM_NOT_PENDING(HttpStatus.BAD_REQUEST, "수락 대기 중인 채팅방이 아닙니다."),
+    CHAT_ROOM_NOT_OPEN(HttpStatus.BAD_REQUEST, "진행 중인 채팅방이 아닙니다."),
+    CHAT_ROOM_DUPLICATE(HttpStatus.CONFLICT, "이미 동일한 멘토/멘티/질문 조합의 채팅방이 존재합니다."),
+    CHAT_QUESTION_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "1:1 멘토링이 허용되지 않은 질문입니다."),
+    CHAT_NOT_MENTOR(HttpStatus.FORBIDDEN, "멘토만 채팅을 제안할 수 있습니다."),
+    CHAT_FEEDBACK_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 피드백을 제출했습니다."),
 
     // 멘토 신청
     MENTOR_APPLICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "멘토 신청을 찾을 수 없습니다."),
