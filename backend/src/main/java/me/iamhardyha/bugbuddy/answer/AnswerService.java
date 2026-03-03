@@ -19,7 +19,9 @@ import me.iamhardyha.bugbuddy.repository.AnswerReactionRepository;
 import me.iamhardyha.bugbuddy.repository.AnswerRepository;
 import me.iamhardyha.bugbuddy.repository.QuestionRepository;
 import me.iamhardyha.bugbuddy.repository.UserRepository;
+import me.iamhardyha.bugbuddy.model.enums.XpEventType;
 import me.iamhardyha.bugbuddy.upload.UploadService;
+import me.iamhardyha.bugbuddy.xp.XpService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -38,19 +40,22 @@ public class AnswerService {
     private final QuestionRepository questionRepository;
     private final UserRepository userRepository;
     private final UploadService uploadService;
+    private final XpService xpService;
 
     public AnswerService(
             AnswerRepository answerRepository,
             AnswerReactionRepository answerReactionRepository,
             QuestionRepository questionRepository,
             UserRepository userRepository,
-            UploadService uploadService
+            UploadService uploadService,
+            XpService xpService
     ) {
         this.answerRepository = answerRepository;
         this.answerReactionRepository = answerReactionRepository;
         this.questionRepository = questionRepository;
         this.userRepository = userRepository;
         this.uploadService = uploadService;
+        this.xpService = xpService;
     }
 
     @Transactional
@@ -77,6 +82,7 @@ public class AnswerService {
 
         Answer saved = answerRepository.save(answer);
         uploadService.linkUploads(request.uploadIds(), userId, ReferenceType.ANSWER, saved.getId());
+        xpService.grantXp(userId, XpEventType.ANSWER_CREATED, ReferenceType.ANSWER, saved.getId(), 5);
         return AnswerResponse.of(saved, 0L, false, user.getNickname());
     }
 
@@ -193,6 +199,9 @@ public class AnswerService {
             reaction.setReactionType(ReactionType.HELPFUL);
             answerReactionRepository.save(reaction);
         }
+
+        xpService.grantXp(answer.getAuthorUserId(), XpEventType.ANSWER_HELPFUL_RECEIVED,
+                ReferenceType.ANSWER, answerId, 20);
 
         long helpfulCount = answerReactionRepository
                 .countActiveByAnswerIdAndReactionType(answerId, ReactionType.HELPFUL);

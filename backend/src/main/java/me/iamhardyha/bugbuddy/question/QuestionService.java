@@ -18,7 +18,9 @@ import me.iamhardyha.bugbuddy.repository.QuestionRepository;
 import me.iamhardyha.bugbuddy.repository.QuestionTagRepository;
 import me.iamhardyha.bugbuddy.repository.TagRepository;
 import me.iamhardyha.bugbuddy.repository.UserRepository;
+import me.iamhardyha.bugbuddy.model.enums.XpEventType;
 import me.iamhardyha.bugbuddy.upload.UploadService;
+import me.iamhardyha.bugbuddy.xp.XpService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -35,17 +37,20 @@ public class QuestionService {
     private final TagRepository tagRepository;
     private final UploadService uploadService;
     private final UserRepository userRepository;
+    private final XpService xpService;
 
     public QuestionService(QuestionRepository questionRepository,
                            QuestionTagRepository questionTagRepository,
                            TagRepository tagRepository,
                            UploadService uploadService,
-                           UserRepository userRepository) {
+                           UserRepository userRepository,
+                           XpService xpService) {
         this.questionRepository = questionRepository;
         this.questionTagRepository = questionTagRepository;
         this.tagRepository = tagRepository;
         this.uploadService = uploadService;
         this.userRepository = userRepository;
+        this.xpService = xpService;
     }
 
     @Transactional
@@ -63,6 +68,7 @@ public class QuestionService {
 
         List<String> tagNames = attachTags(saved.getId(), request.tags());
         uploadService.linkUploads(request.uploadIds(), userId, ReferenceType.QUESTION, saved.getId());
+        xpService.grantXp(userId, XpEventType.QUESTION_CREATED, ReferenceType.QUESTION, saved.getId(), 5);
 
         return QuestionDetailResponse.of(saved, tagNames, getNickname(userId));
     }

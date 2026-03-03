@@ -8,8 +8,10 @@ import me.iamhardyha.bugbuddy.model.enums.ChatMessageType;
 import me.iamhardyha.bugbuddy.model.enums.ChatRoomStatus;
 import me.iamhardyha.bugbuddy.model.enums.MentorStatus;
 import me.iamhardyha.bugbuddy.model.enums.XpEventType;
+import me.iamhardyha.bugbuddy.model.enums.ReferenceType;
 import me.iamhardyha.bugbuddy.repository.QuestionRepository;
 import me.iamhardyha.bugbuddy.repository.UserRepository;
+import me.iamhardyha.bugbuddy.xp.XpService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -31,19 +33,22 @@ public class ChatService {
     private final UserRepository userRepository;
     private final QuestionRepository questionRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final XpService xpService;
 
     public ChatService(ChatRoomRepository chatRoomRepository,
                        ChatMessageRepository chatMessageRepository,
                        ChatRoomFeedbackRepository feedbackRepository,
                        UserRepository userRepository,
                        QuestionRepository questionRepository,
-                       SimpMessagingTemplate messagingTemplate) {
+                       SimpMessagingTemplate messagingTemplate,
+                       XpService xpService) {
         this.chatRoomRepository = chatRoomRepository;
         this.chatMessageRepository = chatMessageRepository;
         this.feedbackRepository = feedbackRepository;
         this.userRepository = userRepository;
         this.questionRepository = questionRepository;
         this.messagingTemplate = messagingTemplate;
+        this.xpService = xpService;
     }
 
     /** 멘토 → 채팅 제안 (PENDING 상태로 생성). */
@@ -153,6 +158,7 @@ public class ChatService {
         feedbackRepository.save(feedback);
 
         recalculateMentorRating(room.getMentorUserId(), roomId);
+        grantChatFeedbackXp(room.getMentorUserId(), roomId, request.rating());
     }
 
     /** WebSocket 메시지 수신 → 저장 → 브로드캐스트. */
@@ -220,6 +226,16 @@ public class ChatService {
                 saved.getId(), roomId, 0L, "SYSTEM",
                 ChatMessageType.SYSTEM.name(), text, saved.getCreatedAt());
         messagingTemplate.convertAndSend("/topic/chat/" + roomId, response);
+    }
+
+    private void grantChatFeedbackXp(Long mentorUserId, Long roomId, int rating) {
+        if (rating >= 4) {
+            xpService.grantXp(mentorUserId, XpEventType.CHAT_FEEDBACK_POSITIVE,
+                    ReferenceType.CHAT_ROOM, roomId, 50);
+        } else {
+            xpService.grantXp(mentorUserId, XpEventType.CHAT_FEEDBACK_NEGATIVE,
+                    ReferenceType.CHAT_ROOM, roomId, 0);
+        }
     }
 
     private void recalculateMentorRating(Long mentorUserId, Long roomId) {
