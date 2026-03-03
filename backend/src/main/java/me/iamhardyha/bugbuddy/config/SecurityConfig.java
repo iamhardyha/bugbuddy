@@ -71,6 +71,8 @@ public class SecurityConfig {
                         .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/users/me").authenticated()
                         .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/users/me").authenticated()
                         .requestMatchers("/api/chat/**").authenticated()
+                        .requestMatchers("/api/reports").authenticated()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().permitAll()
                 )
                 .oauth2Login(oauth2 -> oauth2

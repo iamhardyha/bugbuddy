@@ -48,6 +48,9 @@ public enum ErrorCode {
 
     // 신고
     REPORT_NOT_FOUND(HttpStatus.NOT_FOUND, "신고를 찾을 수 없습니다."),
+    REPORT_SELF(HttpStatus.BAD_REQUEST, "자기 자신은 신고할 수 없습니다."),
+    REPORT_DUPLICATE(HttpStatus.CONFLICT, "이미 신고한 대상입니다."),
+    REPORT_NOT_RESOLVABLE(HttpStatus.BAD_REQUEST, "처리할 수 없는 신고 상태입니다."),
 
     // 파일 업로드
     UPLOAD_NOT_FOUND(HttpStatus.NOT_FOUND, "업로드 파일을 찾을 수 없습니다."),
