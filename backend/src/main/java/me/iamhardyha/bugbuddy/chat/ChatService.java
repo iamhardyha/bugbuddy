@@ -235,6 +235,12 @@ public class ChatService {
         } else {
             xpService.grantXp(mentorUserId, XpEventType.CHAT_FEEDBACK_NEGATIVE,
                     ReferenceType.CHAT_ROOM, roomId, 0);
+            // 부정 피드백 5회 누적마다 -10 XP 차감
+            long negativeCount = xpService.countEvents(mentorUserId, XpEventType.CHAT_FEEDBACK_NEGATIVE, 0);
+            if (negativeCount % 5 == 0) {
+                xpService.grantXp(mentorUserId, XpEventType.CHAT_FEEDBACK_NEGATIVE,
+                        ReferenceType.CHAT_ROOM, roomId, -10);
+            }
         }
     }
 

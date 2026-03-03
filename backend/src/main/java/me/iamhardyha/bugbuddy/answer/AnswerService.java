@@ -161,6 +161,8 @@ public class AnswerService {
 
         answer.setAccepted(true);
         question.setStatus(QuestionStatus.SOLVED);
+        xpService.grantXp(answer.getAuthorUserId(), XpEventType.ANSWER_ACCEPTED,
+                ReferenceType.ANSWER, answerId, 30);
 
         long helpfulCount = answerReactionRepository
                 .countActiveByAnswerIdAndReactionType(answerId, ReactionType.HELPFUL);

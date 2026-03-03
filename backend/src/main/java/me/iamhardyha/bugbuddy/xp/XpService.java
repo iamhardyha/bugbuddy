@@ -15,8 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class XpService {
 
-    /** 레벨 기준 XP 임계값 (인덱스 = 레벨 - 1). Lv.1~5 */
-    private static final int[] LEVEL_THRESHOLDS = {0, 50, 150, 300, 600};
+    /** 레벨 기준 XP 임계값 (인덱스 = 레벨 - 1). Lv.1~10 */
+    private static final int[] LEVEL_THRESHOLDS = {0, 100, 250, 500, 900, 1500, 2500, 4000, 6000, 10000};
 
     private final XpEventRepository xpEventRepository;
     private final UserRepository userRepository;
@@ -47,6 +47,11 @@ public class XpService {
             user.setXp(newXp);
             user.setLevel(calculateLevel(newXp));
         });
+    }
+
+    /** 특정 이벤트 타입 + deltaXp 조합의 누적 건수 반환. */
+    public long countEvents(Long userId, XpEventType eventType, int deltaXp) {
+        return xpEventRepository.countByUserIdAndEventTypeAndDeltaXp(userId, eventType, deltaXp);
     }
 
     public Page<XpEventResponse> getXpEvents(Long userId, Pageable pageable) {
