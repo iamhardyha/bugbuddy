@@ -3,6 +3,7 @@ import { AntdRegistry } from '@ant-design/nextjs-registry';
 import { ThemeProvider } from '@/components/common/ThemeProvider';
 import { AntdProvider } from '@/components/common/AntdProvider';
 import { ModalProvider } from '@/components/common/ModalProvider';
+import GlobalHeader from '@/components/common/GlobalHeader';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -18,6 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ThemeProvider>
             <AntdProvider>
               <ModalProvider>
+                <GlobalHeader />
                 {children}
               </ModalProvider>
             </AntdProvider>

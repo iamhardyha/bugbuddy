@@ -2,17 +2,22 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Button, Flex, Avatar, Skeleton, Typography } from 'antd';
+import { useRouter } from 'next/navigation';
+import { Button, Flex, Avatar, Skeleton, Typography, Badge } from 'antd';
+import { MessageOutlined } from '@ant-design/icons';
 import LoginButton from './LoginButton';
 import { apiFetch } from '@/lib/api';
+import { getChatRooms } from '@/lib/chat';
 import { getAccessToken, clearTokens } from '@/lib/auth';
 import type { UserProfile } from '@/types/user';
 
 const { Text } = Typography;
 
 export default function AuthStatus() {
+  const router = useRouter();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [totalUnread, setTotalUnread] = useState(0);
 
   useEffect(() => {
     if (!getAccessToken()) {
@@ -23,6 +28,15 @@ export default function AuthStatus() {
       .then(res => { if (res.success && res.data) setUser(res.data); })
       .catch(() => {})
       .finally(() => setLoading(false));
+
+    getChatRooms()
+      .then(res => {
+        if (res.success && res.data) {
+          const unread = res.data.reduce((sum, r) => sum + r.unreadCount, 0);
+          setTotalUnread(unread);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   function handleLogout() {
@@ -38,6 +52,17 @@ export default function AuthStatus() {
   if (user) {
     return (
       <Flex align="center" gap={8}>
+        <Badge count={totalUnread} size="small" offset={[-2, 2]}>
+          <button
+            className="theme-btn"
+            onClick={() => router.push('/chat')}
+            style={{ width: 32, height: 32 }}
+            title="채팅"
+          >
+            <MessageOutlined style={{ fontSize: 15 }} />
+          </button>
+        </Badge>
+
         <Link href={`/users/${user.id}`} style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
           <Avatar
             size={30}

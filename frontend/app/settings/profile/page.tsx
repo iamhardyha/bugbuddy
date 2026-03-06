@@ -1,11 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button, Flex, Input, Spin, Typography } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
-import ThemeToggle from '@/components/common/ThemeToggle';
 import { apiFetch } from '@/lib/api';
 import { getAccessToken, clearTokens } from '@/lib/auth';
 import { updateProfile, deactivateAccount } from '@/lib/users';
@@ -107,28 +105,6 @@ export default function ProfileSettingsPage() {
 
   return (
     <div className="page-root">
-      {/* Header */}
-      <header className="page-header">
-        <div className="home-header-inner">
-          <Link href="/" className="wordmark-link">
-            <div
-              style={{
-                width: 30, height: 30, borderRadius: 8,
-                background: 'var(--accent)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 15, flexShrink: 0,
-                boxShadow: '0 2px 8px var(--accent-ring)',
-              }}
-            >🐞</div>
-            <span style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: 17, color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
-              버그버디
-            </span>
-          </Link>
-          <div style={{ flex: 1 }} />
-          <ThemeToggle />
-        </div>
-      </header>
-
       <main className="form-page-main">
         {/* Back button */}
         <Flex align="center" gap={8} style={{ marginBottom: 24 }}>
