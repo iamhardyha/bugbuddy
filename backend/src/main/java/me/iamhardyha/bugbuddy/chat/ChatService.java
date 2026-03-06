@@ -5,6 +5,7 @@ import me.iamhardyha.bugbuddy.global.exception.BugBuddyException;
 import me.iamhardyha.bugbuddy.global.response.ErrorCode;
 import me.iamhardyha.bugbuddy.model.entity.*;
 import me.iamhardyha.bugbuddy.model.enums.ChatMessageType;
+import me.iamhardyha.bugbuddy.model.enums.ChatRoleType;
 import me.iamhardyha.bugbuddy.model.enums.ChatRoomStatus;
 import me.iamhardyha.bugbuddy.model.enums.MentorStatus;
 import me.iamhardyha.bugbuddy.model.enums.XpEventType;
@@ -22,6 +23,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -82,7 +84,7 @@ public class ChatService {
 
         ChatRoom saved = chatRoomRepository.save(room);
 
-        return buildRoomResponse(saved);
+        return buildRoomResponse(saved, mentorUserId);
     }
 
     /** 멘티 → 채팅 수락 (PENDING → OPEN). */
@@ -101,13 +103,14 @@ public class ChatService {
 
         sendSystemMessage(room.getId(), "멘토링 세션이 시작되었습니다.");
 
-        return buildRoomResponse(room);
+        return buildRoomResponse(room, menteeUserId);
     }
 
     /** 내 채팅방 목록 조회. */
-    public Page<ChatRoomResponse> getMyRooms(Long userId, Pageable pageable) {
-        return chatRoomRepository.findActiveByUserId(userId, pageable)
-                .map(this::buildRoomResponse);
+    public List<ChatRoomResponse> getMyRooms(Long userId) {
+        return chatRoomRepository.findActiveByUserId(userId).stream()
+                .map(room -> buildRoomResponse(room, userId))
+                .toList();
     }
 
     /** 메시지 히스토리 조회 (페이징). */
@@ -134,10 +137,10 @@ public class ChatService {
 
         sendSystemMessage(roomId, "멘토링 세션이 종료되었습니다. 피드백을 남겨주세요.");
 
-        return buildRoomResponse(room);
+        return buildRoomResponse(room, userId);
     }
 
-    /** 피드백 제출 + 멘토 평점 재계산 + XP 이벤트. */
+    /** 피드백 제출 + 평점 재계산 + XP 이벤트. */
     @Transactional
     public void submitFeedback(Long userId, Long roomId, ChatFeedbackRequest request) {
         ChatRoom room = findActiveRoom(roomId);
@@ -150,15 +153,43 @@ public class ChatService {
             throw new BugBuddyException(ErrorCode.CHAT_FEEDBACK_ALREADY_EXISTS);
         }
 
+        boolean raterIsMentee = room.getMenteeUserId().equals(userId);
+        ChatRoleType raterRole = raterIsMentee ? ChatRoleType.MENTEE : ChatRoleType.MENTOR;
+
         ChatRoomFeedback feedback = new ChatRoomFeedback();
         feedback.setRoomId(roomId);
         feedback.setRaterUserId(userId);
+        feedback.setRaterRole(raterRole);
         feedback.setRating(request.rating());
         feedback.setComment(request.comment());
         feedbackRepository.save(feedback);
 
-        recalculateMentorRating(room.getMentorUserId(), roomId);
-        grantChatFeedbackXp(room.getMentorUserId(), roomId, request.rating());
+        if (raterIsMentee) {
+            // 멘티 → 멘토 평점
+            recalculateMentorRating(room.getMentorUserId(), request.rating());
+            grantChatFeedbackXp(room.getMentorUserId(), roomId, request.rating());
+        } else {
+            // 멘토 → 멘티 평점
+            recalculateMenteeRating(room.getMenteeUserId(), request.rating());
+        }
+    }
+
+    /** 채팅방 읽음 처리 — 마지막 메시지 ID를 lastReadMessageId에 저장. */
+    @Transactional
+    public void markAsRead(Long userId, Long roomId) {
+        ChatRoom room = findActiveRoom(roomId);
+        assertRoomAccess(room, userId);
+
+        Optional<ChatMessage> lastMessage = chatMessageRepository
+                .findFirstByRoomIdAndDeletedAtIsNullOrderByIdDesc(roomId);
+
+        lastMessage.ifPresent(msg -> {
+            if (room.getMentorUserId().equals(userId)) {
+                room.setMentorLastReadMessageId(msg.getId());
+            } else {
+                room.setMenteeLastReadMessageId(msg.getId());
+            }
+        });
     }
 
     /** WebSocket 메시지 수신 → 저장 → 브로드캐스트. */
@@ -210,8 +241,39 @@ public class ChatService {
                 .orElse("알 수 없음");
     }
 
-    private ChatRoomResponse buildRoomResponse(ChatRoom room) {
-        return ChatRoomResponse.of(room, getNickname(room.getMentorUserId()), getNickname(room.getMenteeUserId()));
+    private ChatRoomResponse buildRoomResponse(ChatRoom room, Long currentUserId) {
+        Long lastReadId = room.getMentorUserId().equals(currentUserId)
+                ? room.getMentorLastReadMessageId()
+                : room.getMenteeLastReadMessageId();
+
+        long unreadCount = lastReadId == null
+                ? chatMessageRepository.countAllFromOthers(room.getId(), currentUserId)
+                : chatMessageRepository.countUnreadAfter(room.getId(), lastReadId, currentUserId);
+
+        Optional<ChatMessage> lastMsg = chatMessageRepository
+                .findFirstByRoomIdAndDeletedAtIsNullOrderByIdDesc(room.getId());
+        String lastMsgContent = lastMsg.map(ChatMessage::getContent).orElse(null);
+        Instant lastMsgAt = lastMsg.map(m -> m.getCreatedAt()).orElse(null);
+
+        String questionTitle = null;
+        if (room.getQuestionId() != null) {
+            questionTitle = questionRepository.findActiveById(room.getQuestionId())
+                    .map(q -> q.getTitle())
+                    .orElse(null);
+        }
+
+        boolean myFeedbackSubmitted = feedbackRepository.existsByRoomIdAndRaterUserId(room.getId(), currentUserId);
+
+        return ChatRoomResponse.of(
+                room,
+                getNickname(room.getMentorUserId()),
+                getNickname(room.getMenteeUserId()),
+                questionTitle,
+                (int) Math.min(unreadCount, 99),
+                lastMsgContent,
+                lastMsgAt,
+                myFeedbackSubmitted
+        );
     }
 
     private void sendSystemMessage(Long roomId, String text) {
@@ -244,20 +306,8 @@ public class ChatService {
         }
     }
 
-    private void recalculateMentorRating(Long mentorUserId, Long roomId) {
-        List<ChatRoomFeedback> allFeedbacks = feedbackRepository.findActiveByRoomId(roomId);
-
-        // 멘토가 받은 피드백만 계산 (멘티가 작성한 것)
-        ChatRoom room = chatRoomRepository.findById(roomId).orElse(null);
-        if (room == null) return;
-
-        Long menteeUserId = room.getMenteeUserId();
-        List<ChatRoomFeedback> menteeFeedbacks = allFeedbacks.stream()
-                .filter(f -> f.getRaterUserId().equals(menteeUserId))
-                .toList();
-
-        if (menteeFeedbacks.isEmpty()) return;
-
+    /** 멘티 → 멘토 평점 증분 재계산. */
+    private void recalculateMentorRating(Long mentorUserId, int newRating) {
         UserEntity mentor = findUser(mentorUserId);
 
         int currentCount = mentor.getMentorRatingCount();
@@ -265,8 +315,6 @@ public class ChatService {
                 ? mentor.getMentorAvgRating()
                 : BigDecimal.ZERO;
 
-        // 새 피드백의 rating
-        int newRating = menteeFeedbacks.getLast().getRating();
         int newCount = currentCount + 1;
         BigDecimal newAvg = currentAvg.multiply(BigDecimal.valueOf(currentCount))
                 .add(BigDecimal.valueOf(newRating))
@@ -275,6 +323,25 @@ public class ChatService {
         mentor.setMentorRatingCount(newCount);
         mentor.setMentorAvgRating(newAvg);
         userRepository.save(mentor);
+    }
+
+    /** 멘토 → 멘티 평점 증분 재계산. */
+    private void recalculateMenteeRating(Long menteeUserId, int newRating) {
+        UserEntity mentee = findUser(menteeUserId);
+
+        int currentCount = mentee.getMenteeRatingCount();
+        BigDecimal currentAvg = mentee.getMenteeAvgRating() != null
+                ? mentee.getMenteeAvgRating()
+                : BigDecimal.ZERO;
+
+        int newCount = currentCount + 1;
+        BigDecimal newAvg = currentAvg.multiply(BigDecimal.valueOf(currentCount))
+                .add(BigDecimal.valueOf(newRating))
+                .divide(BigDecimal.valueOf(newCount), 2, RoundingMode.HALF_UP);
+
+        mentee.setMenteeRatingCount(newCount);
+        mentee.setMenteeAvgRating(newAvg);
+        userRepository.save(mentee);
     }
 
     private ChatMessageType parseChatMessageType(String type) {

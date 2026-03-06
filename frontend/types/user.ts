@@ -30,6 +30,8 @@ export interface PublicProfile {
   isMentor: boolean;
   mentorAvgRating: number | null;
   mentorRatingCount: number;
+  menteeAvgRating: number | null;
+  menteeRatingCount: number;
 }
 
 export interface UserStats {

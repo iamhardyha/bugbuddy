@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import me.iamhardyha.bugbuddy.model.common.BaseSoftDeleteEntity;
+import me.iamhardyha.bugbuddy.model.enums.ChatRoleType;
 
 @Entity
 @Table(
@@ -30,6 +31,11 @@ public class ChatRoomFeedback extends BaseSoftDeleteEntity {
 
     @Column(name = "rater_user_id", nullable = false)
     private Long raterUserId;
+
+    /** 평점을 준 사람의 채팅방 내 역할 (MENTOR / MENTEE). */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "rater_role", nullable = false, length = 10)
+    private ChatRoleType raterRole;
 
     /** Rating: 1~5점 별점. */
     @Column(name = "rating", nullable = false, columnDefinition = "TINYINT")

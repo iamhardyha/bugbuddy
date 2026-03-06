@@ -7,8 +7,6 @@ import {
   Avatar, Button, Flex, Progress, Spin, Tabs, Tag, Typography,
 } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
-import ThemeToggle from '@/components/common/ThemeToggle';
-import AuthStatus from '@/components/auth/AuthStatus';
 import QuestionCard from '@/components/question/QuestionCard';
 import { getPublicProfile, getUserQuestions, getUserAnswers, getUserStats } from '@/lib/users';
 import { getLevelMeta, getXpProgress } from '@/lib/userMeta';
@@ -135,29 +133,6 @@ export default function UserProfilePage() {
 
   return (
     <div className="page-root">
-      {/* Header */}
-      <header className="page-header">
-        <div className="home-header-inner">
-          <Link href="/" className="wordmark-link">
-            <div
-              style={{
-                width: 30, height: 30, borderRadius: 8,
-                background: 'var(--accent)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 15, flexShrink: 0,
-                boxShadow: '0 2px 8px var(--accent-ring)',
-              }}
-            >🐞</div>
-            <span style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: 17, color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
-              버그버디
-            </span>
-          </Link>
-          <div style={{ flex: 1 }} />
-          <ThemeToggle />
-          <AuthStatus />
-        </div>
-      </header>
-
       <main style={{ maxWidth: 860, margin: '0 auto', padding: '32px 24px' }}>
         {/* Profile Card */}
         <div
@@ -250,11 +225,23 @@ export default function UserProfilePage() {
                 </Text>
                 {profile.isMentor && profile.mentorAvgRating != null && (
                   <Text style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-                    ⭐ <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                    ⭐ 멘토{' '}
+                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
                       {Number(profile.mentorAvgRating).toFixed(1)}
                     </span>
                     <span style={{ color: 'var(--text-tertiary)', fontSize: 12 }}>
                       {' '}({profile.mentorRatingCount}개)
+                    </span>
+                  </Text>
+                )}
+                {profile.menteeAvgRating != null && (
+                  <Text style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+                    ⭐ 멘티{' '}
+                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                      {Number(profile.menteeAvgRating).toFixed(1)}
+                    </span>
+                    <span style={{ color: 'var(--text-tertiary)', fontSize: 12 }}>
+                      {' '}({profile.menteeRatingCount}개)
                     </span>
                   </Text>
                 )}

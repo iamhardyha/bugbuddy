@@ -15,7 +15,9 @@ public record PublicProfileResponse(
         long answerCount,
         boolean isMentor,
         BigDecimal mentorAvgRating,
-        int mentorRatingCount
+        int mentorRatingCount,
+        BigDecimal menteeAvgRating,
+        int menteeRatingCount
 ) {
     public static PublicProfileResponse of(UserEntity user, long questionCount, long answerCount) {
         boolean isMentor = user.getMentorStatus() == MentorStatus.APPROVED;
@@ -29,7 +31,9 @@ public record PublicProfileResponse(
                 answerCount,
                 isMentor,
                 isMentor ? user.getMentorAvgRating() : null,
-                isMentor ? user.getMentorRatingCount() : 0
+                isMentor ? user.getMentorRatingCount() : 0,
+                user.getMenteeAvgRating(),
+                user.getMenteeRatingCount()
         );
     }
 }
