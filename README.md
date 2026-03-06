@@ -11,7 +11,7 @@
 - **TypeScript**: 타입 안정성 및 유지보수성 향상
 
 ### Backend
-- **Spring Boot (Kotlin)**: REST API 서버
+- **Spring Boot (Java)**: REST API 서버
 
 ### Database
 - **MySQL 8**: 서비스 데이터 저장
