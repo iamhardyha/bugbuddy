@@ -137,7 +137,7 @@ export default function QuestionCard({ question }: Props) {
               border: 'none',
             }}
           >
-            {category.emoji} {category.label}
+            {category.label}
           </Tag>
 
           {/* Type */}
