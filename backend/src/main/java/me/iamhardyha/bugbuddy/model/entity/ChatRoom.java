@@ -48,4 +48,12 @@ public class ChatRoom extends BaseSoftDeleteEntity {
 
     @Column(name = "closed_at")
     private Instant closedAt;
+
+    /** 멘토가 마지막으로 읽은 메시지 ID. null = 한 번도 읽지 않음. */
+    @Column(name = "mentor_last_read_message_id")
+    private Long mentorLastReadMessageId;
+
+    /** 멘티가 마지막으로 읽은 메시지 ID. null = 한 번도 읽지 않음. */
+    @Column(name = "mentee_last_read_message_id")
+    private Long menteeLastReadMessageId;
 }

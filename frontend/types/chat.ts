@@ -10,9 +10,12 @@ export interface ChatRoom {
   menteeUserId: number;
   menteeNickname: string;
   status: ChatRoomStatus;
-  closedAt: string | null;
+  unreadCount: number;
+  lastMessageContent: string | null;
+  lastMessageAt: string | null;
   createdAt: string;
-  updatedAt: string;
+  closedAt: string | null;
+  myFeedbackSubmitted: boolean;
 }
 
 export interface ChatMessage {

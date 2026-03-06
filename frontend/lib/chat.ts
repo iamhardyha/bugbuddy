@@ -6,6 +6,10 @@ export function getChatRooms() {
   return apiFetch<ChatRoom[]>('/api/chat/rooms');
 }
 
+export function markAsRead(roomId: number) {
+  return apiFetch<void>(`/api/chat/rooms/${roomId}/read`, { method: 'PATCH' });
+}
+
 export function getChatMessages(roomId: number, page = 0) {
   return apiFetch<Page<ChatMessage>>(
     `/api/chat/rooms/${roomId}/messages?page=${page}&size=50&sort=createdAt,asc`

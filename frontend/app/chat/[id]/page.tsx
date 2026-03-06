@@ -9,7 +9,7 @@ import {
   WifiOutlined,
   DisconnectOutlined,
 } from '@ant-design/icons';
-import { getChatRooms, getChatMessages, acceptChatRoom, closeChatRoom, submitFeedback } from '@/lib/chat';
+import { getChatRooms, getChatMessages, acceptChatRoom, closeChatRoom, submitFeedback, markAsRead } from '@/lib/chat';
 import { apiFetch } from '@/lib/api';
 import { getAccessToken } from '@/lib/auth';
 import { useStompChat } from '@/hooks/useStompChat';
@@ -47,7 +47,9 @@ export default function ChatRoomPage() {
       if (prev.some(m => m.id === msg.id)) return prev;
       return [...prev, msg];
     });
-  }, []);
+    // 채팅방이 열려있는 동안 수신된 메시지는 즉시 읽음 처리
+    markAsRead(roomId);
+  }, [roomId]);
 
   const { connected, sendMessage } = useStompChat(roomId, handleNewMessage);
 
@@ -70,7 +72,10 @@ export default function ChatRoomPage() {
 
       if (roomsRes.success && roomsRes.data) {
         const found = roomsRes.data.find(r => r.id === roomId);
-        if (found) setRoom(found);
+        if (found) {
+          setRoom(found);
+          if (found.myFeedbackSubmitted) setFeedbackSubmitted(true);
+        }
       }
       if (messagesRes.success && messagesRes.data) {
         setMessages(messagesRes.data.content);
@@ -79,6 +84,9 @@ export default function ChatRoomPage() {
         setCurrentUser(userRes.data);
       }
       setLoading(false);
+
+      // 채팅방 진입 시 읽음 처리
+      markAsRead(roomId);
     }
 
     load();

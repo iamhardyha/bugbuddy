@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/chat/rooms")
 public class ChatController {
@@ -46,13 +48,21 @@ public class ChatController {
 
     /** GET /api/chat/rooms — 내 채팅방 목록 */
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<ChatRoomResponse>>> getMyRooms(
+    public ResponseEntity<ApiResponse<List<ChatRoomResponse>>> getMyRooms(Authentication authentication) {
+        Long userId = (Long) authentication.getPrincipal();
+        List<ChatRoomResponse> response = chatService.getMyRooms(userId);
+        return ResponseEntity.ok(ApiResponse.ok(response));
+    }
+
+    /** PATCH /api/chat/rooms/{id}/read — 읽음 처리 */
+    @PatchMapping("/{id}/read")
+    public ResponseEntity<ApiResponse<Void>> markAsRead(
             Authentication authentication,
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @PathVariable Long id
     ) {
         Long userId = (Long) authentication.getPrincipal();
-        Page<ChatRoomResponse> response = chatService.getMyRooms(userId, pageable);
-        return ResponseEntity.ok(ApiResponse.ok(response));
+        chatService.markAsRead(userId, id);
+        return ResponseEntity.ok(ApiResponse.ok());
     }
 
     /** GET /api/chat/rooms/{id}/messages — 메시지 히스토리 (페이징) */
