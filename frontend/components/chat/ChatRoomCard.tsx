@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Flex, Typography, Button } from 'antd';
+import { PushpinOutlined } from '@ant-design/icons';
 import { acceptChatRoom } from '@/lib/chat';
 import type { ChatRoom } from '@/types/chat';
 
@@ -42,9 +43,10 @@ interface Props {
   room: ChatRoom;
   currentUserId: number;
   onAccepted: (roomId: number) => void;
+  isActive?: boolean;
 }
 
-export default function ChatRoomCard({ room, currentUserId, onAccepted }: Props) {
+export default function ChatRoomCard({ room, currentUserId, onAccepted, isActive }: Props) {
   const router = useRouter();
   const isMentor = room.mentorUserId === currentUserId;
   const counterpart = isMentor ? room.menteeNickname : room.mentorNickname;
@@ -69,12 +71,11 @@ export default function ChatRoomCard({ room, currentUserId, onAccepted }: Props)
       className="dm-room-card"
       onClick={() => router.push(`/chat/${room.id}`)}
       data-unread={hasUnread}
+      data-active={isActive}
     >
       <div style={{ position: 'relative', flexShrink: 0 }}>
         <Avatar name={counterpart} />
-        {hasUnread && (
-          <div className="dm-unread-dot" />
-        )}
+        {hasUnread && !isActive && <div className="dm-unread-dot" />}
       </div>
 
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -107,7 +108,7 @@ export default function ChatRoomCard({ room, currentUserId, onAccepted }: Props)
             {previewText}
           </Text>
 
-          {hasUnread && (
+          {hasUnread && !isActive && (
             <div className="dm-unread-badge">
               {room.unreadCount > 99 ? '99+' : room.unreadCount}
             </div>
@@ -126,15 +127,18 @@ export default function ChatRoomCard({ room, currentUserId, onAccepted }: Props)
         </Flex>
 
         {room.questionTitle && (
-          <Text
-            type="secondary"
-            style={{
-              fontSize: 11, display: 'block', marginTop: 3,
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-            }}
-          >
-            📌 {room.questionTitle}
-          </Text>
+          <Flex align="center" gap={4} style={{ marginTop: 3 }}>
+            <PushpinOutlined style={{ fontSize: 10, color: 'var(--text-tertiary)', flexShrink: 0 }} />
+            <Text
+              type="secondary"
+              style={{
+                fontSize: 11,
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              }}
+            >
+              {room.questionTitle}
+            </Text>
+          </Flex>
         )}
       </div>
     </button>

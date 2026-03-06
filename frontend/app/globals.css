@@ -795,18 +795,56 @@ body {
   text-align: center;
 }
 
-/* ─── Chat Room (채팅방) ──────────────────────────── */
-.chat-room-root {
+/* ─── DM Layout (Instagram DM 스타일) ─────────────── */
+.dm-layout {
   display: flex;
-  flex-direction: column;
   height: calc(100dvh - var(--global-header-height));
+  overflow: hidden;
   background: var(--bg-base);
 }
 
-.chat-room-header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
+/* Left panel */
+.dm-panel-left {
+  width: 320px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border-faint);
+  background: var(--bg-surface);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Right panel */
+.dm-panel-right {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-base);
+}
+
+/* Sidebar inner scroll */
+.dm-sidebar-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.dm-sidebar-header {
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--border-faint);
+  flex-shrink: 0;
+}
+
+.dm-sidebar-rooms {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Chat header */
+.dm-chat-header {
   border-bottom: 1px solid var(--border-faint);
   background: var(--header-bg);
   backdrop-filter: blur(12px);
@@ -815,6 +853,22 @@ body {
   flex-shrink: 0;
 }
 
+/* Back button: 데스크탑에서는 숨김 */
+.dm-back-btn {
+  display: none;
+}
+
+/* Empty state right panel: 모바일에서 숨김 */
+.dm-panel-right-desktop-only {
+  display: none;
+}
+
+/* Left panel: /chat/[id]에서 모바일 숨김 */
+.dm-panel-left-desktop-only {
+  display: none;
+}
+
+/* ─── Chat Messages & Input ──────────────────────── */
 .chat-messages-area {
   flex: 1;
   overflow-y: auto;
@@ -831,6 +885,44 @@ body {
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+}
+
+/* Desktop (≥ 768px) overrides */
+@media (min-width: 768px) {
+  /* /chat/[id] — 사이드바 보이기 */
+  .dm-panel-left-desktop-only {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* /chat — 오른쪽 empty state 보이기 */
+  .dm-panel-right-desktop-only {
+    display: flex;
+  }
+
+  /* 뒤로가기 버튼 숨김 */
+  .dm-back-btn {
+    display: none;
+  }
+
+  /* /chat — 왼쪽 패널 너비 고정 */
+  .dm-panel-left {
+    width: 320px;
+  }
+}
+
+/* Mobile (< 768px) overrides */
+@media (max-width: 767px) {
+  /* /chat page: 왼쪽 패널이 전체 너비 */
+  .dm-panel-left {
+    width: 100%;
+    border-right: none;
+  }
+
+  /* /chat/[id]: 뒤로가기 버튼 보이기 */
+  .dm-back-btn {
+    display: inline-flex;
+  }
 }
 
 .chat-bubble {
@@ -873,6 +965,12 @@ body {
 }
 .dm-room-card[data-unread="true"]:hover {
   background: var(--bg-hover);
+}
+.dm-room-card[data-active="true"] {
+  background: var(--accent-subtle);
+}
+.dm-room-card[data-active="true"]:hover {
+  background: var(--accent-subtle);
 }
 
 .dm-unread-dot {
