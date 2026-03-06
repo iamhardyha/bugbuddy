@@ -5,7 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { Button, Flex, Tag, Typography, Spin, Divider } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import { getQuestion, deleteQuestion, closeQuestion } from '@/lib/questions';
-import { createChatRoom } from '@/lib/chat';
+import { createChatRoom, getChatRooms } from '@/lib/chat';
+import type { ChatRoom } from '@/types/chat';
 import { apiFetch } from '@/lib/api';
 import { getAccessToken } from '@/lib/auth';
 import { CATEGORY_META, QUESTION_TYPE_META, STATUS_META, relativeTime } from '@/lib/questionMeta';
@@ -27,17 +28,26 @@ export default function QuestionDetailPage() {
   const [deleting, setDeleting] = useState(false);
   const [closing, setClosing] = useState(false);
   const [proposingChat, setProposingChat] = useState(false);
+  const [existingChatRoom, setExistingChatRoom] = useState<ChatRoom | null>(null);
   const { confirm } = useModal();
 
   useEffect(() => {
     async function load() {
-      const [qRes, uRes] = await Promise.all([
+      const isLoggedIn = !!getAccessToken();
+      const [qRes, uRes, roomsRes] = await Promise.all([
         getQuestion(Number(id)),
-        getAccessToken() ? apiFetch<UserProfile>('/api/auth/me') : Promise.resolve({ success: false, data: null }),
+        isLoggedIn ? apiFetch<UserProfile>('/api/auth/me') : Promise.resolve({ success: false, data: null }),
+        isLoggedIn ? getChatRooms() : Promise.resolve({ success: false, data: null }),
       ]);
 
       if (qRes.success && qRes.data) setQuestion(qRes.data);
       if (uRes.success && uRes.data) setCurrentUser(uRes.data as UserProfile);
+      if (roomsRes.success && roomsRes.data) {
+        const matched = (roomsRes.data as ChatRoom[]).find(
+          r => r.questionId === Number(id) && r.status !== 'CLOSED'
+        );
+        setExistingChatRoom(matched ?? null);
+      }
 
       setLoading(false);
     }
@@ -114,7 +124,7 @@ export default function QuestionDetailPage() {
     const res = await createChatRoom(question!.id);
     setProposingChat(false);
     if (res.success && res.data) {
-      router.push(`/chat/${res.data.id}`);
+      setExistingChatRoom(res.data);
     }
   }
 
@@ -273,7 +283,7 @@ export default function QuestionDetailPage() {
             )}
           </Flex>
 
-          {/* 채팅 제안 버튼 (멘토 전용) */}
+          {/* 채팅 제안 배너 (멘토 전용) */}
           {canProposeChat && (
             <Flex
               align="center"
@@ -288,21 +298,35 @@ export default function QuestionDetailPage() {
             >
               <Flex vertical gap={2}>
                 <Text strong style={{ fontSize: 13, color: 'var(--status-open)' }}>
-                  💬 1:1 멘토링 제안
+                  💬 1:1 멘토링
                 </Text>
                 <Text type="secondary" style={{ fontSize: 12 }}>
-                  이 질문에 직접 멘토링을 제안할 수 있어요.
+                  {existingChatRoom
+                    ? existingChatRoom.status === 'PENDING'
+                      ? '채팅 제안을 보냈어요. 멘티의 수락을 기다리고 있어요.'
+                      : '이 질문과 연결된 채팅이 진행 중이에요.'
+                    : '이 질문에 직접 멘토링을 제안할 수 있어요.'}
                 </Text>
               </Flex>
-              <Button
-                type="primary"
-                size="small"
-                loading={proposingChat}
-                onClick={handleProposeChat}
-                style={{ background: 'var(--status-open)', borderColor: 'var(--status-open)', flexShrink: 0 }}
-              >
-                채팅 제안
-              </Button>
+              {existingChatRoom ? (
+                <Button
+                  size="small"
+                  onClick={() => router.push(`/chat/${existingChatRoom.id}`)}
+                  style={{ flexShrink: 0 }}
+                >
+                  채팅방 보기
+                </Button>
+              ) : (
+                <Button
+                  type="primary"
+                  size="small"
+                  loading={proposingChat}
+                  onClick={handleProposeChat}
+                  style={{ background: 'var(--status-open)', borderColor: 'var(--status-open)', flexShrink: 0 }}
+                >
+                  채팅 제안
+                </Button>
+              )}
             </Flex>
           )}
 
