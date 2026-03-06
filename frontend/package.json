@@ -11,6 +11,7 @@
   "dependencies": {
     "@ant-design/icons": "^6.1.0",
     "@ant-design/nextjs-registry": "^1.0.2",
+    "@stomp/stompjs": "^7.3.0",
     "antd": "^6.3.1",
     "framer-motion": "^12.34.3",
     "next": "^15.3.3",
@@ -18,13 +19,15 @@
     "react-dom": "^19",
     "react-markdown": "^10.1.0",
     "rehype-highlight": "^7.0.2",
-    "remark-gfm": "^4.0.1"
+    "remark-gfm": "^4.0.1",
+    "sockjs-client": "^1.6.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/sockjs-client": "^1.5.4",
     "eslint": "^9",
     "eslint-config-next": "^15",
     "tailwindcss": "^4",

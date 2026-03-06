@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Button, Flex, Tag, Typography, Spin, Divider } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import { getQuestion, deleteQuestion, closeQuestion } from '@/lib/questions';
+import { createChatRoom } from '@/lib/chat';
 import { apiFetch } from '@/lib/api';
 import { getAccessToken } from '@/lib/auth';
 import { CATEGORY_META, QUESTION_TYPE_META, STATUS_META, relativeTime } from '@/lib/questionMeta';
@@ -25,6 +26,7 @@ export default function QuestionDetailPage() {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [closing, setClosing] = useState(false);
+  const [proposingChat, setProposingChat] = useState(false);
   const { confirm } = useModal();
 
   useEffect(() => {
@@ -100,6 +102,22 @@ export default function QuestionDetailPage() {
   }
 
   const isAuthor = currentUser?.id === question.authorUserId;
+  const canProposeChat =
+    question.allowOneToOne &&
+    currentUser !== null &&
+    !isAuthor &&
+    currentUser.mentorStatus === 'APPROVED' &&
+    question.status !== 'CLOSED';
+
+  async function handleProposeChat() {
+    setProposingChat(true);
+    const res = await createChatRoom(question!.id);
+    setProposingChat(false);
+    if (res.success && res.data) {
+      router.push(`/chat/${res.data.id}`);
+    }
+  }
+
   const status = STATUS_META[question.status];
   const category = CATEGORY_META[question.category];
   const type = QUESTION_TYPE_META[question.questionType];
@@ -254,6 +272,39 @@ export default function QuestionDetailPage() {
               </>
             )}
           </Flex>
+
+          {/* 채팅 제안 버튼 (멘토 전용) */}
+          {canProposeChat && (
+            <Flex
+              align="center"
+              justify="space-between"
+              style={{
+                background: 'var(--status-open-bg)',
+                border: '1px solid var(--status-open)',
+                borderRadius: 10,
+                padding: '12px 16px',
+                marginBottom: 24,
+              }}
+            >
+              <Flex vertical gap={2}>
+                <Text strong style={{ fontSize: 13, color: 'var(--status-open)' }}>
+                  💬 1:1 멘토링 제안
+                </Text>
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  이 질문에 직접 멘토링을 제안할 수 있어요.
+                </Text>
+              </Flex>
+              <Button
+                type="primary"
+                size="small"
+                loading={proposingChat}
+                onClick={handleProposeChat}
+                style={{ background: 'var(--status-open)', borderColor: 'var(--status-open)', flexShrink: 0 }}
+              >
+                채팅 제안
+              </Button>
+            </Flex>
+          )}
 
           {/* 본문 */}
           <MarkdownRenderer content={question.body} />
