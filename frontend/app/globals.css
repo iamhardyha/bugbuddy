@@ -1,3 +1,4 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css');
 @import "tailwindcss";
 
 /* ─── Design Tokens ─────────────────────────────────── */
@@ -6,7 +7,7 @@
   --global-header-height: 56px;
 
   /* Fonts */
-  --font-dm-sans: 'DM Sans', system-ui, sans-serif;
+  --font-pretendard: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-syne: 'Syne', system-ui, sans-serif;
   --font-outfit: 'Outfit', system-ui, sans-serif;
   --font-jetbrains-mono: 'JetBrains Mono', monospace;
@@ -84,7 +85,7 @@
 @theme inline {
   --color-background: var(--bg-base);
   --color-foreground: var(--text-primary);
-  --font-sans: var(--font-dm-sans);
+  --font-sans: var(--font-pretendard);
   --font-mono: var(--font-jetbrains-mono);
 }
 
@@ -97,7 +98,7 @@ body {
   padding-top: var(--global-header-height);
   background-color: var(--bg-base);
   color: var(--text-primary);
-  font-family: var(--font-dm-sans);
+  font-family: var(--font-pretendard);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color 0.2s ease, color 0.2s ease;
@@ -162,6 +163,63 @@ body {
   font-weight: 600;
 }
 
+
+.ask-btn-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, var(--accent), #9333ea);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: 0 3px 10px var(--accent-ring);
+  transition: opacity 0.15s ease, transform 0.1s ease;
+}
+.ask-btn-inline:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+.fab-ask {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, var(--accent), #9333ea);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: 0 6px 24px var(--accent-ring), 0 2px 8px rgba(0, 0, 0, 0.15);
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.22s ease, transform 0.22s ease, box-shadow 0.2s ease;
+}
+.fab-ask:hover {
+  opacity: 0.88;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px var(--accent-ring), 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+.fab-ask:active {
+  transform: translateY(0);
+}
+.fab-ask.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(14px);
+}
 
 .theme-btn {
   display: inline-flex;
@@ -250,14 +308,7 @@ body {
 }
 
 .page-header {
-  position: sticky;
-  top: var(--global-header-height);
-  z-index: 10;
-  border-bottom: 1px solid var(--border-faint);
-  background: var(--header-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  padding: 12px 24px;
+  padding: 16px 24px 0;
 }
 
 
@@ -1027,7 +1078,7 @@ body {
   }
 
   .page-header {
-    padding: 10px 16px;
+    padding: 12px 16px 0;
   }
 
   .global-header-inner {

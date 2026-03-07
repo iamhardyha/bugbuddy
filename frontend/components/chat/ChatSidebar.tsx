@@ -9,6 +9,7 @@ const { Text } = Typography;
 
 interface SectionProps {
   title: string;
+  dotColor: string;
   badge?: string;
   rooms: ChatRoom[];
   currentUserId: number;
@@ -17,18 +18,23 @@ interface SectionProps {
   emptyText?: string;
 }
 
-function Section({ title, badge, rooms, currentUserId, activeRoomId, onAccepted, emptyText }: SectionProps) {
+function Section({ title, dotColor, badge, rooms, currentUserId, activeRoomId, onAccepted, emptyText }: SectionProps) {
   if (rooms.length === 0 && !emptyText) return null;
   return (
     <section>
-      <Flex align="center" gap={6} style={{ padding: '10px 16px 6px' }}>
-        <Text style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>
+      <Flex align="center" gap={6} style={{ padding: '12px 16px 6px' }}>
+        <span style={{
+          width: 7, height: 7, borderRadius: '50%',
+          background: dotColor, flexShrink: 0,
+          boxShadow: `0 0 5px ${dotColor}88`,
+        }} />
+        <Text style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
           {title}
         </Text>
         {badge && <div className="dm-section-badge">{badge}</div>}
       </Flex>
       {rooms.length === 0 ? (
-        <div style={{ padding: '4px 16px 10px' }}>
+        <div style={{ padding: '4px 16px 12px' }}>
           <Text type="secondary" style={{ fontSize: 12 }}>{emptyText}</Text>
         </div>
       ) : (
@@ -104,22 +110,26 @@ export default function ChatSidebar({ rooms, currentUserId, activeRoomId, onAcce
           <>
             <Section
               title="대기중"
+              dotColor="var(--warning-text)"
               badge={pending.length > 0 ? String(pending.length) : undefined}
               rooms={pending}
               currentUserId={currentUserId}
               activeRoomId={activeRoomId}
               onAccepted={onAccepted}
+              emptyText="대기 중인 채팅이 없어요."
             />
             <Section
               title="진행중"
+              dotColor="var(--status-open)"
               rooms={open}
               currentUserId={currentUserId}
               activeRoomId={activeRoomId}
               onAccepted={onAccepted}
-              emptyText={pending.length > 0 || closed.length > 0 ? '진행 중인 채팅이 없어요.' : undefined}
+              emptyText="진행 중인 채팅이 없어요."
             />
             <Section
               title="종료됨"
+              dotColor="var(--text-tertiary)"
               rooms={closed}
               currentUserId={currentUserId}
               activeRoomId={activeRoomId}

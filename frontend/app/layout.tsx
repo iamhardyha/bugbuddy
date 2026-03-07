@@ -1,18 +1,11 @@
 import type { Metadata } from 'next';
-import { DM_Sans, Syne, Outfit, JetBrains_Mono } from 'next/font/google';
+import { Syne, Outfit, JetBrains_Mono } from 'next/font/google';
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 import { ThemeProvider } from '@/components/common/ThemeProvider';
 import { AntdProvider } from '@/components/common/AntdProvider';
 import { ModalProvider } from '@/components/common/ModalProvider';
 import GlobalHeader from '@/components/common/GlobalHeader';
 import './globals.css';
-
-const dmSans = DM_Sans({
-  subsets: ['latin'],
-  weight: ['400', '500', '600'],
-  variable: '--font-dm-sans',
-  display: 'swap',
-});
 
 const syne = Syne({
   subsets: ['latin'],
@@ -45,7 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="ko"
       suppressHydrationWarning
-      className={`${dmSans.variable} ${syne.variable} ${outfit.variable} ${jetbrainsMono.variable}`}
+      className={`${syne.variable} ${outfit.variable} ${jetbrainsMono.variable}`}
     >
       <body>
         <AntdRegistry>

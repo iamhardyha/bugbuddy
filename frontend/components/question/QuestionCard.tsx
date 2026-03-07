@@ -130,8 +130,8 @@ export default function QuestionCard({ question }: Props) {
           <Tag
             style={{
               borderRadius: 5,
-              background: 'var(--bg-elevated)',
-              color: 'var(--text-secondary)',
+              background: 'var(--accent-subtle)',
+              color: 'var(--accent)',
               fontSize: 10.5,
               fontWeight: 500,
               border: 'none',
@@ -144,8 +144,8 @@ export default function QuestionCard({ question }: Props) {
           <Tag
             style={{
               borderRadius: 5,
-              background: 'var(--bg-elevated)',
-              color: 'var(--text-secondary)',
+              background: 'var(--warning-bg)',
+              color: 'var(--warning-text)',
               fontSize: 10.5,
               fontWeight: 500,
               border: 'none',

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Select, Button, Flex, Skeleton, Typography, Tag, Divider } from 'antd';
+import { Select, Button, Flex, Skeleton, Typography, Tag } from 'antd';
 import {
   AppstoreOutlined,
   ApiOutlined,
@@ -16,6 +16,7 @@ import {
   EllipsisOutlined,
   TagsOutlined,
   PlusOutlined,
+  EditOutlined,
 } from '@ant-design/icons';
 import QuestionCard from './QuestionCard';
 import { getQuestions } from '@/lib/questions';
@@ -77,10 +78,23 @@ export default function QuestionFeed() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showFab, setShowFab] = useState(false);
+  const inlineBtnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     setIsLoggedIn(!!getAccessToken());
   }, []);
+
+  useEffect(() => {
+    const el = inlineBtnRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowFab(!entry.isIntersecting),
+      { threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [isLoggedIn]);
 
   useEffect(() => {
     setLoading(true);
@@ -122,6 +136,7 @@ export default function QuestionFeed() {
   const popularTags = getPopularTags(questions);
 
   return (
+    <>
     <Flex className="feed-root">
 
       {/* ── Left Sidebar: Category Nav ─────────────────── */}
@@ -173,21 +188,6 @@ export default function QuestionFeed() {
             );
           })}
 
-          {isLoggedIn && (
-            <>
-              <Divider style={{ margin: '12px 0', borderColor: 'var(--border-faint)' }} />
-              <div style={{ padding: '0 12px' }}>
-                <Button
-                  type="primary"
-                  icon={<PlusOutlined />}
-                  onClick={() => router.push('/questions/new')}
-                  style={{ width: '100%' }}
-                >
-                  질문하기
-                </Button>
-              </div>
-            </>
-          )}
         </div>
       </aside>
 
@@ -233,15 +233,14 @@ export default function QuestionFeed() {
           />
           <div style={{ flex: 1 }} />
           {isLoggedIn && (
-            <Button
-              type="primary"
-              size="small"
-              icon={<PlusOutlined />}
+            <button
+              ref={inlineBtnRef}
+              className="ask-btn-inline"
               onClick={() => router.push('/questions/new')}
-              className="lg:hidden"
             >
+              <EditOutlined />
               질문하기
-            </Button>
+            </button>
           )}
         </Flex>
 
@@ -361,5 +360,16 @@ export default function QuestionFeed() {
       </aside>
 
     </Flex>
+
+    {isLoggedIn && (
+      <button
+        className={`fab-ask${showFab ? '' : ' hidden'}`}
+        onClick={() => router.push('/questions/new')}
+      >
+        <EditOutlined />
+        질문하기
+      </button>
+    )}
+    </>
   );
 }

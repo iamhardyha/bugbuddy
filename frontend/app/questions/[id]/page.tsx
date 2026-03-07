@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Button, Flex, Tag, Typography, Spin, Divider } from 'antd';
-import { LoadingOutlined } from '@ant-design/icons';
+import { LoadingOutlined, EyeOutlined, MessageOutlined } from '@ant-design/icons';
 import { getQuestion, deleteQuestion, closeQuestion } from '@/lib/questions';
 import { createChatRoom, getChatRooms } from '@/lib/chat';
 import type { ChatRoom } from '@/types/chat';
@@ -205,7 +205,7 @@ export default function QuestionDetailPage() {
                 fontSize: 11,
               }}
             >
-              {category.emoji} {category.label}
+              {category.label}
             </Tag>
             <Tag
               style={{
@@ -216,7 +216,7 @@ export default function QuestionDetailPage() {
                 fontSize: 11,
               }}
             >
-              {type.emoji} {type.label}
+              {type.label}
             </Tag>
             {question.allowOneToOne && (
               <Tag
@@ -228,7 +228,7 @@ export default function QuestionDetailPage() {
                   fontSize: 11,
                 }}
               >
-                💬 1:1 가능
+                1:1 가능
               </Tag>
             )}
           </Flex>
@@ -272,7 +272,7 @@ export default function QuestionDetailPage() {
           >
             <Text strong className="question-meta-author">{question.authorNickname}</Text>
             <Text type="secondary">·</Text>
-            <Text type="secondary">👁 {question.viewCount.toLocaleString()} 조회</Text>
+            <Text type="secondary"><EyeOutlined style={{ marginRight: 4 }} />{question.viewCount.toLocaleString()} 조회</Text>
             <Text type="secondary">·</Text>
             <Text type="secondary">{relativeTime(question.createdAt)}</Text>
             {question.updatedAt !== question.createdAt && (
@@ -298,7 +298,7 @@ export default function QuestionDetailPage() {
             >
               <Flex vertical gap={2}>
                 <Text strong style={{ fontSize: 13, color: 'var(--status-open)' }}>
-                  💬 1:1 멘토링
+                  <MessageOutlined style={{ marginRight: 6 }} />1:1 멘토링
                 </Text>
                 <Text type="secondary" style={{ fontSize: 12 }}>
                   {existingChatRoom

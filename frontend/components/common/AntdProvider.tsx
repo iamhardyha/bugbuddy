@@ -27,7 +27,7 @@ export function AntdProvider({ children }: { children: ReactNode }) {
           colorTextSecondary:   isDark ? '#8686a8' : '#4a4a6a',
           colorTextTertiary:    isDark ? '#505068' : '#8888aa',
           borderRadius:         8,
-          fontFamily:           "var(--font-dm-sans, 'DM Sans', system-ui, sans-serif)",
+          fontFamily:           "var(--font-pretendard, 'Pretendard Variable', system-ui, sans-serif)",
           fontSize:             14,
           controlHeight:        38,
         },
