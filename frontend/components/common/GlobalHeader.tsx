@@ -11,8 +11,8 @@ export default function GlobalHeader() {
       <div className="global-header-inner">
         {/* Wordmark */}
         <Link href="/" className="bugbuddy-wordmark">
-          <span className="bugbuddy-wordmark-bug">Bug</span>
-          <span className="bugbuddy-wordmark-buddy">Buddy</span>
+          <span className="bugbuddy-wordmark-bug">Log</span>
+          <span className="bugbuddy-wordmark-buddy">os</span>
         </Link>
 
         <div style={{ flex: 1 }} />

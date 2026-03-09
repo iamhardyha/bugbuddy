@@ -25,7 +25,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('dark');
 
   useEffect(() => {
-    const stored = localStorage.getItem('bugbuddy-theme') as Theme | null;
+    const stored = localStorage.getItem('logos-theme') as Theme | null;
     const initial: Theme = stored ?? 'system';
     setThemeState(initial);
 
@@ -55,7 +55,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   function setTheme(newTheme: Theme) {
     setThemeState(newTheme);
-    localStorage.setItem('bugbuddy-theme', newTheme);
+    localStorage.setItem('logos-theme', newTheme);
   }
 
   return (

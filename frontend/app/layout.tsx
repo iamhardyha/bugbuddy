@@ -29,7 +29,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'BugBuddy',
+  title: 'Logos',
   description: '개발자를 위한 1:1 멘토링 커뮤니티',
 };
 

@@ -385,7 +385,7 @@ export default function QuestionFeed() {
           ) : !isLoggedIn ? (
             <div className="feed-sidebar-card" style={{ marginBottom: 16 }}>
               <Text strong style={{ fontSize: 13, display: 'block', marginBottom: 8 }}>
-                BugBuddy에 오신 것을 환영해요!
+                Logos에 오신 것을 환영해요!
               </Text>
               <Text style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
                 로그인하면 질문하기, 멘토링 요청 등 다양한 기능을 사용할 수 있어요.
