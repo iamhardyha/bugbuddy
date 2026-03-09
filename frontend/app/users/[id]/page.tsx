@@ -49,6 +49,10 @@ export default function UserProfilePage() {
       if (profileRes.success && profileRes.data) setProfile(profileRes.data);
       if (userRes.success && userRes.data) setCurrentUser(userRes.data as UserProfile);
       setLoading(false);
+
+      // 사이드바 통계를 위해 초기에 바로 로드
+      const statsRes = await getUserStats(userId);
+      if (statsRes.success && statsRes.data) setStats(statsRes.data);
     }
     load();
   }, [userId]);
@@ -93,16 +97,9 @@ export default function UserProfilePage() {
     setAnswersLoading(false);
   }
 
-  async function loadStats() {
-    if (stats) return;
-    const res = await getUserStats(userId);
-    if (res.success && res.data) setStats(res.data);
-  }
-
   function handleTabChange(key: string) {
     setActiveTab(key);
     if (key === 'answers' && answers.length === 0) loadAnswers(0);
-    if (key === 'stats') loadStats();
   }
 
   if (loading) {
@@ -131,173 +128,229 @@ export default function UserProfilePage() {
   const levelMeta = getLevelMeta(profile.level);
   const xpProgress = getXpProgress(profile.xp, profile.level);
 
+  const totalActivity = profile.questionCount + profile.answerCount;
+  const xpItems = [
+    { label: '답변 활동', value: profile.answerCount, total: totalActivity },
+    { label: '질문 활동', value: profile.questionCount, total: totalActivity },
+  ];
+
+  const statItems = [
+    { label: 'Helpful Votes', value: stats?.helpfulReceivedCount ?? 0, icon: '👍' },
+    { label: 'Solved Issues', value: stats?.acceptedAnswerCount ?? 0, icon: '✅' },
+    { label: 'Questions', value: profile.questionCount, icon: '❓' },
+    { label: 'Answers', value: profile.answerCount, icon: '💬' },
+  ];
+
   return (
     <div className="page-root">
-      <main style={{ maxWidth: 860, margin: '0 auto', padding: '32px 24px' }}>
-        {/* Profile Card */}
-        <div
-          style={{
-            borderRadius: 16,
-            border: '1px solid var(--border-faint)',
-            background: 'var(--bg-surface)',
-            padding: '32px 28px',
-            marginBottom: 24,
-            boxShadow: 'var(--shadow-sm)',
-          }}
-        >
-          <Flex align="flex-start" gap={24} wrap>
-            {/* Avatar */}
-            <Avatar
-              size={72}
-              style={{
-                background: 'var(--accent-subtle)',
-                color: 'var(--accent)',
-                border: '2px solid var(--accent-ring)',
-                fontSize: 28,
-                fontWeight: 700,
-                flexShrink: 0,
-              }}
-            >
-              {profile.nickname.charAt(0).toUpperCase()}
-            </Avatar>
-
-            {/* Info */}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <Flex align="center" gap={8} wrap style={{ marginBottom: 6 }}>
-                <Title level={4} style={{ margin: 0, color: 'var(--text-primary)', fontSize: 20 }}>
-                  {profile.nickname}
-                </Title>
-
-                {/* Level badge */}
-                <span className="badge badge-accent" style={{ fontSize: 12 }}>
-                  {levelMeta.emoji} Lv.{profile.level} {levelMeta.name}
-                </span>
-
-                {/* Mentor badge */}
-                {profile.isMentor && (
-                  <span className="badge badge-success" style={{ fontSize: 12 }}>
-                    🎓 인증 멘토
-                  </span>
-                )}
-              </Flex>
-
-              {/* Bio */}
-              <Text
+      <div className="profile-two-col">
+        {/* 왼쪽: 프로필 카드 + 탭 */}
+        <div>
+          {/* Profile Card */}
+          <div
+            style={{
+              borderRadius: 16,
+              border: '1px solid var(--border-faint)',
+              background: 'var(--bg-surface)',
+              padding: '32px 28px',
+              marginBottom: 24,
+              boxShadow: 'var(--shadow-sm)',
+            }}
+          >
+            <Flex align="flex-start" gap={24} wrap>
+              {/* Avatar */}
+              <Avatar
+                size={72}
                 style={{
-                  display: 'block',
-                  color: profile.bio ? 'var(--text-secondary)' : 'var(--text-tertiary)',
-                  fontSize: 13.5,
-                  marginBottom: 14,
-                  lineHeight: 1.6,
+                  background: 'var(--accent-subtle)',
+                  color: 'var(--accent)',
+                  border: '2px solid var(--accent-ring)',
+                  fontSize: 28,
+                  fontWeight: 700,
+                  flexShrink: 0,
                 }}
               >
-                {profile.bio ?? '자기소개가 없습니다.'}
-              </Text>
+                {profile.nickname.charAt(0).toUpperCase()}
+              </Avatar>
 
-              {/* XP Progress */}
-              <div style={{ marginBottom: 14 }}>
-                <Flex justify="space-between" style={{ marginBottom: 4 }}>
-                  <Text style={{ fontSize: 11.5, color: 'var(--text-tertiary)' }}>
-                    경험치 {profile.xp.toLocaleString()} XP
-                  </Text>
-                  {xpProgress.percent < 100 && (
-                    <Text style={{ fontSize: 11.5, color: 'var(--text-tertiary)' }}>
-                      다음 레벨까지 {(xpProgress.next - xpProgress.current).toLocaleString()} XP
-                    </Text>
+              {/* Info */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <Flex align="center" gap={8} wrap style={{ marginBottom: 6 }}>
+                  <Title level={4} style={{ margin: 0, color: 'var(--text-primary)', fontSize: 20 }}>
+                    {profile.nickname}
+                  </Title>
+
+                  {/* Level badge */}
+                  <span className="badge badge-accent" style={{ fontSize: 12 }}>
+                    {levelMeta.emoji} Lv.{profile.level} {levelMeta.name}
+                  </span>
+
+                  {/* Mentor badge */}
+                  {profile.isMentor && (
+                    <span className="badge badge-success" style={{ fontSize: 12 }}>
+                      🎓 인증 멘토
+                    </span>
                   )}
                 </Flex>
-                <Progress
-                  percent={xpProgress.percent}
-                  showInfo={false}
-                  strokeColor="var(--accent)"
-                  trailColor="var(--bg-elevated)"
-                  size={{ height: 5 }}
-                />
+
+                {/* Bio */}
+                <Text
+                  style={{
+                    display: 'block',
+                    color: profile.bio ? 'var(--text-secondary)' : 'var(--text-tertiary)',
+                    fontSize: 13.5,
+                    marginBottom: 14,
+                    lineHeight: 1.6,
+                  }}
+                >
+                  {profile.bio ?? '자기소개가 없습니다.'}
+                </Text>
+
+                {/* XP Progress */}
+                <div style={{ marginBottom: 14 }}>
+                  <Flex justify="space-between" style={{ marginBottom: 4 }}>
+                    <Text style={{ fontSize: 11.5, color: 'var(--text-tertiary)' }}>
+                      경험치 {profile.xp.toLocaleString()} XP
+                    </Text>
+                    {xpProgress.percent < 100 && (
+                      <Text style={{ fontSize: 11.5, color: 'var(--text-tertiary)' }}>
+                        다음 레벨까지 {(xpProgress.next - xpProgress.current).toLocaleString()} XP
+                      </Text>
+                    )}
+                  </Flex>
+                  <Progress
+                    percent={xpProgress.percent}
+                    showInfo={false}
+                    strokeColor="var(--accent)"
+                    trailColor="var(--bg-elevated)"
+                    size={{ height: 5 }}
+                  />
+                </div>
+
+                {/* Stats row */}
+                <Flex align="center" gap={16} wrap>
+                  <Text style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{profile.questionCount}</span> 질문
+                  </Text>
+                  <Text style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{profile.answerCount}</span> 답변
+                  </Text>
+                  {profile.isMentor && profile.mentorAvgRating != null && (
+                    <Text style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+                      ⭐ 멘토{' '}
+                      <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                        {Number(profile.mentorAvgRating).toFixed(1)}
+                      </span>
+                      <span style={{ color: 'var(--text-tertiary)', fontSize: 12 }}>
+                        {' '}({profile.mentorRatingCount}개)
+                      </span>
+                    </Text>
+                  )}
+                  {profile.menteeAvgRating != null && (
+                    <Text style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+                      ⭐ 멘티{' '}
+                      <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                        {Number(profile.menteeAvgRating).toFixed(1)}
+                      </span>
+                      <span style={{ color: 'var(--text-tertiary)', fontSize: 12 }}>
+                        {' '}({profile.menteeRatingCount}개)
+                      </span>
+                    </Text>
+                  )}
+
+                  {isOwnProfile && (
+                    <Button
+                      type="default"
+                      size="small"
+                      onClick={() => router.push('/settings/profile')}
+                      style={{ marginLeft: 'auto', fontSize: 12 }}
+                    >
+                      프로필 수정
+                    </Button>
+                  )}
+                </Flex>
               </div>
+            </Flex>
+          </div>
 
-              {/* Stats row */}
-              <Flex align="center" gap={16} wrap>
-                <Text style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-                  <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{profile.questionCount}</span> 질문
-                </Text>
-                <Text style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-                  <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{profile.answerCount}</span> 답변
-                </Text>
-                {profile.isMentor && profile.mentorAvgRating != null && (
-                  <Text style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-                    ⭐ 멘토{' '}
-                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-                      {Number(profile.mentorAvgRating).toFixed(1)}
-                    </span>
-                    <span style={{ color: 'var(--text-tertiary)', fontSize: 12 }}>
-                      {' '}({profile.mentorRatingCount}개)
-                    </span>
-                  </Text>
-                )}
-                {profile.menteeAvgRating != null && (
-                  <Text style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-                    ⭐ 멘티{' '}
-                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-                      {Number(profile.menteeAvgRating).toFixed(1)}
-                    </span>
-                    <span style={{ color: 'var(--text-tertiary)', fontSize: 12 }}>
-                      {' '}({profile.menteeRatingCount}개)
-                    </span>
-                  </Text>
-                )}
-
-                {isOwnProfile && (
-                  <Button
-                    type="default"
-                    size="small"
-                    onClick={() => router.push('/settings/profile')}
-                    style={{ marginLeft: 'auto', fontSize: 12 }}
-                  >
-                    프로필 수정
-                  </Button>
-                )}
-              </Flex>
-            </div>
-          </Flex>
+          {/* Tabs */}
+          <Tabs
+            activeKey={activeTab}
+            onChange={handleTabChange}
+            items={[
+              {
+                key: 'questions',
+                label: `질문 ${profile.questionCount}`,
+                children: (
+                  <QuestionsTab
+                    questions={questions}
+                    total={questionsTotal}
+                    loading={questionsLoading}
+                    onLoadMore={() => loadQuestions(questionsPage + 1)}
+                  />
+                ),
+              },
+              {
+                key: 'answers',
+                label: `답변 ${profile.answerCount}`,
+                children: (
+                  <AnswersTab
+                    answers={answers}
+                    total={answersTotal}
+                    loading={answersLoading}
+                    onLoadMore={() => loadAnswers(answersPage + 1)}
+                  />
+                ),
+              },
+            ]}
+          />
         </div>
 
-        {/* Tabs */}
-        <Tabs
-          activeKey={activeTab}
-          onChange={handleTabChange}
-          items={[
-            {
-              key: 'questions',
-              label: `질문 ${profile.questionCount}`,
-              children: (
-                <QuestionsTab
-                  questions={questions}
-                  total={questionsTotal}
-                  loading={questionsLoading}
-                  onLoadMore={() => loadQuestions(questionsPage + 1)}
-                />
-              ),
-            },
-            {
-              key: 'answers',
-              label: `답변 ${profile.answerCount}`,
-              children: (
-                <AnswersTab
-                  answers={answers}
-                  total={answersTotal}
-                  loading={answersLoading}
-                  onLoadMore={() => loadAnswers(answersPage + 1)}
-                />
-              ),
-            },
-            {
-              key: 'stats',
-              label: '통계',
-              children: <StatsTab stats={stats} />,
-            },
-          ]}
-        />
-      </main>
+        {/* 오른쪽: 사이드바 */}
+        <div style={{ position: 'sticky', top: 'calc(var(--global-header-height) + 24px)' }}>
+          {/* Stats Summary */}
+          <div className="profile-sidebar-card">
+            <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 16 }}>Stats Summary</Text>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              {statItems.map(item => (
+                <div key={item.label} style={{ textAlign: 'center' }}>
+                  <Text style={{ fontSize: 22, display: 'block', marginBottom: 2 }}>{item.icon}</Text>
+                  <Text style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', display: 'block', lineHeight: 1 }}>
+                    {item.value.toLocaleString()}
+                  </Text>
+                  <Text style={{ fontSize: 11, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    {item.label}
+                  </Text>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* XP Distribution */}
+          <div className="profile-sidebar-card">
+            <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 16 }}>XP Distribution</Text>
+            <Flex vertical gap={12}>
+              {xpItems.map(item => (
+                <div key={item.label}>
+                  <Flex justify="space-between" style={{ marginBottom: 4 }}>
+                    <Text style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{item.label}</Text>
+                    <Text style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>
+                      {item.total > 0 ? Math.round((item.value / item.total) * 100) : 0}%
+                    </Text>
+                  </Flex>
+                  <Progress
+                    percent={item.total > 0 ? Math.round((item.value / item.total) * 100) : 0}
+                    showInfo={false}
+                    strokeColor="var(--accent)"
+                    trailColor="var(--bg-elevated)"
+                    size={{ height: 6 }}
+                  />
+                </div>
+              ))}
+            </Flex>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -440,64 +493,5 @@ function AnswersTab({
         </Flex>
       )}
     </Flex>
-  );
-}
-
-function StatsTab({ stats }: { stats: UserStats | null }) {
-  if (!stats) {
-    return (
-      <Flex justify="center" style={{ padding: '40px 0' }}>
-        <Spin indicator={<LoadingOutlined spin />} />
-      </Flex>
-    );
-  }
-
-  const items = [
-    { label: '질문한 글', value: stats.questionCount, emoji: '❓' },
-    { label: '답변한 글', value: stats.answerCount, emoji: '💬' },
-    { label: '도움됐어요 받음', value: stats.helpfulReceivedCount, emoji: '👍' },
-    { label: '채택된 답변', value: stats.acceptedAnswerCount, emoji: '✅' },
-  ];
-
-  return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-        gap: 16,
-        padding: '4px 0',
-      }}
-    >
-      {items.map(item => (
-        <div
-          key={item.label}
-          style={{
-            borderRadius: 12,
-            border: '1px solid var(--border-faint)',
-            background: 'var(--bg-surface)',
-            padding: '20px 20px',
-            boxShadow: 'var(--shadow-sm)',
-          }}
-        >
-          <Text style={{ fontSize: 24, display: 'block', marginBottom: 8 }}>{item.emoji}</Text>
-          <Text
-            style={{
-              fontFamily: 'var(--font-jetbrains-mono)',
-              fontSize: 28,
-              fontWeight: 700,
-              color: 'var(--text-primary)',
-              display: 'block',
-              lineHeight: 1,
-              marginBottom: 6,
-            }}
-          >
-            {item.value.toLocaleString()}
-          </Text>
-          <Text style={{ fontSize: 12.5, color: 'var(--text-tertiary)' }}>
-            {item.label}
-          </Text>
-        </div>
-      ))}
-    </div>
   );
 }

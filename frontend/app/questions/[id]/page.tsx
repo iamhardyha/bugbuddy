@@ -1,16 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { Button, Flex, Tag, Typography, Spin, Divider } from 'antd';
+import { Button, Flex, Tag, Typography, Spin } from 'antd';
 import { LoadingOutlined, EyeOutlined, MessageOutlined } from '@ant-design/icons';
-import { getQuestion, deleteQuestion, closeQuestion } from '@/lib/questions';
+import { getQuestion, deleteQuestion, closeQuestion, getQuestions } from '@/lib/questions';
 import { createChatRoom, getChatRooms } from '@/lib/chat';
 import type { ChatRoom } from '@/types/chat';
 import { apiFetch } from '@/lib/api';
 import { getAccessToken } from '@/lib/auth';
 import { CATEGORY_META, QUESTION_TYPE_META, STATUS_META, relativeTime } from '@/lib/questionMeta';
-import type { QuestionDetail } from '@/types/question';
+import type { QuestionDetail, QuestionSummary } from '@/types/question';
 import type { UserProfile } from '@/types/user';
 import MarkdownRenderer from '@/components/editor/MarkdownRenderer';
 import AnswerList from '@/components/answer/AnswerList';
@@ -29,6 +30,7 @@ export default function QuestionDetailPage() {
   const [closing, setClosing] = useState(false);
   const [proposingChat, setProposingChat] = useState(false);
   const [existingChatRoom, setExistingChatRoom] = useState<ChatRoom | null>(null);
+  const [similarQuestions, setSimilarQuestions] = useState<QuestionSummary[]>([]);
   const { confirm } = useModal();
 
   useEffect(() => {
@@ -40,7 +42,15 @@ export default function QuestionDetailPage() {
         isLoggedIn ? getChatRooms() : Promise.resolve({ success: false, data: null }),
       ]);
 
-      if (qRes.success && qRes.data) setQuestion(qRes.data);
+      if (qRes.success && qRes.data) {
+        setQuestion(qRes.data);
+        // 같은 카테고리의 유사 질문 로드
+        const simRes = await getQuestions({ category: qRes.data.category, size: 4 });
+        if (simRes.success && simRes.data) {
+          // 현재 질문 제외
+          setSimilarQuestions(simRes.data.content.filter(q => q.id !== qRes.data!.id).slice(0, 3));
+        }
+      }
       if (uRes.success && uRes.data) setCurrentUser(uRes.data as UserProfile);
       if (roomsRes.success && roomsRes.data) {
         const matched = (roomsRes.data as ChatRoom[]).find(
@@ -111,6 +121,7 @@ export default function QuestionDetailPage() {
     );
   }
 
+  const isLoggedIn = !!getAccessToken();
   const isAuthor = currentUser?.id === question.authorUserId;
   const canProposeChat =
     question.allowOneToOne &&
@@ -134,19 +145,23 @@ export default function QuestionDetailPage() {
 
   return (
     <div className="page-root">
+      {/* 브레드크럼 + 작성자 액션 헤더 */}
       <header className="page-header">
         <Flex
           align="center"
           justify="space-between"
-          style={{ margin: '0 auto', maxWidth: '760px' }}
+          style={{ margin: '0 auto', maxWidth: '1080px' }}
         >
-          <Button
-            type="link"
-            onClick={() => router.back()}
-            style={{ padding: 0, height: 'auto', fontSize: '13px', color: 'var(--text-tertiary)' }}
-          >
-            ← 목록으로
-          </Button>
+          {/* 브레드크럼 */}
+          <Flex align="center" gap={6} style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>
+            <Link href="/" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>Home</Link>
+            <span>›</span>
+            <Link href="/questions" style={{ color: 'var(--text-tertiary)', textDecoration: 'none' }}>Questions</Link>
+            <span>›</span>
+            <span style={{ color: 'var(--text-secondary)', maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {question.title}
+            </span>
+          </Flex>
 
           {isAuthor && (
             <Flex align="center" gap={8}>
@@ -181,170 +196,233 @@ export default function QuestionDetailPage() {
         </Flex>
       </header>
 
-      <main className="detail-page-main">
-        <article className="question-article">
-          {/* 배지 영역 */}
-          <Flex wrap align="center" gap={8} style={{ marginBottom: 18 }}>
-            <Tag
-              style={{
-                ...status.style,
-                borderRadius: 999,
-                border: 'none',
-                fontWeight: 600,
-                fontSize: 11,
-              }}
-            >
-              {status.label}
-            </Tag>
-            <Tag
-              style={{
-                background: 'var(--accent-subtle)',
-                color: 'var(--accent)',
-                borderRadius: 999,
-                border: 'none',
-                fontSize: 11,
-              }}
-            >
-              {category.label}
-            </Tag>
-            <Tag
-              style={{
-                background: 'var(--warning-bg)',
-                color: 'var(--warning-text)',
-                borderRadius: 999,
-                border: 'none',
-                fontSize: 11,
-              }}
-            >
-              {type.label}
-            </Tag>
-            {question.allowOneToOne && (
+      {/* 2컬럼 레이아웃 */}
+      <div className="detail-two-col-root">
+        {/* 왼쪽: 질문 + 답변 */}
+        <div>
+          <article className="question-article">
+            {/* 배지 영역 */}
+            <Flex wrap align="center" gap={8} style={{ marginBottom: 18 }}>
               <Tag
                 style={{
-                  background: 'var(--status-open-bg)',
-                  color: 'var(--status-open)',
+                  ...status.style,
+                  borderRadius: 999,
+                  border: 'none',
+                  fontWeight: 600,
+                  fontSize: 11,
+                }}
+              >
+                {status.label}
+              </Tag>
+              <Tag
+                style={{
+                  background: 'var(--accent-subtle)',
+                  color: 'var(--accent)',
                   borderRadius: 999,
                   border: 'none',
                   fontSize: 11,
                 }}
               >
-                1:1 가능
+                {category.label}
               </Tag>
-            )}
-          </Flex>
-
-          {/* 제목 */}
-          <Title
-            level={3}
-            style={{ color: 'var(--text-primary)', lineHeight: 1.35, marginBottom: 14 }}
-          >
-            {question.title}
-          </Title>
-
-          {/* 태그 */}
-          {question.tags.length > 0 && (
-            <Flex wrap gap={6} style={{ marginBottom: 18 }}>
-              {question.tags.map(tag => (
+              <Tag
+                style={{
+                  background: 'var(--warning-bg)',
+                  color: 'var(--warning-text)',
+                  borderRadius: 999,
+                  border: 'none',
+                  fontSize: 11,
+                }}
+              >
+                {type.label}
+              </Tag>
+              {question.allowOneToOne && (
                 <Tag
-                  key={tag}
                   style={{
-                    background: 'var(--tag-bg)',
-                    color: 'var(--tag-text)',
+                    background: 'var(--status-open-bg)',
+                    color: 'var(--status-open)',
+                    borderRadius: 999,
                     border: 'none',
-                    borderRadius: 4,
-                    fontSize: 12,
-                    fontFamily: 'var(--font-jetbrains-mono)',
+                    fontSize: 11,
                   }}
                 >
-                  #{tag}
+                  1:1 가능
                 </Tag>
-              ))}
-            </Flex>
-          )}
-
-          {/* 메타 */}
-          <Flex
-            align="center"
-            gap={6}
-            wrap
-            className="question-meta"
-            style={{ marginBottom: 24, paddingBottom: 20, borderBottom: '1px solid var(--border-faint)' }}
-          >
-            <Text strong className="question-meta-author">{question.authorNickname}</Text>
-            <Text type="secondary">·</Text>
-            <Text type="secondary"><EyeOutlined style={{ marginRight: 4 }} />{question.viewCount.toLocaleString()} 조회</Text>
-            <Text type="secondary">·</Text>
-            <Text type="secondary">{relativeTime(question.createdAt)}</Text>
-            {question.updatedAt !== question.createdAt && (
-              <>
-                <Text type="secondary">·</Text>
-                <Text type="secondary">수정됨 {relativeTime(question.updatedAt)}</Text>
-              </>
-            )}
-          </Flex>
-
-          {/* 채팅 제안 배너 (멘토 전용) */}
-          {canProposeChat && (
-            <Flex
-              align="center"
-              justify="space-between"
-              style={{
-                background: 'var(--status-open-bg)',
-                border: '1px solid var(--status-open)',
-                borderRadius: 10,
-                padding: '12px 16px',
-                marginBottom: 24,
-              }}
-            >
-              <Flex vertical gap={2}>
-                <Text strong style={{ fontSize: 13, color: 'var(--status-open)' }}>
-                  <MessageOutlined style={{ marginRight: 6 }} />1:1 멘토링
-                </Text>
-                <Text type="secondary" style={{ fontSize: 12 }}>
-                  {existingChatRoom
-                    ? existingChatRoom.status === 'PENDING'
-                      ? '채팅 제안을 보냈어요. 멘티의 수락을 기다리고 있어요.'
-                      : '이 질문과 연결된 채팅이 진행 중이에요.'
-                    : '이 질문에 직접 멘토링을 제안할 수 있어요.'}
-                </Text>
-              </Flex>
-              {existingChatRoom ? (
-                <Button
-                  size="small"
-                  onClick={() => router.push(`/chat/${existingChatRoom.id}`)}
-                  style={{ flexShrink: 0 }}
-                >
-                  채팅방 보기
-                </Button>
-              ) : (
-                <Button
-                  type="primary"
-                  size="small"
-                  loading={proposingChat}
-                  onClick={handleProposeChat}
-                  style={{ background: 'var(--status-open)', borderColor: 'var(--status-open)', flexShrink: 0 }}
-                >
-                  채팅 제안
-                </Button>
               )}
             </Flex>
+
+            {/* 제목 */}
+            <Title
+              level={3}
+              style={{ color: 'var(--text-primary)', lineHeight: 1.35, marginBottom: 14 }}
+            >
+              {question.title}
+            </Title>
+
+            {/* 태그 */}
+            {question.tags.length > 0 && (
+              <Flex wrap gap={6} style={{ marginBottom: 18 }}>
+                {question.tags.map(tag => (
+                  <Tag
+                    key={tag}
+                    style={{
+                      background: 'var(--tag-bg)',
+                      color: 'var(--tag-text)',
+                      border: 'none',
+                      borderRadius: 4,
+                      fontSize: 12,
+                      fontFamily: 'var(--font-jetbrains-mono)',
+                    }}
+                  >
+                    #{tag}
+                  </Tag>
+                ))}
+              </Flex>
+            )}
+
+            {/* 메타 */}
+            <Flex
+              align="center"
+              gap={6}
+              wrap
+              className="question-meta"
+              style={{ marginBottom: 24, paddingBottom: 20, borderBottom: '1px solid var(--border-faint)' }}
+            >
+              <Text strong className="question-meta-author">{question.authorNickname}</Text>
+              <Text type="secondary">·</Text>
+              <Text type="secondary"><EyeOutlined style={{ marginRight: 4 }} />{question.viewCount.toLocaleString()} 조회</Text>
+              <Text type="secondary">·</Text>
+              <Text type="secondary">{relativeTime(question.createdAt)}</Text>
+              {question.updatedAt !== question.createdAt && (
+                <>
+                  <Text type="secondary">·</Text>
+                  <Text type="secondary">수정됨 {relativeTime(question.updatedAt)}</Text>
+                </>
+              )}
+            </Flex>
+
+            {/* 채팅 제안 배너 (멘토 전용) */}
+            {canProposeChat && (
+              <Flex
+                align="center"
+                justify="space-between"
+                style={{
+                  background: 'var(--status-open-bg)',
+                  border: '1px solid var(--status-open)',
+                  borderRadius: 10,
+                  padding: '12px 16px',
+                  marginBottom: 24,
+                }}
+              >
+                <Flex vertical gap={2}>
+                  <Text strong style={{ fontSize: 13, color: 'var(--status-open)' }}>
+                    <MessageOutlined style={{ marginRight: 6 }} />1:1 멘토링
+                  </Text>
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    {existingChatRoom
+                      ? existingChatRoom.status === 'PENDING'
+                        ? '채팅 제안을 보냈어요. 멘티의 수락을 기다리고 있어요.'
+                        : '이 질문과 연결된 채팅이 진행 중이에요.'
+                      : '이 질문에 직접 멘토링을 제안할 수 있어요.'}
+                  </Text>
+                </Flex>
+                {existingChatRoom ? (
+                  <Button
+                    size="small"
+                    onClick={() => router.push(`/chat/${existingChatRoom.id}`)}
+                    style={{ flexShrink: 0 }}
+                  >
+                    채팅방 보기
+                  </Button>
+                ) : (
+                  <Button
+                    type="primary"
+                    size="small"
+                    loading={proposingChat}
+                    onClick={handleProposeChat}
+                    style={{ background: 'var(--status-open)', borderColor: 'var(--status-open)', flexShrink: 0 }}
+                  >
+                    채팅 제안
+                  </Button>
+                )}
+              </Flex>
+            )}
+
+            {/* 본문 */}
+            <MarkdownRenderer content={question.body} />
+          </article>
+
+          {/* 답변 섹션 */}
+          <div style={{ marginTop: 32 }}>
+            <AnswerList
+              questionId={question.id}
+              questionStatus={question.status}
+              questionAuthorId={question.authorUserId}
+              currentUserId={currentUser?.id ?? null}
+              onAccepted={() => setQuestion(prev => prev ? { ...prev, status: 'SOLVED' } : prev)}
+            />
+          </div>
+        </div>
+
+        {/* 오른쪽: 사이드바 */}
+        <aside style={{ position: 'sticky', top: 'calc(var(--global-header-height) + 24px)' }}>
+          {/* Question Author 카드 */}
+          <div className="detail-sidebar-card" style={{ marginBottom: 16 }}>
+            <Text style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-tertiary)', display: 'block', marginBottom: 12 }}>
+              Question Author
+            </Text>
+            <Flex align="center" gap={10} style={{ marginBottom: 12 }}>
+              <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--accent-subtle)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 700, flexShrink: 0 }}>
+                {question.authorNickname.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <Text strong style={{ fontSize: 14, color: 'var(--text-primary)', display: 'block' }}>
+                  @{question.authorNickname}
+                </Text>
+              </div>
+            </Flex>
+            <Button type="default" block size="small" onClick={() => router.push(`/users/${question.authorUserId}`)}>
+              View Full Portfolio
+            </Button>
+          </div>
+
+          {/* Similar Questions 카드 */}
+          {similarQuestions.length > 0 && (
+            <div className="detail-sidebar-card" style={{ marginBottom: 16 }}>
+              <Text style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-tertiary)', display: 'block', marginBottom: 12 }}>
+                Similar Questions
+              </Text>
+              <Flex vertical gap={10}>
+                {similarQuestions.map(q => (
+                  <Link key={q.id} href={`/questions/${q.id}`} style={{ textDecoration: 'none' }}>
+                    <Text style={{ fontSize: 13, color: 'var(--text-primary)', fontWeight: 500, lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden' }}>
+                      {q.title}
+                    </Text>
+                  </Link>
+                ))}
+              </Flex>
+            </div>
           )}
 
-          {/* 본문 */}
-          <MarkdownRenderer content={question.body} />
-        </article>
-
-        {/* 답변 섹션 */}
-        <div style={{ marginTop: 32 }}>
-          <AnswerList
-            questionId={question.id}
-            questionStatus={question.status}
-            questionAuthorId={question.authorUserId}
-            currentUserId={currentUser?.id ?? null}
-            onAccepted={() => setQuestion(prev => prev ? { ...prev, status: 'SOLVED' } : prev)}
-          />
-        </div>
-      </main>
+          {/* Join the Elite 카드 */}
+          {isLoggedIn && currentUser?.mentorStatus !== 'APPROVED' && (
+            <div className="detail-sidebar-card" style={{ background: '#2563eb', border: 'none' }}>
+              <Text strong style={{ fontSize: 14, color: '#ffffff', display: 'block', marginBottom: 6 }}>
+                Join the Elite
+              </Text>
+              <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.85)', lineHeight: 1.6, display: 'block', marginBottom: 12 }}>
+                Become a Verified Mentor and help others grow while earning exclusive rewards and XP.
+              </Text>
+              <button
+                onClick={() => router.push('/settings/profile')}
+                style={{ width: '100%', padding: '8px 0', borderRadius: 8, border: '1px solid rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.15)', color: '#ffffff', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+              >
+                Apply for Mentorship
+              </button>
+            </div>
+          )}
+        </aside>
+      </div>
     </div>
   );
 }

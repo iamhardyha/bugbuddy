@@ -2,19 +2,12 @@
 
 import Link from 'next/link';
 import { Flex, Tag, Typography } from 'antd';
-import { CATEGORY_META, QUESTION_TYPE_META, relativeTime } from '@/lib/questionMeta';
+import { CaretUpOutlined, CaretDownOutlined } from '@ant-design/icons';
+import { CATEGORY_META, relativeTime } from '@/lib/questionMeta';
 import type { QuestionSummary } from '@/types/question';
 
 const { Text } = Typography;
 
-/* Status config with CSS variable references */
-const STATUS: Record<string, { label: string; color: string; bg: string }> = {
-  OPEN:   { label: '답변 받는 중', color: 'var(--status-open)',   bg: 'var(--status-open-bg)'   },
-  SOLVED: { label: '해결됨',       color: 'var(--status-solved)', bg: 'var(--status-solved-bg)' },
-  CLOSED: { label: '마감',         color: 'var(--status-closed)', bg: 'var(--status-closed-bg)' },
-};
-
-/* Category accent colors */
 const CAT_ACCENT: Record<string, string> = {
   BACKEND:  '#7c65f6',
   FRONTEND: '#4ea8de',
@@ -27,184 +20,124 @@ const CAT_ACCENT: Record<string, string> = {
   ETC:      '#8888a8',
 };
 
+const AVATAR_COLORS: [string, string][] = [
+  ['#e8e0ff', '#5548e0'],
+  ['#d4f5e9', '#1a9c5e'],
+  ['#dbeafe', '#2878e8'],
+  ['#fde8d8', '#a0522d'],
+  ['#fce7f3', '#be185d'],
+];
+
+function AuthorAvatar({ name }: { name: string }) {
+  const initial = name.charAt(0).toUpperCase();
+  const [bg, fg] = AVATAR_COLORS[initial.charCodeAt(0) % AVATAR_COLORS.length];
+  return (
+    <div style={{
+      width: 22, height: 22, borderRadius: '50%',
+      background: bg, color: fg,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontSize: 10, fontWeight: 700, flexShrink: 0,
+    }}>
+      {initial}
+    </div>
+  );
+}
+
 interface Props {
   question: QuestionSummary;
 }
 
 export default function QuestionCard({ question }: Props) {
-  const status   = STATUS[question.status] ?? STATUS.CLOSED;
   const category = CATEGORY_META[question.category];
-  const type     = QUESTION_TYPE_META[question.questionType];
-  const accent   = CAT_ACCENT[question.category] ?? '#8080a0';
+  const accent = CAT_ACCENT[question.category] ?? '#8080a0';
 
-  const views =
-    question.viewCount >= 100000
+  const score =
+    question.viewCount >= 10000
       ? `${Math.round(question.viewCount / 1000)}k`
-      : question.viewCount >= 1000
-      ? `${(question.viewCount / 1000).toFixed(1)}k`
       : String(question.viewCount);
 
   return (
     <Link href={`/questions/${question.id}`} className="card-link">
-      {/* ── Left metric column (Reddit-style) ── */}
+      {/* Left: Vote column */}
       <Flex
         vertical
         align="center"
         justify="center"
+        gap={4}
         style={{
-          width: 64,
+          width: 60,
           flexShrink: 0,
           padding: '16px 8px',
           borderRight: '1px solid var(--border-faint)',
           background: 'var(--bg-subtle)',
-          gap: 8,
         }}
       >
-        {/* Category color stripe */}
-        <div
-          style={{
-            width: 3,
-            height: 32,
-            borderRadius: 2,
-            background: accent,
-            opacity: 0.55,
-          }}
-        />
-        {/* View count */}
+        <CaretUpOutlined style={{ fontSize: 14, color: 'var(--text-tertiary)' }} />
         <Text
           style={{
             fontFamily: 'var(--font-jetbrains-mono)',
-            fontSize: 12,
-            fontWeight: 500,
+            fontSize: 15,
+            fontWeight: 700,
             color: 'var(--text-secondary)',
             lineHeight: 1,
           }}
         >
-          {views}
+          {score}
         </Text>
-        <Text
-          style={{
-            fontSize: 9.5,
-            color: 'var(--text-tertiary)',
-            letterSpacing: '0.04em',
-            textTransform: 'uppercase',
-          }}
-        >
-          views
-        </Text>
+        <CaretDownOutlined style={{ fontSize: 14, color: 'var(--text-tertiary)' }} />
       </Flex>
 
-      {/* ── Content ── */}
-      <div style={{ flex: 1, minWidth: 0, padding: '14px 20px 13px' }}>
+      {/* Content */}
+      <div style={{ flex: 1, minWidth: 0, padding: '14px 18px 13px' }}>
         {/* Meta row */}
-        <Flex align="center" gap={6} wrap style={{ marginBottom: 9 }}>
-          {/* Status badge */}
+        <Flex align="center" gap={6} style={{ marginBottom: 8 }} wrap>
+          <AuthorAvatar name={question.authorNickname} />
+          <Text style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>
+            {question.authorNickname}
+          </Text>
+          <Text style={{ fontSize: 11.5, color: 'var(--text-tertiary)' }}>
+            · {relativeTime(question.createdAt)}
+          </Text>
+          <div style={{ flex: 1 }} />
           <Tag
             style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 5,
-              borderRadius: 20,
-              background: status.bg,
-              color: status.color,
-              fontSize: 10.5,
-              fontWeight: 600,
-              border: 'none',
-              flexShrink: 0,
-            }}
-          >
-            <span
-              style={{
-                width: 5,
-                height: 5,
-                borderRadius: '50%',
-                background: status.color,
-                display: 'inline-block',
-                flexShrink: 0,
-              }}
-            />
-            {status.label}
-          </Tag>
-
-          {/* Category */}
-          <Tag
-            style={{
-              borderRadius: 5,
+              borderRadius: 4,
               background: 'var(--accent-subtle)',
               color: 'var(--accent)',
               fontSize: 10.5,
               fontWeight: 500,
               border: 'none',
+              flexShrink: 0,
             }}
           >
             {category.label}
           </Tag>
-
-          {/* Type */}
-          <Tag
-            style={{
-              borderRadius: 5,
-              background: 'var(--warning-bg)',
-              color: 'var(--warning-text)',
-              fontSize: 10.5,
-              fontWeight: 500,
-              border: 'none',
-            }}
-          >
-            {type.label}
-          </Tag>
-
-          {/* 1:1 badge */}
           {question.allowOneToOne && (
             <Tag
               style={{
-                borderRadius: 5,
+                borderRadius: 999,
                 background: 'var(--status-open-bg)',
                 color: 'var(--status-open)',
                 fontSize: 10.5,
                 fontWeight: 600,
                 border: 'none',
+                flexShrink: 0,
               }}
             >
-              1:1 가능
+              1:1 멘토링 가능
             </Tag>
           )}
-
-          {/* Author nickname */}
-          <Text
-            style={{
-              marginLeft: 'auto',
-              fontSize: 11,
-              color: 'var(--text-secondary)',
-              fontWeight: 500,
-              flexShrink: 0,
-            }}
-          >
-            {question.authorNickname}
-          </Text>
-
-          {/* Time */}
-          <Text
-            style={{
-              fontSize: 11,
-              color: 'var(--text-tertiary)',
-              fontFamily: 'var(--font-jetbrains-mono)',
-              flexShrink: 0,
-            }}
-          >
-            {relativeTime(question.createdAt)}
-          </Text>
         </Flex>
 
         {/* Title */}
         <Text
           style={{
             display: '-webkit-box',
-            fontSize: 14.5,
-            fontWeight: 600,
-            lineHeight: 1.48,
+            fontSize: 15,
+            fontWeight: 700,
+            lineHeight: 1.45,
             color: 'var(--text-primary)',
-            letterSpacing: '-0.01em',
+            letterSpacing: '-0.015em',
             WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical' as const,
             overflow: 'hidden',
@@ -215,7 +148,7 @@ export default function QuestionCard({ question }: Props) {
 
         {/* Tags */}
         {question.tags.length > 0 && (
-          <Flex wrap gap={5} style={{ marginTop: 11 }}>
+          <Flex wrap gap={5} style={{ marginTop: 10 }}>
             {question.tags.slice(0, 5).map(tag => (
               <Tag
                 key={tag}
@@ -229,19 +162,19 @@ export default function QuestionCard({ question }: Props) {
                   border: 'none',
                 }}
               >
-                #{tag}
+                {tag}
               </Tag>
             ))}
           </Flex>
         )}
       </div>
 
-      {/* ── Right accent bar (category color) ── */}
+      {/* Right: category color accent */}
       <div
         style={{
           width: 3,
           flexShrink: 0,
-          background: `linear-gradient(to bottom, ${accent}55, transparent)`,
+          background: `linear-gradient(to bottom, ${accent}66, transparent)`,
         }}
       />
     </Link>

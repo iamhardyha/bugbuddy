@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import AuthStatus from '@/components/auth/AuthStatus';
 import ThemeToggle from '@/components/common/ThemeToggle';
+import NotificationBell from '@/components/common/NotificationBell';
 
 export default function GlobalHeader() {
   return (
@@ -17,6 +18,7 @@ export default function GlobalHeader() {
         <div style={{ flex: 1 }} />
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <NotificationBell />
           <ThemeToggle />
           <AuthStatus />
         </div>

@@ -1106,6 +1106,7 @@ body {
     padding: 20px 16px;
   }
 
+
   .form-grid-2 {
     grid-template-columns: 1fr;
   }
@@ -1141,5 +1142,192 @@ body {
   /* AuthStatus: 모바일에서 닉네임 숨김 */
   .auth-nickname {
     display: none;
+  }
+}
+
+/* ─── Feed Filter Tabs ────────────────────────────── */
+.feed-filter-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.feed-filter-tab:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.feed-filter-tab.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* ─── Feed Sidebar Card ───────────────────────────── */
+.feed-sidebar-card {
+  border-radius: 12px;
+  border: 1px solid var(--border-faint);
+  background: var(--bg-surface);
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ─── Notification Layout ────────────────────────── */
+.notification-layout {
+  display: flex;
+  min-height: calc(100vh - var(--global-header-height));
+  background: var(--bg-base);
+}
+
+.notification-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border-faint);
+  background: var(--bg-surface);
+  padding: 24px 0;
+}
+
+.notification-main {
+  flex: 1;
+  min-width: 0;
+  padding: 24px 32px;
+  max-width: 700px;
+}
+
+.notification-right {
+  width: 280px;
+  flex-shrink: 0;
+  border-left: 1px solid var(--border-faint);
+  padding: 24px 20px;
+}
+
+.notification-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13.5px;
+  font-weight: 400;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s ease, color 0.12s ease;
+  position: relative;
+}
+.notification-nav-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+.notification-nav-btn.active {
+  background: var(--accent-subtle);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.notification-card {
+  border-radius: 12px;
+  border: 1px solid var(--border-faint);
+  background: var(--bg-surface);
+  padding: 18px 20px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.notification-card:hover {
+  border-color: var(--border);
+  box-shadow: var(--shadow-md);
+}
+.notification-card.unread {
+  border-left: 3px solid var(--accent);
+}
+
+/* ─── Detail Two-Column Layout ───────────────────── */
+.detail-two-col-root {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 28px 24px;
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.detail-sidebar-card {
+  border-radius: 12px;
+  border: 1px solid var(--border-faint);
+  background: var(--bg-surface);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ─── Profile Two-Column Layout ──────────────────── */
+.profile-two-col {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 32px 24px;
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.profile-sidebar-card {
+  border-radius: 12px;
+  border: 1px solid var(--border-faint);
+  background: var(--bg-surface);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 16px;
+}
+
+/* ─── Responsive: 2-col → 1-col on smaller screens ─ */
+@media (max-width: 900px) {
+  .detail-two-col-root {
+    grid-template-columns: 1fr;
+    max-width: 760px;
+  }
+
+  .profile-two-col {
+    grid-template-columns: 1fr;
+    max-width: 860px;
+  }
+
+  .notification-right {
+    display: none;
+  }
+
+  .notification-sidebar {
+    width: 180px;
+  }
+}
+
+@media (max-width: 639px) {
+  .detail-two-col-root {
+    padding: 20px 16px;
+  }
+
+  .profile-two-col {
+    padding: 20px 16px;
+  }
+
+  .notification-sidebar {
+    display: none;
+  }
+
+  .notification-main {
+    padding: 16px;
   }
 }
