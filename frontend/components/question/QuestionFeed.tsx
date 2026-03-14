@@ -405,7 +405,7 @@ export default function QuestionFeed() {
               {[
                 { label: '진행중인 질문', value: questions.filter(q => q.status === 'OPEN').length },
                 { label: '해결된 질문', value: questions.filter(q => q.status === 'SOLVED').length },
-                { label: '1:1 멘토링 가능', value: questions.filter(q => q.allowOneToOne).length },
+                { label: '마감된 질문', value: questions.filter(q => q.status === 'CLOSED').length },
               ].map(item => (
                 <Flex key={item.label} align="center" justify="space-between">
                   <Text style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{item.label}</Text>

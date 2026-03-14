@@ -16,7 +16,6 @@ public record QuestionSummaryResponse(
         QuestionCategory category,
         QuestionType questionType,
         QuestionStatus status,
-        boolean allowOneToOne,
         int viewCount,
         List<String> tags,
         Instant createdAt
@@ -30,7 +29,6 @@ public record QuestionSummaryResponse(
                 question.getCategory(),
                 question.getQuestionType(),
                 question.getStatus(),
-                question.isAllowOneToOne(),
                 question.getViewCount(),
                 tags,
                 question.getCreatedAt()

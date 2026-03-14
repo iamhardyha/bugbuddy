@@ -79,6 +79,7 @@ public class AnswerService {
         answer.setAuthorUserId(userId);
         answer.setBody(request.body());
         answer.setAuthorSnapshotRole(snapshotRole);
+        answer.setAllowOneToOne(request.allowOneToOne() && snapshotRole == SnapshotRole.MENTOR);
 
         Answer saved = answerRepository.save(answer);
         uploadService.linkUploads(request.uploadIds(), userId, ReferenceType.ANSWER, saved.getId());
@@ -120,6 +121,12 @@ public class AnswerService {
         }
 
         answer.setBody(request.body());
+
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new BugBuddyException(ErrorCode.USER_NOT_FOUND));
+        boolean isMentor = user.getMentorStatus() == MentorStatus.APPROVED;
+        answer.setAllowOneToOne(request.allowOneToOne() && isMentor);
+
         uploadService.linkUploads(request.uploadIds(), userId, ReferenceType.ANSWER, answerId);
 
         long helpfulCount = answerReactionRepository

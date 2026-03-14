@@ -4,10 +4,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { Button, Flex, Tag, Typography, Spin } from 'antd';
-import { LoadingOutlined, EyeOutlined, MessageOutlined } from '@ant-design/icons';
+import { LoadingOutlined, EyeOutlined } from '@ant-design/icons';
 import { getQuestion, deleteQuestion, closeQuestion, getQuestions } from '@/lib/questions';
-import { createChatRoom, getChatRooms } from '@/lib/chat';
-import type { ChatRoom } from '@/types/chat';
 import { apiFetch } from '@/lib/api';
 import { getAccessToken } from '@/lib/auth';
 import { CATEGORY_META, QUESTION_TYPE_META, STATUS_META, relativeTime } from '@/lib/questionMeta';
@@ -28,18 +26,15 @@ export default function QuestionDetailPage() {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [closing, setClosing] = useState(false);
-  const [proposingChat, setProposingChat] = useState(false);
-  const [existingChatRoom, setExistingChatRoom] = useState<ChatRoom | null>(null);
   const [similarQuestions, setSimilarQuestions] = useState<QuestionSummary[]>([]);
   const { confirm } = useModal();
 
   useEffect(() => {
     async function load() {
       const isLoggedIn = !!getAccessToken();
-      const [qRes, uRes, roomsRes] = await Promise.all([
+      const [qRes, uRes] = await Promise.all([
         getQuestion(Number(id)),
         isLoggedIn ? apiFetch<UserProfile>('/api/auth/me') : Promise.resolve({ success: false, data: null }),
-        isLoggedIn ? getChatRooms() : Promise.resolve({ success: false, data: null }),
       ]);
 
       if (qRes.success && qRes.data) {
@@ -52,12 +47,6 @@ export default function QuestionDetailPage() {
         }
       }
       if (uRes.success && uRes.data) setCurrentUser(uRes.data as UserProfile);
-      if (roomsRes.success && roomsRes.data) {
-        const matched = (roomsRes.data as ChatRoom[]).find(
-          r => r.questionId === Number(id) && r.status !== 'CLOSED'
-        );
-        setExistingChatRoom(matched ?? null);
-      }
 
       setLoading(false);
     }
@@ -123,21 +112,6 @@ export default function QuestionDetailPage() {
 
   const isLoggedIn = !!getAccessToken();
   const isAuthor = currentUser?.id === question.authorUserId;
-  const canProposeChat =
-    question.allowOneToOne &&
-    currentUser !== null &&
-    !isAuthor &&
-    currentUser.mentorStatus === 'APPROVED' &&
-    question.status !== 'CLOSED';
-
-  async function handleProposeChat() {
-    setProposingChat(true);
-    const res = await createChatRoom(question!.id);
-    setProposingChat(false);
-    if (res.success && res.data) {
-      setExistingChatRoom(res.data);
-    }
-  }
 
   const status = STATUS_META[question.status];
   const category = CATEGORY_META[question.category];
@@ -236,19 +210,6 @@ export default function QuestionDetailPage() {
               >
                 {type.label}
               </Tag>
-              {question.allowOneToOne && (
-                <Tag
-                  style={{
-                    background: 'var(--status-open-bg)',
-                    color: 'var(--status-open)',
-                    borderRadius: 999,
-                    border: 'none',
-                    fontSize: 11,
-                  }}
-                >
-                  1:1 가능
-                </Tag>
-              )}
             </Flex>
 
             {/* 제목 */}
@@ -300,53 +261,6 @@ export default function QuestionDetailPage() {
                 </>
               )}
             </Flex>
-
-            {/* 채팅 제안 배너 (멘토 전용) */}
-            {canProposeChat && (
-              <Flex
-                align="center"
-                justify="space-between"
-                style={{
-                  background: 'var(--status-open-bg)',
-                  border: '1px solid var(--status-open)',
-                  borderRadius: 10,
-                  padding: '12px 16px',
-                  marginBottom: 24,
-                }}
-              >
-                <Flex vertical gap={2}>
-                  <Text strong style={{ fontSize: 13, color: 'var(--status-open)' }}>
-                    <MessageOutlined style={{ marginRight: 6 }} />1:1 멘토링
-                  </Text>
-                  <Text type="secondary" style={{ fontSize: 12 }}>
-                    {existingChatRoom
-                      ? existingChatRoom.status === 'PENDING'
-                        ? '채팅 제안을 보냈어요. 멘티의 수락을 기다리고 있어요.'
-                        : '이 질문과 연결된 채팅이 진행 중이에요.'
-                      : '이 질문에 직접 멘토링을 제안할 수 있어요.'}
-                  </Text>
-                </Flex>
-                {existingChatRoom ? (
-                  <Button
-                    size="small"
-                    onClick={() => router.push(`/chat/${existingChatRoom.id}`)}
-                    style={{ flexShrink: 0 }}
-                  >
-                    채팅방 보기
-                  </Button>
-                ) : (
-                  <Button
-                    type="primary"
-                    size="small"
-                    loading={proposingChat}
-                    onClick={handleProposeChat}
-                    style={{ background: 'var(--status-open)', borderColor: 'var(--status-open)', flexShrink: 0 }}
-                  >
-                    채팅 제안
-                  </Button>
-                )}
-              </Flex>
-            )}
 
             {/* 본문 */}
             <MarkdownRenderer content={question.body} />

@@ -9,5 +9,7 @@ public record AnswerUpdateRequest(
         @Size(min = 10, message = "답변은 최소 10자 이상이어야 합니다.")
         String body,
 
+        boolean allowOneToOne,
+
         List<Long> uploadIds
 ) {}

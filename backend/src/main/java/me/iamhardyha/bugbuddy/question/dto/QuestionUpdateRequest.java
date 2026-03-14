@@ -23,8 +23,6 @@ public record QuestionUpdateRequest(
         @NotNull(message = "질문 유형을 선택해주세요.")
         QuestionType questionType,
 
-        boolean allowOneToOne,
-
         @Size(max = 5, message = "태그는 최대 5개입니다.")
         List<String> tags,
 

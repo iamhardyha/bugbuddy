@@ -2,7 +2,7 @@
 
 import { useState, useEffect, type KeyboardEvent } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Button, Input, Select, Switch, Tag, Alert } from 'antd';
+import { Button, Input, Select, Tag, Alert } from 'antd';
 import { getAccessToken } from '@/lib/auth';
 import { getQuestion, updateQuestion } from '@/lib/questions';
 import { CATEGORY_META, QUESTION_TYPE_META } from '@/lib/questionMeta';
@@ -19,7 +19,6 @@ export default function EditQuestionPage() {
   const [questionType, setQuestionType] = useState<QuestionType | undefined>(undefined);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
-  const [allowOneToOne, setAllowOneToOne] = useState(false);
   const [uploadIds, setUploadIds] = useState<number[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -42,7 +41,6 @@ export default function EditQuestionPage() {
         setCategory(q.category);
         setQuestionType(q.questionType);
         setTags(q.tags);
-        setAllowOneToOne(q.allowOneToOne);
       } else {
         router.replace('/');
       }
@@ -82,7 +80,6 @@ export default function EditQuestionPage() {
       body,
       category,
       questionType,
-      allowOneToOne,
       tags,
       uploadIds,
     });
@@ -213,20 +210,6 @@ export default function EditQuestionPage() {
                 />
               )}
             </div>
-          </div>
-
-          {/* 1:1 멘토링 허용 */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <Switch
-              checked={allowOneToOne}
-              onChange={setAllowOneToOne}
-            />
-            <span style={{ fontSize: '13.5px', color: 'var(--text-primary)' }}>
-              1:1 멘토링 허용
-            </span>
-            <span style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>
-              (인증 멘토에게 1:1 채팅 요청 허용)
-            </span>
           </div>
 
           {/* 에러 메시지 */}

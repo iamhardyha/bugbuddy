@@ -16,10 +16,10 @@ export function getChatMessages(roomId: number, page = 0) {
   );
 }
 
-export function createChatRoom(questionId: number) {
+export function createChatRoom(answerId: number) {
   return apiFetch<ChatRoom>('/api/chat/rooms', {
     method: 'POST',
-    body: JSON.stringify({ questionId }),
+    body: JSON.stringify({ answerId }),
   });
 }
 

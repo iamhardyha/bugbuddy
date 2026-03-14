@@ -47,9 +47,6 @@ public class Question extends BaseSoftDeleteEntity {
     @Column(name = "question_type", nullable = false, length = 30)
     private QuestionType questionType;
 
-    @Column(name = "allow_1to1", nullable = false)
-    private boolean allowOneToOne = false;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private QuestionStatus status = QuestionStatus.OPEN;

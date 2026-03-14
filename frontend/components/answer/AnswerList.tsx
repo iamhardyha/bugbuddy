@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { Button, Flex, Typography, Tag, Divider } from 'antd';
 import {
   CheckCircleFilled,
@@ -10,6 +11,7 @@ import {
   DeleteOutlined,
   CheckOutlined,
   MessageOutlined,
+  CommentOutlined,
 } from '@ant-design/icons';
 import { getAccessToken } from '@/lib/auth';
 import {
@@ -21,8 +23,10 @@ import {
   addHelpful,
   removeHelpful,
 } from '@/lib/answers';
+import { createChatRoom, getChatRooms } from '@/lib/chat';
 import { relativeTime } from '@/lib/questionMeta';
 import type { Answer } from '@/types/answer';
+import type { ChatRoom } from '@/types/chat';
 import type { QuestionStatus } from '@/types/question';
 import MarkdownRenderer from '@/components/editor/MarkdownRenderer';
 import MarkdownEditor from '@/components/editor/MarkdownEditor';
@@ -58,6 +62,8 @@ export default function AnswerList({
   const [editSubmitting, setEditSubmitting] = useState(false);
 
   const [reacted, setReacted] = useState<Set<number>>(new Set());
+  const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
+  const [proposingAnswerId, setProposingAnswerId] = useState<number | null>(null);
 
   const { confirm } = useModal();
   const isLoggedIn = !!getAccessToken();
@@ -65,15 +71,23 @@ export default function AnswerList({
   const isQuestionAuthor = currentUserId === questionAuthorId;
 
   useEffect(() => {
-    getAnswers(questionId).then(res => {
-      if (res.success && res.data) {
-        const content = res.data.content;
+    async function load() {
+      const [answersRes, roomsRes] = await Promise.all([
+        getAnswers(questionId),
+        isLoggedIn ? getChatRooms() : Promise.resolve({ success: false, data: null }),
+      ]);
+      if (answersRes.success && answersRes.data) {
+        const content = answersRes.data.content;
         setAnswers(content);
         setReacted(new Set(content.filter(a => a.myHelpful).map(a => a.id)));
       }
+      if (roomsRes.success && roomsRes.data) {
+        setChatRooms(roomsRes.data.filter(r => r.questionId === questionId));
+      }
       setLoading(false);
-    });
-  }, [questionId]);
+    }
+    load();
+  }, [questionId, isLoggedIn]);
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -162,6 +176,19 @@ export default function AnswerList({
     }
   }
 
+  function findChatRoomForAnswer(answerAuthorId: number) {
+    return chatRooms.find(r => r.mentorUserId === answerAuthorId && r.status !== 'CLOSED') ?? null;
+  }
+
+  async function handleProposeChat(answerId: number) {
+    setProposingAnswerId(answerId);
+    const res = await createChatRoom(answerId);
+    if (res.success && res.data) {
+      setChatRooms(prev => [...prev, res.data!]);
+    }
+    setProposingAnswerId(null);
+  }
+
   if (loading) {
     return (
       <Flex justify="center" style={{ padding: '32px 0' }}>
@@ -219,6 +246,8 @@ export default function AnswerList({
               isEditing={editingId === answer.id}
               editBody={editBody}
               editSubmitting={editSubmitting}
+              existingChatRoom={findChatRoomForAnswer(answer.authorUserId)}
+              proposingChat={proposingAnswerId === answer.id}
               onEditBodyChange={setEditBody}
               onEditUpload={id => setEditUploadIds(prev => [...prev, id])}
               onStartEdit={() => startEdit(answer)}
@@ -227,6 +256,7 @@ export default function AnswerList({
               onDelete={() => handleDelete(answer.id)}
               onAccept={() => handleAccept(answer.id)}
               onHelpful={() => handleHelpful(answer)}
+              onProposeChat={() => handleProposeChat(answer.id)}
             />
           ))}
         </Flex>
@@ -292,6 +322,8 @@ interface AnswerCardProps {
   isEditing: boolean;
   editBody: string;
   editSubmitting: boolean;
+  existingChatRoom: ChatRoom | null;
+  proposingChat: boolean;
   onEditBodyChange: (v: string) => void;
   onEditUpload: (uploadId: number) => void;
   onStartEdit: () => void;
@@ -300,6 +332,7 @@ interface AnswerCardProps {
   onDelete: () => void;
   onAccept: () => void;
   onHelpful: () => void;
+  onProposeChat: () => void;
 }
 
 function AnswerCard({
@@ -311,6 +344,8 @@ function AnswerCard({
   isEditing,
   editBody,
   editSubmitting,
+  existingChatRoom,
+  proposingChat,
   onEditBodyChange,
   onEditUpload,
   onStartEdit,
@@ -319,10 +354,12 @@ function AnswerCard({
   onDelete,
   onAccept,
   onHelpful,
+  onProposeChat,
 }: AnswerCardProps) {
   const isOwn = currentUserId === answer.authorUserId;
   const canAccept = isQuestionAuthor && questionStatus === 'OPEN' && !answer.accepted;
   const canReact = currentUserId !== null && !isOwn;
+  const canProposeChat = isQuestionAuthor && answer.allowOneToOne && !existingChatRoom && questionStatus !== 'CLOSED';
 
   return (
     <article className={`answer-card ${answer.accepted ? 'answer-card-accepted' : ''}`}>
@@ -341,6 +378,13 @@ function AnswerCard({
             style={{ background: 'var(--accent-subtle)', color: 'var(--accent)', fontSize: '11px', border: 'none' }}
           >
             🎓 멘토
+          </Tag>
+        )}
+        {answer.allowOneToOne && (
+          <Tag
+            style={{ background: 'var(--status-open-bg)', color: 'var(--status-open)', fontSize: '11px', border: 'none' }}
+          >
+            1:1 가능
           </Tag>
         )}
         <Text strong style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
@@ -412,8 +456,31 @@ function AnswerCard({
               )}
             </Button>
 
-            {/* 채택 + 수정/삭제 */}
+            {/* 채팅 신청 + 채택 + 수정/삭제 */}
             <Flex gap={8}>
+              {canProposeChat && (
+                <Button
+                  variant="outlined"
+                  size="small"
+                  icon={<CommentOutlined />}
+                  loading={proposingChat}
+                  onClick={onProposeChat}
+                  style={{ color: 'var(--status-open)', borderColor: 'var(--status-open)' }}
+                >
+                  1:1 채팅 신청
+                </Button>
+              )}
+              {existingChatRoom && isQuestionAuthor && (
+                <Link href={`/chat/${existingChatRoom.id}`}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    icon={<CommentOutlined />}
+                  >
+                    {existingChatRoom.status === 'PENDING' ? '수락 대기 중' : '채팅방 보기'}
+                  </Button>
+                </Link>
+              )}
               {canAccept && (
                 <Button
                   variant="outlined"

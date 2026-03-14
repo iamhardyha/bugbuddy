@@ -16,7 +16,6 @@ export interface QuestionSummary {
   category: QuestionCategory;
   questionType: QuestionType;
   status: QuestionStatus;
-  allowOneToOne: boolean;
   viewCount: number;
   tags: string[];
   createdAt: string;
@@ -33,7 +32,6 @@ export interface QuestionRequest {
   body: string;
   category: QuestionCategory;
   questionType: QuestionType;
-  allowOneToOne?: boolean;
   tags?: string[];
   uploadIds?: number[];
 }

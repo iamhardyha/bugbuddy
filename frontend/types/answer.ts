@@ -8,6 +8,7 @@ export interface Answer {
   body: string;
   authorSnapshotRole: SnapshotRole;
   accepted: boolean;
+  allowOneToOne: boolean;
   helpfulCount: number;
   myHelpful: boolean;
   createdAt: string;
@@ -16,5 +17,6 @@ export interface Answer {
 
 export interface AnswerRequest {
   body: string;
+  allowOneToOne?: boolean;
   uploadIds?: number[];
 }

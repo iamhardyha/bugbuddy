@@ -10,6 +10,7 @@ import me.iamhardyha.bugbuddy.model.enums.ChatRoomStatus;
 import me.iamhardyha.bugbuddy.model.enums.MentorStatus;
 import me.iamhardyha.bugbuddy.model.enums.XpEventType;
 import me.iamhardyha.bugbuddy.model.enums.ReferenceType;
+import me.iamhardyha.bugbuddy.repository.AnswerRepository;
 import me.iamhardyha.bugbuddy.repository.QuestionRepository;
 import me.iamhardyha.bugbuddy.repository.UserRepository;
 import me.iamhardyha.bugbuddy.xp.XpService;
@@ -33,6 +34,7 @@ public class ChatService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomFeedbackRepository feedbackRepository;
     private final UserRepository userRepository;
+    private final AnswerRepository answerRepository;
     private final QuestionRepository questionRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final XpService xpService;
@@ -41,6 +43,7 @@ public class ChatService {
                        ChatMessageRepository chatMessageRepository,
                        ChatRoomFeedbackRepository feedbackRepository,
                        UserRepository userRepository,
+                       AnswerRepository answerRepository,
                        QuestionRepository questionRepository,
                        SimpMessagingTemplate messagingTemplate,
                        XpService xpService) {
@@ -48,30 +51,33 @@ public class ChatService {
         this.chatMessageRepository = chatMessageRepository;
         this.feedbackRepository = feedbackRepository;
         this.userRepository = userRepository;
+        this.answerRepository = answerRepository;
         this.questionRepository = questionRepository;
         this.messagingTemplate = messagingTemplate;
         this.xpService = xpService;
     }
 
-    /** 멘토 → 채팅 제안 (PENDING 상태로 생성). */
+    /** 질문자(멘티) → 채팅 신청 (PENDING 상태로 생성). */
     @Transactional
-    public ChatRoomResponse proposeChat(Long mentorUserId, ChatRoomCreateRequest request) {
-        UserEntity mentor = findUser(mentorUserId);
-        if (mentor.getMentorStatus() != MentorStatus.APPROVED) {
-            throw new BugBuddyException(ErrorCode.CHAT_NOT_MENTOR);
+    public ChatRoomResponse proposeChat(Long menteeUserId, ChatRoomCreateRequest request) {
+        Answer answer = answerRepository.findActiveById(request.answerId())
+                .orElseThrow(() -> new BugBuddyException(ErrorCode.ANSWER_NOT_FOUND));
+
+        if (!answer.isAllowOneToOne()) {
+            throw new BugBuddyException(ErrorCode.CHAT_ANSWER_NOT_ALLOWED);
         }
 
-        Question question = questionRepository.findActiveById(request.questionId())
+        Question question = questionRepository.findActiveById(answer.getQuestionId())
                 .orElseThrow(() -> new BugBuddyException(ErrorCode.QUESTION_NOT_FOUND));
 
-        if (!question.isAllowOneToOne()) {
-            throw new BugBuddyException(ErrorCode.CHAT_QUESTION_NOT_ALLOWED);
+        if (!question.getAuthorUserId().equals(menteeUserId)) {
+            throw new BugBuddyException(ErrorCode.CHAT_NOT_QUESTION_AUTHOR);
         }
 
-        Long menteeUserId = question.getAuthorUserId();
+        Long mentorUserId = answer.getAuthorUserId();
 
         boolean duplicate = chatRoomRepository.existsByMentorUserIdAndMenteeUserIdAndQuestionIdAndStatusNot(
-                mentorUserId, menteeUserId, request.questionId(), ChatRoomStatus.CLOSED);
+                mentorUserId, menteeUserId, question.getId(), ChatRoomStatus.CLOSED);
         if (duplicate) {
             throw new BugBuddyException(ErrorCode.CHAT_ROOM_DUPLICATE);
         }
@@ -79,20 +85,20 @@ public class ChatService {
         ChatRoom room = new ChatRoom();
         room.setMentorUserId(mentorUserId);
         room.setMenteeUserId(menteeUserId);
-        room.setQuestionId(request.questionId());
+        room.setQuestionId(question.getId());
         room.setStatus(ChatRoomStatus.PENDING);
 
         ChatRoom saved = chatRoomRepository.save(room);
 
-        return buildRoomResponse(saved, mentorUserId);
+        return buildRoomResponse(saved, menteeUserId);
     }
 
-    /** 멘티 → 채팅 수락 (PENDING → OPEN). */
+    /** 멘토 → 채팅 수락 (PENDING → OPEN). */
     @Transactional
-    public ChatRoomResponse acceptChat(Long menteeUserId, Long roomId) {
+    public ChatRoomResponse acceptChat(Long mentorUserId, Long roomId) {
         ChatRoom room = findActiveRoom(roomId);
 
-        if (!room.getMenteeUserId().equals(menteeUserId)) {
+        if (!room.getMentorUserId().equals(mentorUserId)) {
             throw new BugBuddyException(ErrorCode.CHAT_ROOM_ACCESS_DENIED);
         }
         if (room.getStatus() != ChatRoomStatus.PENDING) {
@@ -103,10 +109,10 @@ public class ChatService {
 
         sendSystemMessage(room.getId(), "멘토링 세션이 시작되었습니다.");
 
-        // 멘토에게 수락 이벤트 브로드캐스트 (채팅 목록 실시간 업데이트)
-        broadcastUserEvent(room.getMentorUserId(), ChatRoomEvent.roomAccepted(roomId));
+        // 멘티에게 수락 이벤트 브로드캐스트 (채팅 목록 실시간 업데이트)
+        broadcastUserEvent(room.getMenteeUserId(), ChatRoomEvent.roomAccepted(roomId));
 
-        return buildRoomResponse(room, menteeUserId);
+        return buildRoomResponse(room, mentorUserId);
     }
 
     /** 내 채팅방 목록 조회. */

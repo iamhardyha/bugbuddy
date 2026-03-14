@@ -112,21 +112,6 @@ export default function QuestionCard({ question }: Props) {
           >
             {category.label}
           </Tag>
-          {question.allowOneToOne && (
-            <Tag
-              style={{
-                borderRadius: 999,
-                background: 'var(--status-open-bg)',
-                color: 'var(--status-open)',
-                fontSize: 10.5,
-                fontWeight: 600,
-                border: 'none',
-                flexShrink: 0,
-              }}
-            >
-              1:1 멘토링 가능
-            </Tag>
-          )}
         </Flex>
 
         {/* Title */}

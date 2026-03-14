@@ -51,9 +51,8 @@ export default function ChatRoomCard({ room, currentUserId, onAccepted, isActive
   const isMentor = room.mentorUserId === currentUserId;
   const counterpart = isMentor ? room.menteeNickname : room.mentorNickname;
   const hasUnread = room.unreadCount > 0;
-  const isMentee = room.menteeUserId === currentUserId;
   const isPending = room.status === 'PENDING';
-  const canAccept = isPending && isMentee;
+  const canAccept = isPending && isMentor;
 
   async function handleAccept(e: React.MouseEvent) {
     e.stopPropagation();
@@ -62,8 +61,9 @@ export default function ChatRoomCard({ room, currentUserId, onAccepted, isActive
   }
 
   const lastTime = room.lastMessageAt ?? room.createdAt;
+  const isMentee = room.menteeUserId === currentUserId;
   const previewText = isPending
-    ? isMentor ? '채팅 제안을 보냈어요' : '채팅 제안이 왔어요'
+    ? isMentee ? '채팅 신청을 보냈어요' : '채팅 신청이 왔어요'
     : room.lastMessageContent ?? '대화를 시작해보세요';
 
   return (

@@ -133,7 +133,7 @@ export default function ChatRoomPage() {
   }
 
   async function handleAccept() {
-    const ok = await confirm({ title: '채팅을 수락할까요?', message: '멘토와 1:1 채팅이 시작됩니다.', variant: 'info', confirmLabel: '수락' });
+    const ok = await confirm({ title: '채팅을 수락할까요?', message: '멘티와 1:1 채팅이 시작됩니다.', variant: 'info', confirmLabel: '수락' });
     if (!ok) return;
     const res = await acceptChatRoom(roomId);
     if (res.success && res.data) {
@@ -184,7 +184,7 @@ export default function ChatRoomPage() {
   const counterpart = isMentor ? room.menteeNickname : room.mentorNickname;
   const status = ROOM_STATUS_META[room.status];
 
-  const canAccept      = room.status === 'PENDING' && isMentee;
+  const canAccept      = room.status === 'PENDING' && isMentor;
   const canClose       = room.status === 'OPEN' && (isMentor || isMentee);
   const canSend        = room.status === 'OPEN' && connected;
   const showFeedbackBtn = room.status === 'CLOSED' && !feedbackSubmitted;

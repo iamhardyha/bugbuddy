@@ -61,7 +61,6 @@ public class QuestionService {
         question.setBody(request.body());
         question.setCategory(request.category());
         question.setQuestionType(request.questionType());
-        question.setAllowOneToOne(request.allowOneToOne());
         question.setStatus(QuestionStatus.OPEN);
 
         Question saved = questionRepository.save(question);
@@ -126,7 +125,6 @@ public class QuestionService {
         question.setBody(request.body());
         question.setCategory(request.category());
         question.setQuestionType(request.questionType());
-        question.setAllowOneToOne(request.allowOneToOne());
 
         questionTagRepository.deleteByQuestionId(questionId);
         List<String> tagNames = attachTags(questionId, request.tags());

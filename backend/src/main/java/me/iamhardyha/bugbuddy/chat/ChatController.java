@@ -24,7 +24,7 @@ public class ChatController {
         this.chatService = chatService;
     }
 
-    /** POST /api/chat/rooms — 채팅 제안 (멘토만) */
+    /** POST /api/chat/rooms — 채팅 신청 (질문자만) */
     @PostMapping
     public ResponseEntity<ApiResponse<ChatRoomResponse>> propose(
             Authentication authentication,
@@ -35,7 +35,7 @@ public class ChatController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(response));
     }
 
-    /** PATCH /api/chat/rooms/{id}/accept — 채팅 수락 (멘티) */
+    /** PATCH /api/chat/rooms/{id}/accept — 채팅 수락 (멘토) */
     @PatchMapping("/{id}/accept")
     public ResponseEntity<ApiResponse<ChatRoomResponse>> accept(
             Authentication authentication,

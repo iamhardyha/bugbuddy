@@ -42,4 +42,7 @@ public class Answer extends BaseSoftDeleteEntity {
 
     @Column(name = "is_accepted", nullable = false)
     private boolean accepted = false;
+
+    @Column(name = "allow_1to1", nullable = false)
+    private boolean allowOneToOne = false;
 }
