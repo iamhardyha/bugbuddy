@@ -15,6 +15,7 @@ import { getChatRooms, getChatMessages, acceptChatRoom, closeChatRoom, submitFee
 import { apiFetch } from '@/lib/api';
 import { getAccessToken } from '@/lib/auth';
 import { useStompChat } from '@/hooks/useStompChat';
+import { useUserChatEvents } from '@/hooks/useUserChatEvents';
 import { useModal } from '@/components/common/ModalProvider';
 import ChatMessageItem from '@/components/chat/ChatMessageItem';
 import ChatFeedbackModal from '@/components/chat/ChatFeedbackModal';
@@ -51,10 +52,42 @@ export default function ChatRoomPage() {
       if (prev.some(m => m.id === msg.id)) return prev;
       return [...prev, msg];
     });
+
+    // SYSTEM 종료 메시지 수신 시 채팅방 상태를 CLOSED로 업데이트
+    if (msg.messageType === 'SYSTEM' && msg.content.includes('종료')) {
+      setRoom(prev => prev ? { ...prev, status: 'CLOSED', closedAt: msg.createdAt } : prev);
+      setAllRooms(prev => prev.map(r => r.id === roomId ? { ...r, status: 'CLOSED' as const } : r));
+      setFeedbackOpen(true);
+    }
+
     markAsRead(roomId);
   }, [roomId]);
 
   const { connected, sendMessage } = useStompChat(roomId, handleNewMessage);
+
+  // 유저 이벤트 구독 — 사이드바 실시간 업데이트 (다른 방의 새 메시지, 상태 변경)
+  const handleChatEvent = useCallback((event: import('@/hooks/useUserChatEvents').ChatRoomEvent) => {
+    if (event.type === 'ROOM_CLOSED') {
+      setAllRooms(prev => prev.map(r => r.id === event.roomId ? { ...r, status: 'CLOSED' as const } : r));
+      if (event.roomId === roomId) {
+        setRoom(prev => prev ? { ...prev, status: 'CLOSED' } : prev);
+        setFeedbackOpen(true);
+      }
+    } else if (event.type === 'NEW_MESSAGE' && event.lastMessageContent) {
+      setAllRooms(prev => prev.map(r =>
+        r.id === event.roomId
+          ? { ...r, lastMessageContent: event.lastMessageContent, lastMessageAt: event.lastMessageAt, unreadCount: r.id === roomId ? r.unreadCount : r.unreadCount + 1 }
+          : r,
+      ));
+    } else if (event.type === 'ROOM_ACCEPTED') {
+      setAllRooms(prev => prev.map(r => r.id === event.roomId ? { ...r, status: 'OPEN' as const } : r));
+      if (event.roomId === roomId) {
+        setRoom(prev => prev ? { ...prev, status: 'OPEN' } : prev);
+      }
+    }
+  }, [roomId]);
+
+  useUserChatEvents(currentUser?.id, handleChatEvent);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

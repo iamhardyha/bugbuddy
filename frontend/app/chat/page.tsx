@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Flex, Spin, Typography } from 'antd';
 import { LoadingOutlined, MessageOutlined } from '@ant-design/icons';
 import { getChatRooms } from '@/lib/chat';
 import { apiFetch } from '@/lib/api';
 import { getAccessToken } from '@/lib/auth';
+import { useUserChatEvents, type ChatRoomEvent } from '@/hooks/useUserChatEvents';
 import ChatSidebar from '@/components/chat/ChatSidebar';
 import type { ChatRoom } from '@/types/chat';
 import type { UserProfile } from '@/types/user';
@@ -39,6 +40,23 @@ export default function ChatListPage() {
   function handleAccepted(roomId: number) {
     setRooms(prev => prev.map(r => r.id === roomId ? { ...r, status: 'OPEN' as const } : r));
   }
+
+  // 유저 이벤트 구독 — 채팅 목록 실시간 업데이트
+  const handleChatEvent = useCallback((event: ChatRoomEvent) => {
+    if (event.type === 'ROOM_CLOSED') {
+      setRooms(prev => prev.map(r => r.id === event.roomId ? { ...r, status: 'CLOSED' as const } : r));
+    } else if (event.type === 'NEW_MESSAGE' && event.lastMessageContent) {
+      setRooms(prev => prev.map(r =>
+        r.id === event.roomId
+          ? { ...r, lastMessageContent: event.lastMessageContent, lastMessageAt: event.lastMessageAt, unreadCount: r.unreadCount + 1 }
+          : r,
+      ));
+    } else if (event.type === 'ROOM_ACCEPTED') {
+      setRooms(prev => prev.map(r => r.id === event.roomId ? { ...r, status: 'OPEN' as const } : r));
+    }
+  }, []);
+
+  useUserChatEvents(currentUser?.id, handleChatEvent);
 
   if (loading) {
     return (

@@ -103,6 +103,9 @@ public class ChatService {
 
         sendSystemMessage(room.getId(), "멘토링 세션이 시작되었습니다.");
 
+        // 멘토에게 수락 이벤트 브로드캐스트 (채팅 목록 실시간 업데이트)
+        broadcastUserEvent(room.getMentorUserId(), ChatRoomEvent.roomAccepted(roomId));
+
         return buildRoomResponse(room, menteeUserId);
     }
 
@@ -136,6 +139,11 @@ public class ChatService {
         room.setClosedAt(Instant.now());
 
         sendSystemMessage(roomId, "멘토링 세션이 종료되었습니다. 피드백을 남겨주세요.");
+
+        // 양측에 종료 이벤트 브로드캐스트 (채팅 목록 + 채팅방 실시간 업데이트)
+        ChatRoomEvent closedEvent = ChatRoomEvent.roomClosed(roomId);
+        broadcastUserEvent(room.getMentorUserId(), closedEvent);
+        broadcastUserEvent(room.getMenteeUserId(), closedEvent);
 
         return buildRoomResponse(room, userId);
     }
@@ -214,6 +222,14 @@ public class ChatService {
         ChatMessageResponse response = ChatMessageResponse.of(saved, getNickname(senderUserId));
 
         messagingTemplate.convertAndSend("/topic/chat/" + roomId, response);
+
+        // 상대방에게 새 메시지 이벤트 브로드캐스트 (채팅 목록 실시간 업데이트)
+        Long recipientId = room.getMentorUserId().equals(senderUserId)
+                ? room.getMenteeUserId()
+                : room.getMentorUserId();
+        broadcastUserEvent(recipientId,
+                ChatRoomEvent.newMessage(roomId, payload.content(), saved.getCreatedAt()));
+
         return response;
     }
 
@@ -274,6 +290,10 @@ public class ChatService {
                 lastMsgAt,
                 myFeedbackSubmitted
         );
+    }
+
+    private void broadcastUserEvent(Long userId, ChatRoomEvent event) {
+        messagingTemplate.convertAndSend("/topic/user/" + userId + "/chat-events", event);
     }
 
     private void sendSystemMessage(Long roomId, String text) {
