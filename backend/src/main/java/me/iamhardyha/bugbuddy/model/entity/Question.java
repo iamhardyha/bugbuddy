@@ -32,8 +32,9 @@ public class Question extends BaseSoftDeleteEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "author_user_id", nullable = false)
-    private Long authorUserId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_user_id", nullable = false)
+    private UserEntity author;
 
     @Column(nullable = false, length = 120)
     private String title;

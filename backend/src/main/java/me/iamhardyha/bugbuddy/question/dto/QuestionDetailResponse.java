@@ -22,11 +22,11 @@ public record QuestionDetailResponse(
         Instant createdAt,
         Instant updatedAt
 ) {
-    public static QuestionDetailResponse of(Question question, List<String> tags, String authorNickname) {
+    public static QuestionDetailResponse of(Question question, List<String> tags) {
         return new QuestionDetailResponse(
                 question.getId(),
-                question.getAuthorUserId(),
-                authorNickname,
+                question.getAuthor().getId(),
+                question.getAuthor().getNickname(),
                 question.getTitle(),
                 question.getBody(),
                 question.getCategory(),

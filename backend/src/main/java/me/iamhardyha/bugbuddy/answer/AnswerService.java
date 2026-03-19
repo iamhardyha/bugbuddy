@@ -156,7 +156,7 @@ public class AnswerService {
         Question question = questionRepository.findActiveById(questionId)
                 .orElseThrow(() -> new BugBuddyException(ErrorCode.QUESTION_NOT_FOUND));
 
-        if (!question.getAuthorUserId().equals(userId)) {
+        if (!question.getAuthor().getId().equals(userId)) {
             throw new BugBuddyException(ErrorCode.ANSWER_ACCEPT_FORBIDDEN);
         }
 

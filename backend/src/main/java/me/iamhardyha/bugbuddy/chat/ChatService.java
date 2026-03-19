@@ -70,7 +70,7 @@ public class ChatService {
         Question question = questionRepository.findActiveById(answer.getQuestionId())
                 .orElseThrow(() -> new BugBuddyException(ErrorCode.QUESTION_NOT_FOUND));
 
-        if (!question.getAuthorUserId().equals(menteeUserId)) {
+        if (!question.getAuthor().getId().equals(menteeUserId)) {
             throw new BugBuddyException(ErrorCode.CHAT_NOT_QUESTION_AUTHOR);
         }
 

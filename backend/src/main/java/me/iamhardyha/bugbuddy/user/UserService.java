@@ -83,9 +83,7 @@ public class UserService {
             List<String> tags = questionTags.isEmpty() ? List.of()
                     : tagRepository.findAllById(questionTags.stream().map(QuestionTag::getTagId).toList())
                             .stream().map(Tag::getName).toList();
-            String nickname = userRepository.findById(q.getAuthorUserId())
-                    .map(UserEntity::getNickname).orElse("탈퇴한 유저");
-            return QuestionSummaryResponse.of(q, tags, nickname);
+            return QuestionSummaryResponse.of(q, tags);
         });
     }
 

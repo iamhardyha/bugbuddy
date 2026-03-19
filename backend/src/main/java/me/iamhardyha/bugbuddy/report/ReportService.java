@@ -145,7 +145,7 @@ public class ReportService {
     private Long resolveTargetUserId(ReportTargetType targetType, Long targetId) {
         return switch (targetType) {
             case QUESTION -> questionRepository.findActiveById(targetId)
-                    .map(q -> q.getAuthorUserId())
+                    .map(q -> q.getAuthor().getId())
                     .orElse(null);
             case ANSWER -> answerRepository.findActiveById(targetId)
                     .map(a -> a.getAuthorUserId())
