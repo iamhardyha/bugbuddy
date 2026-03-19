@@ -73,7 +73,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/chat/**").authenticated()
                         .requestMatchers("/api/reports").authenticated()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(endpoint -> endpoint.userService(customOAuth2UserService))
