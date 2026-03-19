@@ -53,7 +53,7 @@ public class ReportService {
         }
 
         // 중복 신고 방지
-        if (reportRepository.existsByReporterUserIdAndTargetTypeAndTargetIdAndDeletedAtIsNull(
+        if (reportRepository.existsByReporterUserIdAndTargetTypeAndTargetId(
                 reporterUserId, request.targetType(), request.targetId())) {
             throw new BugBuddyException(ErrorCode.REPORT_DUPLICATE);
         }

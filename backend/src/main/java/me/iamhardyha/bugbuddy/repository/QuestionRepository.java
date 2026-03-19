@@ -15,28 +15,28 @@ import java.util.Optional;
 
 public interface QuestionRepository extends JpaRepository<Question, Long> {
 
-    @Query("SELECT q FROM Question q WHERE q.deletedAt IS NULL ORDER BY q.createdAt DESC")
+    @Query("SELECT q FROM Question q ORDER BY q.createdAt DESC")
     Page<Question> findAllActive(Pageable pageable);
 
-    @Query("SELECT q FROM Question q WHERE q.deletedAt IS NULL AND q.category = :category ORDER BY q.createdAt DESC")
+    @Query("SELECT q FROM Question q WHERE q.category = :category ORDER BY q.createdAt DESC")
     Page<Question> findAllActiveByCategory(@Param("category") QuestionCategory category, Pageable pageable);
 
-    @Query("SELECT q FROM Question q WHERE q.deletedAt IS NULL AND q.questionType = :type ORDER BY q.createdAt DESC")
+    @Query("SELECT q FROM Question q WHERE q.questionType = :type ORDER BY q.createdAt DESC")
     Page<Question> findAllActiveByType(@Param("type") QuestionType type, Pageable pageable);
 
-    @Query("SELECT q FROM Question q WHERE q.deletedAt IS NULL AND q.status = :status ORDER BY q.createdAt DESC")
+    @Query("SELECT q FROM Question q WHERE q.status = :status ORDER BY q.createdAt DESC")
     Page<Question> findAllActiveByStatus(@Param("status") QuestionStatus status, Pageable pageable);
 
-    @Query("SELECT q FROM Question q WHERE q.deletedAt IS NULL AND q.category = :category AND q.questionType = :type ORDER BY q.createdAt DESC")
+    @Query("SELECT q FROM Question q WHERE q.category = :category AND q.questionType = :type ORDER BY q.createdAt DESC")
     Page<Question> findAllActiveByCategoryAndType(@Param("category") QuestionCategory category, @Param("type") QuestionType type, Pageable pageable);
 
-    @Query("SELECT q FROM Question q WHERE q.deletedAt IS NULL AND q.id = :id")
+    @Query("SELECT q FROM Question q WHERE q.id = :id")
     Optional<Question> findActiveById(@Param("id") Long id);
 
-    @Query("SELECT q FROM Question q WHERE q.deletedAt IS NULL AND q.authorUserId = :authorUserId ORDER BY q.createdAt DESC")
+    @Query("SELECT q FROM Question q WHERE q.authorUserId = :authorUserId ORDER BY q.createdAt DESC")
     Page<Question> findAllActiveByAuthorUserId(@Param("authorUserId") Long authorUserId, Pageable pageable);
 
-    @Query("SELECT COUNT(q) FROM Question q WHERE q.deletedAt IS NULL AND q.authorUserId = :authorUserId")
+    @Query("SELECT COUNT(q) FROM Question q WHERE q.authorUserId = :authorUserId")
     long countAllActiveByAuthorUserId(@Param("authorUserId") Long authorUserId);
 
     @Modifying

@@ -15,7 +15,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,10 +30,9 @@ public class QuestionController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<QuestionDetailResponse>> create(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @RequestBody @Valid QuestionCreateRequest request
     ) {
-        Long userId = (Long) authentication.getPrincipal();
         QuestionDetailResponse response = questionService.create(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(response));
     }
@@ -57,31 +56,28 @@ public class QuestionController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<QuestionDetailResponse>> update(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable Long id,
             @RequestBody @Valid QuestionUpdateRequest request
     ) {
-        Long userId = (Long) authentication.getPrincipal();
         QuestionDetailResponse response = questionService.update(userId, id, request);
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> delete(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable Long id
     ) {
-        Long userId = (Long) authentication.getPrincipal();
         questionService.delete(userId, id);
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
     @PatchMapping("/{id}/close")
     public ResponseEntity<ApiResponse<QuestionDetailResponse>> close(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable Long id
     ) {
-        Long userId = (Long) authentication.getPrincipal();
         QuestionDetailResponse response = questionService.close(userId, id);
         return ResponseEntity.ok(ApiResponse.ok(response));
     }

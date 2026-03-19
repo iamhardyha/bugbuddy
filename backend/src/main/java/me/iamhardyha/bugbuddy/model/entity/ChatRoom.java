@@ -6,10 +6,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import me.iamhardyha.bugbuddy.model.common.BaseSoftDeleteEntity;
 import me.iamhardyha.bugbuddy.model.enums.ChatRoomStatus;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.Instant;
 
 @Entity
+@SQLRestriction("deleted_at IS NULL")
 @Table(
         name = "chat_rooms",
         uniqueConstraints = {

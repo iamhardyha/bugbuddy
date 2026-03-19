@@ -9,7 +9,7 @@ import me.iamhardyha.bugbuddy.global.response.ErrorCode;
 import me.iamhardyha.bugbuddy.model.entity.UserEntity;
 import me.iamhardyha.bugbuddy.user.UserService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -43,8 +43,9 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse<UserProfileResponse>> me(Authentication authentication) {
-        Long userId = (Long) authentication.getPrincipal();
+    public ResponseEntity<ApiResponse<UserProfileResponse>> me(
+            @AuthenticationPrincipal Long userId
+    ) {
         UserEntity user = userService.findById(userId);
         return ResponseEntity.ok(ApiResponse.ok(UserProfileResponse.from(user)));
     }

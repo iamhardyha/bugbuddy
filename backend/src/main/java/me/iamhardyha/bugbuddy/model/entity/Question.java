@@ -8,8 +8,10 @@ import me.iamhardyha.bugbuddy.model.common.BaseSoftDeleteEntity;
 import me.iamhardyha.bugbuddy.model.enums.QuestionCategory;
 import me.iamhardyha.bugbuddy.model.enums.QuestionStatus;
 import me.iamhardyha.bugbuddy.model.enums.QuestionType;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
+@SQLRestriction("deleted_at IS NULL")
 @Table(
         name = "questions",
         indexes = {

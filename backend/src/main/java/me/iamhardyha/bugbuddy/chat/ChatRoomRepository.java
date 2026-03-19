@@ -11,10 +11,10 @@ import java.util.Optional;
 
 public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 
-    @Query("SELECT r FROM ChatRoom r WHERE r.id = :id AND r.deletedAt IS NULL")
+    @Query("SELECT r FROM ChatRoom r WHERE r.id = :id")
     Optional<ChatRoom> findActiveById(@Param("id") Long id);
 
-    @Query("SELECT r FROM ChatRoom r WHERE (r.mentorUserId = :userId OR r.menteeUserId = :userId) AND r.deletedAt IS NULL ORDER BY r.createdAt DESC")
+    @Query("SELECT r FROM ChatRoom r WHERE (r.mentorUserId = :userId OR r.menteeUserId = :userId) ORDER BY r.createdAt DESC")
     List<ChatRoom> findActiveByUserId(@Param("userId") Long userId);
 
     boolean existsByMentorUserIdAndMenteeUserIdAndQuestionIdAndStatusNot(

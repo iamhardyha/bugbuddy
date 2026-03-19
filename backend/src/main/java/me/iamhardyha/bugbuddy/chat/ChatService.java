@@ -195,7 +195,7 @@ public class ChatService {
         assertRoomAccess(room, userId);
 
         Optional<ChatMessage> lastMessage = chatMessageRepository
-                .findFirstByRoomIdAndDeletedAtIsNullOrderByIdDesc(roomId);
+                .findFirstByRoomIdOrderByIdDesc(roomId);
 
         lastMessage.ifPresent(msg -> {
             if (room.getMentorUserId().equals(userId)) {
@@ -273,7 +273,7 @@ public class ChatService {
                 : chatMessageRepository.countUnreadAfter(room.getId(), lastReadId, currentUserId);
 
         Optional<ChatMessage> lastMsg = chatMessageRepository
-                .findFirstByRoomIdAndDeletedAtIsNullOrderByIdDesc(room.getId());
+                .findFirstByRoomIdOrderByIdDesc(room.getId());
         String lastMsgContent = lastMsg.map(ChatMessage::getContent).orElse(null);
         Instant lastMsgAt = lastMsg.map(m -> m.getCreatedAt()).orElse(null);
 

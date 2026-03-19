@@ -8,10 +8,12 @@ import me.iamhardyha.bugbuddy.model.common.BaseSoftDeleteEntity;
 import me.iamhardyha.bugbuddy.model.enums.ReasonCode;
 import me.iamhardyha.bugbuddy.model.enums.ReportStatus;
 import me.iamhardyha.bugbuddy.model.enums.ReportTargetType;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.Instant;
 
 @Entity
+@SQLRestriction("deleted_at IS NULL")
 @Table(
         name = "reports",
         indexes = {

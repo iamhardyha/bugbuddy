@@ -14,7 +14,7 @@ public interface UploadRepository extends JpaRepository<Upload, Long> {
 
     Optional<Upload> findByIdAndUploaderUserId(Long id, Long uploaderUserId);
 
-    List<Upload> findAllByRefTypeAndRefIdAndDeletedAtIsNull(ReferenceType refType, Long refId);
+    List<Upload> findAllByRefTypeAndRefId(ReferenceType refType, Long refId);
 
     /** 질문/답변/채팅 저장 시 임시 업로드들을 한 번에 연결 */
     @Modifying
@@ -24,7 +24,6 @@ public interface UploadRepository extends JpaRepository<Upload, Long> {
             WHERE u.id IN :ids
               AND u.uploaderUserId = :uploaderUserId
               AND u.refType IS NULL
-              AND u.deletedAt IS NULL
             """)
     int linkUploads(@Param("ids") List<Long> ids,
                     @Param("uploaderUserId") Long uploaderUserId,

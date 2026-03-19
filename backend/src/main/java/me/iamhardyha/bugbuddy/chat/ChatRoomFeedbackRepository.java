@@ -11,6 +11,6 @@ public interface ChatRoomFeedbackRepository extends JpaRepository<ChatRoomFeedba
 
     boolean existsByRoomIdAndRaterUserId(Long roomId, Long raterUserId);
 
-    @Query("SELECT f FROM ChatRoomFeedback f WHERE f.roomId = :roomId AND f.deletedAt IS NULL")
+    @Query("SELECT f FROM ChatRoomFeedback f WHERE f.roomId = :roomId")
     List<ChatRoomFeedback> findActiveByRoomId(@Param("roomId") Long roomId);
 }
