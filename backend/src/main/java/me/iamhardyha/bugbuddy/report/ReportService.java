@@ -148,7 +148,7 @@ public class ReportService {
                     .map(q -> q.getAuthor().getId())
                     .orElse(null);
             case ANSWER -> answerRepository.findActiveById(targetId)
-                    .map(a -> a.getAuthorUserId())
+                    .map(a -> a.getAuthor().getId())
                     .orElse(null);
             case CHAT_MESSAGE -> chatMessageRepository.findById(targetId)
                     .filter(m -> !m.isDeleted())

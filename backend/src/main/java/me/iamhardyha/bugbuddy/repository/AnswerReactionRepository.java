@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -37,6 +38,9 @@ public interface AnswerReactionRepository extends JpaRepository<AnswerReaction, 
             @Param("answerIds") Collection<Long> answerIds
     );
 
-    @Query("SELECT COUNT(r) FROM AnswerReaction r WHERE r.reactionType = :reactionType AND r.answerId IN (SELECT a.id FROM Answer a WHERE a.authorUserId = :authorUserId)")
+    @Query("SELECT COUNT(r) FROM AnswerReaction r WHERE r.reactionType = :reactionType AND r.answerId IN (SELECT a.id FROM Answer a WHERE a.author.id = :authorUserId)")
     long countHelpfulReceivedByAuthorUserId(@Param("authorUserId") Long authorUserId, @Param("reactionType") ReactionType reactionType);
+
+    @Query("SELECT r.answerId, COUNT(r) FROM AnswerReaction r WHERE r.answerId IN :answerIds AND r.reactionType = :reactionType GROUP BY r.answerId")
+    List<Object[]> countByAnswerIdsAndReactionType(@Param("answerIds") Collection<Long> answerIds, @Param("reactionType") ReactionType reactionType);
 }

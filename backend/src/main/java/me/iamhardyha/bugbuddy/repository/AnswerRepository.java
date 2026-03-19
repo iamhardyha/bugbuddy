@@ -11,21 +11,23 @@ import java.util.Optional;
 
 public interface AnswerRepository extends JpaRepository<Answer, Long> {
 
-    @Query("SELECT a FROM Answer a WHERE a.questionId = :questionId ORDER BY a.accepted DESC, a.createdAt ASC")
+    @Query(value = "SELECT a FROM Answer a JOIN FETCH a.author WHERE a.question.id = :questionId ORDER BY a.accepted DESC, a.createdAt ASC",
+           countQuery = "SELECT COUNT(a) FROM Answer a WHERE a.question.id = :questionId")
     Page<Answer> findAllActiveByQuestionId(@Param("questionId") Long questionId, Pageable pageable);
 
-    @Query("SELECT a FROM Answer a WHERE a.id = :id")
+    @Query("SELECT a FROM Answer a JOIN FETCH a.author WHERE a.id = :id")
     Optional<Answer> findActiveById(@Param("id") Long id);
 
-    @Query("SELECT a FROM Answer a WHERE a.questionId = :questionId AND a.accepted = true")
+    @Query("SELECT a FROM Answer a JOIN FETCH a.author WHERE a.question.id = :questionId AND a.accepted = true")
     Optional<Answer> findAcceptedByQuestionId(@Param("questionId") Long questionId);
 
-    @Query("SELECT a FROM Answer a WHERE a.authorUserId = :authorUserId ORDER BY a.createdAt DESC")
+    @Query(value = "SELECT a FROM Answer a JOIN FETCH a.author WHERE a.author.id = :authorUserId ORDER BY a.createdAt DESC",
+           countQuery = "SELECT COUNT(a) FROM Answer a WHERE a.author.id = :authorUserId")
     Page<Answer> findAllActiveByAuthorUserId(@Param("authorUserId") Long authorUserId, Pageable pageable);
 
-    @Query("SELECT COUNT(a) FROM Answer a WHERE a.authorUserId = :authorUserId")
+    @Query("SELECT COUNT(a) FROM Answer a WHERE a.author.id = :authorUserId")
     long countAllActiveByAuthorUserId(@Param("authorUserId") Long authorUserId);
 
-    @Query("SELECT COUNT(a) FROM Answer a WHERE a.authorUserId = :authorUserId AND a.accepted = true")
+    @Query("SELECT COUNT(a) FROM Answer a WHERE a.author.id = :authorUserId AND a.accepted = true")
     long countAllAcceptedByAuthorUserId(@Param("authorUserId") Long authorUserId);
 }

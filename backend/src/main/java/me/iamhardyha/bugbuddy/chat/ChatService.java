@@ -67,14 +67,14 @@ public class ChatService {
             throw new BugBuddyException(ErrorCode.CHAT_ANSWER_NOT_ALLOWED);
         }
 
-        Question question = questionRepository.findActiveById(answer.getQuestionId())
+        Question question = questionRepository.findActiveById(answer.getQuestion().getId())
                 .orElseThrow(() -> new BugBuddyException(ErrorCode.QUESTION_NOT_FOUND));
 
         if (!question.getAuthor().getId().equals(menteeUserId)) {
             throw new BugBuddyException(ErrorCode.CHAT_NOT_QUESTION_AUTHOR);
         }
 
-        Long mentorUserId = answer.getAuthorUserId();
+        Long mentorUserId = answer.getAuthor().getId();
 
         boolean duplicate = chatRoomRepository.existsByMentorUserIdAndMenteeUserIdAndQuestionIdAndStatusNot(
                 mentorUserId, menteeUserId, question.getId(), ChatRoomStatus.CLOSED);

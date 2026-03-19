@@ -9,17 +9,16 @@ import me.iamhardyha.bugbuddy.model.entity.Answer;
 import me.iamhardyha.bugbuddy.model.entity.AnswerReaction;
 import me.iamhardyha.bugbuddy.model.entity.Question;
 import me.iamhardyha.bugbuddy.model.entity.UserEntity;
-import me.iamhardyha.bugbuddy.model.entity.UserEntity;
 import me.iamhardyha.bugbuddy.model.enums.MentorStatus;
 import me.iamhardyha.bugbuddy.model.enums.QuestionStatus;
 import me.iamhardyha.bugbuddy.model.enums.ReactionType;
 import me.iamhardyha.bugbuddy.model.enums.ReferenceType;
 import me.iamhardyha.bugbuddy.model.enums.SnapshotRole;
+import me.iamhardyha.bugbuddy.model.enums.XpEventType;
 import me.iamhardyha.bugbuddy.repository.AnswerReactionRepository;
 import me.iamhardyha.bugbuddy.repository.AnswerRepository;
 import me.iamhardyha.bugbuddy.repository.QuestionRepository;
 import me.iamhardyha.bugbuddy.repository.UserRepository;
-import me.iamhardyha.bugbuddy.model.enums.XpEventType;
 import me.iamhardyha.bugbuddy.upload.UploadService;
 import me.iamhardyha.bugbuddy.xp.XpService;
 import org.springframework.data.domain.Page;
@@ -29,7 +28,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -75,8 +76,8 @@ public class AnswerService {
                 : SnapshotRole.USER;
 
         Answer answer = new Answer();
-        answer.setQuestionId(questionId);
-        answer.setAuthorUserId(userId);
+        answer.setQuestion(question);
+        answer.setAuthor(user);
         answer.setBody(request.body());
         answer.setAuthorSnapshotRole(snapshotRole);
         answer.setAllowOneToOne(request.allowOneToOne() && snapshotRole == SnapshotRole.MENTOR);
@@ -84,28 +85,41 @@ public class AnswerService {
         Answer saved = answerRepository.save(answer);
         uploadService.linkUploads(request.uploadIds(), userId, ReferenceType.ANSWER, saved.getId());
         xpService.grantXp(userId, XpEventType.ANSWER_CREATED, ReferenceType.ANSWER, saved.getId(), 5);
-        return AnswerResponse.of(saved, 0L, false, user.getNickname());
+        return AnswerResponse.of(saved, 0L, false);
     }
 
     public Page<AnswerResponse> findAllByQuestion(Long questionId, Long currentUserId, Pageable pageable) {
         questionRepository.findActiveById(questionId)
                 .orElseThrow(() -> new BugBuddyException(ErrorCode.QUESTION_NOT_FOUND));
 
+        // 1 query: answers page with author JOIN FETCH
         Page<Answer> answers = answerRepository.findAllActiveByQuestionId(questionId, pageable);
 
-        // 로그인한 유저의 반응 여부를 한 번의 쿼리로 일괄 조회
-        Set<Long> reactedIds = currentUserId != null && !answers.isEmpty()
-                ? answerReactionRepository.findReactedAnswerIds(
-                        currentUserId,
-                        ReactionType.HELPFUL,
-                        answers.stream().map(Answer::getId).toList())
+        if (answers.isEmpty()) {
+            return answers.map(a -> AnswerResponse.of(a, 0L, false));
+        }
+
+        // Extract answer IDs
+        List<Long> answerIds = answers.stream().map(Answer::getId).toList();
+
+        // 1 query: batch count helpful reactions
+        Map<Long, Long> helpfulCountMap = answerReactionRepository
+                .countByAnswerIdsAndReactionType(answerIds, ReactionType.HELPFUL)
+                .stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> (Long) row[1]
+                ));
+
+        // 1 query: reacted answer IDs for current user
+        Set<Long> reactedIds = currentUserId != null
+                ? answerReactionRepository.findReactedAnswerIds(currentUserId, ReactionType.HELPFUL, answerIds)
                 : Collections.emptySet();
 
         return answers.map(a -> {
-            long helpfulCount = answerReactionRepository
-                    .countActiveByAnswerIdAndReactionType(a.getId(), ReactionType.HELPFUL);
+            long helpfulCount = helpfulCountMap.getOrDefault(a.getId(), 0L);
             boolean myHelpful = reactedIds.contains(a.getId());
-            return AnswerResponse.of(a, helpfulCount, myHelpful, getNickname(a.getAuthorUserId()));
+            return AnswerResponse.of(a, helpfulCount, myHelpful);
         });
     }
 
@@ -116,7 +130,7 @@ public class AnswerService {
 
         Answer answer = findActiveAnswerInQuestion(answerId, questionId);
 
-        if (!answer.getAuthorUserId().equals(userId)) {
+        if (!answer.getAuthor().getId().equals(userId)) {
             throw new BugBuddyException(ErrorCode.ANSWER_FORBIDDEN);
         }
 
@@ -134,7 +148,7 @@ public class AnswerService {
         boolean myHelpful = answerReactionRepository
                 .findActiveByAnswerIdAndVoterUserIdAndReactionType(answerId, userId, ReactionType.HELPFUL)
                 .isPresent();
-        return AnswerResponse.of(answer, helpfulCount, myHelpful, getNickname(answer.getAuthorUserId()));
+        return AnswerResponse.of(answer, helpfulCount, myHelpful);
     }
 
     @Transactional
@@ -144,7 +158,7 @@ public class AnswerService {
 
         Answer answer = findActiveAnswerInQuestion(answerId, questionId);
 
-        if (!answer.getAuthorUserId().equals(userId)) {
+        if (!answer.getAuthor().getId().equals(userId)) {
             throw new BugBuddyException(ErrorCode.ANSWER_FORBIDDEN);
         }
 
@@ -168,13 +182,12 @@ public class AnswerService {
 
         answer.setAccepted(true);
         question.setStatus(QuestionStatus.SOLVED);
-        xpService.grantXp(answer.getAuthorUserId(), XpEventType.ANSWER_ACCEPTED,
+        xpService.grantXp(answer.getAuthor().getId(), XpEventType.ANSWER_ACCEPTED,
                 ReferenceType.ANSWER, answerId, 30);
 
         long helpfulCount = answerReactionRepository
                 .countActiveByAnswerIdAndReactionType(answerId, ReactionType.HELPFUL);
-        // 채택하는 사람은 질문 작성자이므로 myHelpful은 항상 false
-        return AnswerResponse.of(answer, helpfulCount, false, getNickname(answer.getAuthorUserId()));
+        return AnswerResponse.of(answer, helpfulCount, false);
     }
 
     @Transactional
@@ -184,11 +197,10 @@ public class AnswerService {
 
         Answer answer = findActiveAnswerInQuestion(answerId, questionId);
 
-        if (answer.getAuthorUserId().equals(userId)) {
+        if (answer.getAuthor().getId().equals(userId)) {
             throw new BugBuddyException(ErrorCode.ANSWER_SELF_REACTION);
         }
 
-        // soft-delete된 레코드 포함하여 조회 (유니크 제약 충돌 방지)
         AnswerReaction reaction = answerReactionRepository
                 .findByAnswerIdAndVoterUserIdAndReactionType(answerId, userId, ReactionType.HELPFUL)
                 .orElse(null);
@@ -198,10 +210,8 @@ public class AnswerService {
         }
 
         if (reaction != null) {
-            // soft-delete된 레코드 복원
             reaction.setDeletedAt(null);
         } else {
-            // 최초 반응 생성
             reaction = new AnswerReaction();
             reaction.setAnswerId(answerId);
             reaction.setVoterUserId(userId);
@@ -209,12 +219,12 @@ public class AnswerService {
             answerReactionRepository.save(reaction);
         }
 
-        xpService.grantXp(answer.getAuthorUserId(), XpEventType.ANSWER_HELPFUL_RECEIVED,
+        xpService.grantXp(answer.getAuthor().getId(), XpEventType.ANSWER_HELPFUL_RECEIVED,
                 ReferenceType.ANSWER, answerId, 20);
 
         long helpfulCount = answerReactionRepository
                 .countActiveByAnswerIdAndReactionType(answerId, ReactionType.HELPFUL);
-        return AnswerResponse.of(answer, helpfulCount, true, getNickname(answer.getAuthorUserId()));
+        return AnswerResponse.of(answer, helpfulCount, true);
     }
 
     @Transactional
@@ -232,23 +242,17 @@ public class AnswerService {
 
         long helpfulCount = answerReactionRepository
                 .countActiveByAnswerIdAndReactionType(answerId, ReactionType.HELPFUL);
-        return AnswerResponse.of(answer, helpfulCount, false, getNickname(answer.getAuthorUserId()));
+        return AnswerResponse.of(answer, helpfulCount, false);
     }
 
     private Answer findActiveAnswerInQuestion(Long answerId, Long questionId) {
         Answer answer = answerRepository.findActiveById(answerId)
                 .orElseThrow(() -> new BugBuddyException(ErrorCode.ANSWER_NOT_FOUND));
 
-        if (!answer.getQuestionId().equals(questionId)) {
+        if (!answer.getQuestion().getId().equals(questionId)) {
             throw new BugBuddyException(ErrorCode.ANSWER_NOT_FOUND);
         }
 
         return answer;
-    }
-
-    private String getNickname(Long userId) {
-        return userRepository.findById(userId)
-                .map(UserEntity::getNickname)
-                .orElse("알 수 없음");
     }
 }

@@ -29,11 +29,13 @@ public class Answer extends BaseSoftDeleteEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "question_id", nullable = false)
-    private Long questionId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "question_id", nullable = false)
+    private Question question;
 
-    @Column(name = "author_user_id", nullable = false)
-    private Long authorUserId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_user_id", nullable = false)
+    private UserEntity author;
 
     @Column(nullable = false, columnDefinition = "MEDIUMTEXT")
     private String body;
