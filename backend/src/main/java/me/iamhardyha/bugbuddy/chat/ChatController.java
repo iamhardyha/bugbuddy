@@ -18,10 +18,16 @@ import java.util.List;
 @RequestMapping("/api/chat/rooms")
 public class ChatController {
 
-    private final ChatService chatService;
+    private final ChatRoomService chatRoomService;
+    private final ChatMessageService chatMessageService;
+    private final ChatFeedbackService chatFeedbackService;
 
-    public ChatController(ChatService chatService) {
-        this.chatService = chatService;
+    public ChatController(ChatRoomService chatRoomService,
+                          ChatMessageService chatMessageService,
+                          ChatFeedbackService chatFeedbackService) {
+        this.chatRoomService = chatRoomService;
+        this.chatMessageService = chatMessageService;
+        this.chatFeedbackService = chatFeedbackService;
     }
 
     /** POST /api/chat/rooms — 채팅 신청 (질문자만) */
@@ -30,7 +36,7 @@ public class ChatController {
             @AuthenticationPrincipal Long userId,
             @RequestBody @Valid ChatRoomCreateRequest request
     ) {
-        ChatRoomResponse response = chatService.proposeChat(userId, request);
+        ChatRoomResponse response = chatRoomService.proposeChat(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(response));
     }
 
@@ -40,7 +46,7 @@ public class ChatController {
             @AuthenticationPrincipal Long userId,
             @PathVariable Long id
     ) {
-        ChatRoomResponse response = chatService.acceptChat(userId, id);
+        ChatRoomResponse response = chatRoomService.acceptChat(userId, id);
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
@@ -49,7 +55,7 @@ public class ChatController {
     public ResponseEntity<ApiResponse<List<ChatRoomResponse>>> getMyRooms(
             @AuthenticationPrincipal Long userId
     ) {
-        List<ChatRoomResponse> response = chatService.getMyRooms(userId);
+        List<ChatRoomResponse> response = chatRoomService.getMyRooms(userId);
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
@@ -59,7 +65,7 @@ public class ChatController {
             @AuthenticationPrincipal Long userId,
             @PathVariable Long id
     ) {
-        chatService.markAsRead(userId, id);
+        chatMessageService.markAsRead(id, userId);
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
@@ -70,7 +76,7 @@ public class ChatController {
             @PathVariable Long id,
             @PageableDefault(size = 50, sort = "createdAt", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-        Page<ChatMessageResponse> response = chatService.getMessages(userId, id, pageable);
+        Page<ChatMessageResponse> response = chatMessageService.getMessages(id, userId, pageable);
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
@@ -80,7 +86,7 @@ public class ChatController {
             @AuthenticationPrincipal Long userId,
             @PathVariable Long id
     ) {
-        ChatRoomResponse response = chatService.closeRoom(userId, id);
+        ChatRoomResponse response = chatRoomService.closeRoom(userId, id);
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
@@ -91,7 +97,7 @@ public class ChatController {
             @PathVariable Long id,
             @RequestBody @Valid ChatFeedbackRequest request
     ) {
-        chatService.submitFeedback(userId, id, request);
+        chatFeedbackService.submitFeedback(id, userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok());
     }
 }

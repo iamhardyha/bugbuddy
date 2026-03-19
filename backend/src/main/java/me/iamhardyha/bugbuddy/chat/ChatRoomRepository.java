@@ -14,9 +14,9 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     @Query("SELECT r FROM ChatRoom r WHERE r.id = :id")
     Optional<ChatRoom> findActiveById(@Param("id") Long id);
 
-    @Query("SELECT r FROM ChatRoom r WHERE (r.mentorUserId = :userId OR r.menteeUserId = :userId) ORDER BY r.createdAt DESC")
+    @Query("SELECT r FROM ChatRoom r JOIN FETCH r.mentor JOIN FETCH r.mentee LEFT JOIN FETCH r.question WHERE (r.mentor.id = :userId OR r.mentee.id = :userId) ORDER BY r.createdAt DESC")
     List<ChatRoom> findActiveByUserId(@Param("userId") Long userId);
 
-    boolean existsByMentorUserIdAndMenteeUserIdAndQuestionIdAndStatusNot(
-            Long mentorUserId, Long menteeUserId, Long questionId, ChatRoomStatus status);
+    boolean existsByMentorIdAndMenteeIdAndQuestionIdAndStatusNot(
+            Long mentorId, Long menteeId, Long questionId, ChatRoomStatus status);
 }
