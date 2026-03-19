@@ -1,0 +1,30 @@
+.root {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 28px 24px;
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.sidebarCard {
+  border-radius: 12px;
+  border: 1px solid var(--border-faint);
+  background: var(--bg-surface);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+@media (max-width: 900px) {
+  .root {
+    grid-template-columns: 1fr;
+    max-width: 760px;
+  }
+}
+
+@media (max-width: 639px) {
+  .root {
+    padding: 16px 0;
+  }
+}

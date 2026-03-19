@@ -21,6 +21,7 @@ import {
   CheckCircleOutlined,
 } from '@ant-design/icons';
 import QuestionCard from './QuestionCard';
+import styles from './QuestionFeed.module.css';
 import { getQuestions } from '@/lib/questions';
 import { getAccessToken } from '@/lib/auth';
 import { apiFetch } from '@/lib/api';
@@ -146,10 +147,10 @@ export default function QuestionFeed() {
 
   return (
     <>
-    <Flex className="feed-root">
+    <Flex className={styles.root}>
 
       {/* ── Left Sidebar ─────────────────────────────────── */}
-      <aside className="hidden lg:block feed-sidebar-left">
+      <aside className={`hidden lg:block ${styles.sidebarLeft}`}>
         <div style={{ position: 'sticky', top: `calc(var(--global-header-height) + 24px)`, padding: '20px 0' }}>
 
           {/* FEEDS section */}
@@ -168,7 +169,7 @@ export default function QuestionFeed() {
             Feeds
           </Text>
           <button
-            className="nav-btn active"
+            className={`${styles.navBtn} ${styles.active}`}
             onClick={() => { setCategory(ALL); setActiveTab('all'); }}
           >
             <span style={{ fontSize: 13, display: 'flex', alignItems: 'center' }}>
@@ -177,7 +178,7 @@ export default function QuestionFeed() {
             <span>홈</span>
           </button>
           <button
-            className="nav-btn"
+            className={styles.navBtn}
             onClick={() => setActiveTab('solved')}
           >
             <span style={{ fontSize: 13, display: 'flex', alignItems: 'center' }}>
@@ -211,7 +212,7 @@ export default function QuestionFeed() {
               <button
                 key={c.value}
                 onClick={() => setCategory(c.value)}
-                className={`nav-btn ${isActive ? 'active' : ''}`}
+                className={`${styles.navBtn}${isActive ? ` ${styles.active}` : ''}`}
               >
                 {isActive && (
                   <span
@@ -238,15 +239,15 @@ export default function QuestionFeed() {
       </aside>
 
       {/* ── Main Feed ──────────────────────────────────────── */}
-      <div style={{ flex: 1, minWidth: 0, paddingTop: 24, paddingBottom: 64, paddingLeft: 24, paddingRight: 24 }}>
+      <div className={styles.mainContent} style={{ flex: 1, minWidth: 0 }}>
 
         {/* Mobile: Category pills */}
-        <div className="mobile-cat-bar lg:hidden">
+        <div className={`${styles.mobileCatBar} lg:hidden`}>
           {CATEGORIES.map(c => (
             <button
               key={c.value}
               onClick={() => setCategory(c.value)}
-              className={`mobile-cat-btn${category === c.value ? ' active' : ''}`}
+              className={`${styles.mobileCatBtn}${category === c.value ? ` ${styles.active}` : ''}`}
             >
               {c.label}
             </button>
@@ -260,7 +261,7 @@ export default function QuestionFeed() {
               <button
                 key={tab.value}
                 onClick={() => setActiveTab(tab.value)}
-                className={`feed-filter-tab${activeTab === tab.value ? ' active' : ''}`}
+                className={`${styles.filterTab}${activeTab === tab.value ? ` ${styles.active}` : ''}`}
               >
                 {tab.label}
               </button>
@@ -269,7 +270,7 @@ export default function QuestionFeed() {
           {isLoggedIn && (
             <button
               ref={inlineBtnRef}
-              className="ask-btn-inline"
+              className={styles.askBtnInline}
               onClick={() => router.push('/questions/new')}
             >
               <EditOutlined />
@@ -337,12 +338,12 @@ export default function QuestionFeed() {
       </div>
 
       {/* ── Right Sidebar ────────────────────────────────── */}
-      <aside className="hidden xl:block feed-sidebar-right">
+      <aside className={`hidden xl:block ${styles.sidebarRight}`}>
         <div style={{ position: 'sticky', top: `calc(var(--global-header-height) + 24px)` }}>
 
           {/* User mini profile card */}
           {currentUser && xpProgress && levelMeta ? (
-            <div className="feed-sidebar-card" style={{ marginBottom: 16 }}>
+            <div className={styles.sidebarCard} style={{ marginBottom: 16 }}>
               <Flex align="center" gap={12} style={{ marginBottom: 14 }}>
                 <div style={{
                   width: 44, height: 44, borderRadius: '50%',
@@ -383,7 +384,7 @@ export default function QuestionFeed() {
               </div>
             </div>
           ) : !isLoggedIn ? (
-            <div className="feed-sidebar-card" style={{ marginBottom: 16 }}>
+            <div className={styles.sidebarCard} style={{ marginBottom: 16 }}>
               <Text strong style={{ fontSize: 13, display: 'block', marginBottom: 8 }}>
                 Logos에 오신 것을 환영해요!
               </Text>
@@ -394,7 +395,7 @@ export default function QuestionFeed() {
           ) : null}
 
           {/* Community Pulse */}
-          <div className="feed-sidebar-card" style={{ marginBottom: 16 }}>
+          <div className={styles.sidebarCard} style={{ marginBottom: 16 }}>
             <Flex align="center" gap={6} style={{ marginBottom: 12 }}>
               <TeamOutlined style={{ fontSize: 13, color: 'var(--text-secondary)' }} />
               <Text strong style={{ fontSize: 13, color: 'var(--text-primary)' }}>
@@ -420,7 +421,7 @@ export default function QuestionFeed() {
           {/* Post a Question CTA */}
           {isLoggedIn && (
             <button
-              className="ask-btn-inline"
+              className={styles.askBtnInline}
               onClick={() => router.push('/questions/new')}
               style={{ width: '100%', justifyContent: 'center', padding: '10px 16px', fontSize: 13 }}
             >
@@ -432,7 +433,7 @@ export default function QuestionFeed() {
           {/* Verified Mentor CTA */}
           {isLoggedIn && currentUser?.mentorStatus !== 'APPROVED' && (
             <div
-              className="feed-sidebar-card"
+              className={styles.sidebarCard}
               style={{
                 marginTop: 12,
                 background: 'linear-gradient(135deg, var(--accent), #7c3aed)',
@@ -474,7 +475,7 @@ export default function QuestionFeed() {
 
     {isLoggedIn && (
       <button
-        className={`fab-ask${showFab ? '' : ' hidden'}`}
+        className={`${styles.fabAsk}${showFab ? '' : ` ${styles.hidden}`}`}
         onClick={() => router.push('/questions/new')}
       >
         <EditOutlined />

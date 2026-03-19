@@ -6,6 +6,7 @@ import { Badge } from 'antd';
 import { BellOutlined } from '@ant-design/icons';
 import { apiFetch } from '@/lib/api';
 import { getAccessToken } from '@/lib/auth';
+import themeBtnStyles from '@/components/common/ThemeToggle.module.css';
 
 export default function NotificationBell() {
   const router = useRouter();
@@ -25,7 +26,7 @@ export default function NotificationBell() {
   return (
     <Badge count={unreadCount} size="small" offset={[-2, 2]}>
       <button
-        className="theme-btn"
+        className={themeBtnStyles.themeBtn}
         onClick={() => router.push('/notifications')}
         style={{ width: 32, height: 32 }}
         title="알림"

@@ -1,0 +1,66 @@
+/* ─── DM Layout (Instagram DM 스타일) ─────────────── */
+.layout {
+  display: flex;
+  height: calc(100dvh - var(--global-header-height));
+  overflow: hidden;
+  background: var(--bg-base);
+}
+
+/* Left panel */
+.panelLeft {
+  width: 320px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border-faint);
+  background: var(--bg-surface);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Right panel */
+.panelRight {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-base);
+}
+
+/* Empty state right panel: 모바일에서 숨김 */
+.panelRightDesktopOnly {
+  display: none;
+}
+
+/* Left panel: /chat/[id]에서 모바일 숨김 */
+.panelLeftDesktopOnly {
+  display: none;
+}
+
+/* Desktop (≥ 768px) overrides */
+@media (min-width: 768px) {
+  /* /chat/[id] — 사이드바 보이기 */
+  .panelLeftDesktopOnly {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* /chat — 오른쪽 empty state 보이기 */
+  .panelRightDesktopOnly {
+    display: flex;
+  }
+
+  /* /chat — 왼쪽 패널 너비 고정 */
+  .panelLeft {
+    width: 320px;
+  }
+}
+
+/* Mobile (< 768px) overrides */
+@media (max-width: 767px) {
+  /* /chat page: 왼쪽 패널이 전체 너비 */
+  .panelLeft {
+    width: 100%;
+    border-right: none;
+  }
+}

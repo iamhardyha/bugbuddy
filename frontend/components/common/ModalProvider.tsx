@@ -15,6 +15,7 @@ import {
   InfoCircleOutlined,
   CheckCircleOutlined,
 } from '@ant-design/icons';
+import modalStyles from './Modal.module.css';
 
 const { Title, Text } = Typography;
 
@@ -45,6 +46,15 @@ interface ModalContextValue {
 // ── Context ─────────────────────────────────────────────────────────────────
 
 const ModalContext = createContext<ModalContextValue | null>(null);
+
+// ── 아이콘 variant → CSS Module 클래스 맵 ────────────────────────────────────
+
+const variantIconClassMap: Record<ModalVariant, string> = {
+  danger:  modalStyles.iconDanger,
+  warning: modalStyles.iconWarning,
+  info:    modalStyles.iconInfo,
+  success: modalStyles.iconSuccess,
+};
 
 // ── 아이콘 ───────────────────────────────────────────────────────────────────
 
@@ -140,7 +150,7 @@ export function ModalProvider({ children }: { children: ReactNode }) {
         {modal && (
           <Flex vertical align="center" style={{ padding: '28px 24px 20px' }}>
             {/* 아이콘 */}
-            <div className={`modal-icon modal-icon-${modal.variant}`}>
+            <div className={`${modalStyles.icon} ${variantIconClassMap[modal.variant] ?? ''}`}>
               {ICONS[modal.variant]}
             </div>
 

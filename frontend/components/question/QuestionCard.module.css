@@ -1,0 +1,30 @@
+.cardLink {
+  display: flex;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 10px;
+  border: 1px solid var(--border-faint);
+  background: var(--bg-surface);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+.cardLink:hover {
+  border-color: var(--border);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 639px) {
+  .cardLink {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    box-shadow: none;
+  }
+
+  .cardLink:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}

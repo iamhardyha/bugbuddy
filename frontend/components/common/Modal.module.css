@@ -1,0 +1,29 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: overlay-in 0.15s ease;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+
+.iconDanger  { background: var(--error-bg);        color: var(--error-text);   }
+.iconWarning { background: var(--warning-bg);       color: var(--warning-text); }
+.iconInfo    { background: var(--accent-subtle);    color: var(--accent);       }
+.iconSuccess { background: var(--status-open-bg);   color: var(--status-open);  }

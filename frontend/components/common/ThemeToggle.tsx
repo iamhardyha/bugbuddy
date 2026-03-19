@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from 'antd';
 import { SunOutlined, MoonOutlined } from '@ant-design/icons';
 import { useTheme } from './ThemeProvider';
+import styles from './ThemeToggle.module.css';
 
 export default function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
@@ -12,7 +13,7 @@ export default function ThemeToggle() {
   useEffect(() => { setMounted(true); }, []);
 
   if (!mounted) {
-    return <Button type="text" className="theme-btn" style={{ width: 34, height: 34 }} aria-hidden="true" />;
+    return <Button type="text" className={styles.themeBtn} style={{ width: 34, height: 34 }} aria-hidden="true" />;
   }
 
   const isDark = resolvedTheme === 'dark';
@@ -20,7 +21,7 @@ export default function ThemeToggle() {
   return (
     <Button
       type="text"
-      className="theme-btn"
+      className={styles.themeBtn}
       style={{ width: 34, height: 34 }}
       icon={isDark ? <SunOutlined /> : <MoonOutlined />}
       onClick={() => setTheme(isDark ? 'light' : 'dark')}

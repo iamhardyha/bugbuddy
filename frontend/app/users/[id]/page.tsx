@@ -15,6 +15,8 @@ import { apiFetch } from '@/lib/api';
 import { getAccessToken } from '@/lib/auth';
 import type { PublicProfile, UserStats, UserAnswerSummary, UserProfile } from '@/types/user';
 import type { QuestionSummary } from '@/types/question';
+import profileStyles from '@/components/profile/ProfilePage.module.css';
+import layoutStyles from '@/components/common/Layout.module.css';
 
 const { Title, Text } = Typography;
 
@@ -104,7 +106,7 @@ export default function UserProfilePage() {
 
   if (loading) {
     return (
-      <div className="page-root">
+      <div className={layoutStyles.pageRoot}>
         <Flex align="center" justify="center" style={{ minHeight: '60vh' }}>
           <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />
         </Flex>
@@ -114,7 +116,7 @@ export default function UserProfilePage() {
 
   if (!profile) {
     return (
-      <div className="page-root">
+      <div className={layoutStyles.pageRoot}>
         <Flex vertical align="center" justify="center" gap={12} style={{ minHeight: '60vh' }}>
           <Text style={{ fontSize: '3rem', lineHeight: 1 }}>🔍</Text>
           <Text type="secondary" style={{ fontSize: 14 }}>사용자를 찾을 수 없어요.</Text>
@@ -143,7 +145,7 @@ export default function UserProfilePage() {
 
   return (
     <div className="page-root">
-      <div className="profile-two-col">
+      <div className={profileStyles.twoCol}>
         {/* 왼쪽: 프로필 카드 + 탭 */}
         <div>
           {/* Profile Card */}
@@ -309,7 +311,7 @@ export default function UserProfilePage() {
         {/* 오른쪽: 사이드바 */}
         <div style={{ position: 'sticky', top: 'calc(var(--global-header-height) + 24px)' }}>
           {/* Stats Summary */}
-          <div className="profile-sidebar-card">
+          <div className={profileStyles.sidebarCard}>
             <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 16 }}>Stats Summary</Text>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
               {statItems.map(item => (
@@ -327,7 +329,7 @@ export default function UserProfilePage() {
           </div>
 
           {/* XP Distribution */}
-          <div className="profile-sidebar-card">
+          <div className={profileStyles.sidebarCard}>
             <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 16 }}>XP Distribution</Text>
             <Flex vertical gap={12}>
               {xpItems.map(item => (

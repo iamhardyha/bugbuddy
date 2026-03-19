@@ -8,6 +8,8 @@ import { apiFetch } from '@/lib/api';
 import { getAccessToken, clearTokens } from '@/lib/auth';
 import { updateProfile, deactivateAccount } from '@/lib/users';
 import { useModal } from '@/components/common/ModalProvider';
+import layoutStyles from '@/components/common/Layout.module.css';
+import formStyles from '@/components/question/QuestionForm.module.css';
 import type { UserProfile } from '@/types/user';
 
 const { Text } = Typography;
@@ -95,7 +97,7 @@ export default function ProfileSettingsPage() {
 
   if (loading) {
     return (
-      <div className="page-root">
+      <div className={layoutStyles.pageRoot}>
         <Flex align="center" justify="center" style={{ minHeight: '60vh' }}>
           <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />
         </Flex>
@@ -105,7 +107,7 @@ export default function ProfileSettingsPage() {
 
   return (
     <div className="page-root">
-      <main className="form-page-main">
+      <main className={layoutStyles.formPageMain}>
         {/* Back button */}
         <Flex align="center" gap={8} style={{ marginBottom: 24 }}>
           <Button
@@ -143,9 +145,9 @@ export default function ProfileSettingsPage() {
 
           <Flex vertical gap={16}>
             {/* Nickname */}
-            <div className="form-field">
-              <label className="form-label">
-                닉네임 <span className="form-label-required">*</span>
+            <div className={formStyles.formField}>
+              <label className={formStyles.formLabel}>
+                닉네임 <span className={formStyles.formLabelRequired}>*</span>
               </label>
               <Input
                 value={nickname}
@@ -169,8 +171,8 @@ export default function ProfileSettingsPage() {
             </div>
 
             {/* Bio */}
-            <div className="form-field">
-              <label className="form-label">자기소개</label>
+            <div className={formStyles.formField}>
+              <label className={formStyles.formLabel}>자기소개</label>
               <TextArea
                 value={bio}
                 onChange={e => {
@@ -202,7 +204,7 @@ export default function ProfileSettingsPage() {
               <Text style={{ fontSize: 13, color: 'var(--status-open)' }}>✓ 저장됐습니다.</Text>
             )}
 
-            <div className="form-actions">
+            <div className={layoutStyles.formActions}>
               <Button
                 onClick={handleSave}
                 loading={saving}

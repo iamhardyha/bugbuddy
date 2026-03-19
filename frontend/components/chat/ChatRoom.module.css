@@ -1,0 +1,49 @@
+/* Chat header */
+.chatHeader {
+  border-bottom: 1px solid var(--border-faint);
+  background: var(--header-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 12px 16px;
+  flex-shrink: 0;
+}
+
+/* Back button: 데스크탑에서는 숨김 */
+.backBtn {
+  display: none;
+}
+
+/* ─── Chat Messages & Input ──────────────────────── */
+.messagesArea {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.inputBar {
+  border-top: 1px solid var(--border-faint);
+  background: var(--bg-surface);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Desktop (≥ 768px) overrides */
+@media (min-width: 768px) {
+  /* 뒤로가기 버튼 숨김 */
+  .backBtn {
+    display: none;
+  }
+}
+
+/* Mobile (< 768px) overrides */
+@media (max-width: 767px) {
+  /* /chat/[id]: 뒤로가기 버튼 보이기 */
+  .backBtn {
+    display: inline-flex;
+  }
+}

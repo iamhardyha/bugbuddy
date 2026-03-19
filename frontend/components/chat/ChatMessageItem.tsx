@@ -3,6 +3,7 @@
 import { Flex, Typography } from 'antd';
 import MarkdownRenderer from '@/components/editor/MarkdownRenderer';
 import type { ChatMessage } from '@/types/chat';
+import styles from './ChatMessageItem.module.css';
 
 const { Text } = Typography;
 
@@ -56,7 +57,7 @@ export default function ChatMessageItem({ message, isMe }: Props) {
         gap={6}
         style={{ flexDirection: isMe ? 'row-reverse' : 'row' }}
       >
-        <div className={`chat-bubble ${isMe ? 'chat-bubble-me' : 'chat-bubble-other'}`}>
+        <div className={`${styles.bubble} ${isMe ? styles.bubbleMe : styles.bubbleOther}`}>
           {isMarkdown ? (
             <MarkdownRenderer content={message.content} />
           ) : (

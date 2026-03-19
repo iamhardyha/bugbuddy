@@ -12,6 +12,7 @@ import { Button, Flex, Segmented, Typography } from 'antd';
 import { PictureOutlined, LoadingOutlined } from '@ant-design/icons';
 import { uploadImage } from '@/lib/uploads';
 import MarkdownRenderer from './MarkdownRenderer';
+import styles from './MarkdownEditor.module.css';
 
 const { Text } = Typography;
 
@@ -186,9 +187,9 @@ export default function MarkdownEditor({
   }
 
   return (
-    <div className="editor-wrap">
+    <div className={styles.wrap}>
       {/* 탭 + 툴바 헤더 */}
-      <div className="editor-header">
+      <div className={styles.editorHeader}>
         {/* 탭 */}
         <Segmented
           value={tab}
@@ -216,7 +217,7 @@ export default function MarkdownEditor({
               </Button>
             ))}
 
-            <div className="editor-divider" />
+            <div className={styles.divider} />
 
             <Button
               type="text"
@@ -252,12 +253,12 @@ export default function MarkdownEditor({
           placeholder={placeholder}
           required={required}
           rows={minRows}
-          className="editor-textarea"
+          className={styles.textarea}
           style={isDragging ? { backgroundColor: 'var(--accent-subtle)' } : undefined}
         />
       ) : (
         <div
-          className="editor-preview"
+          className={styles.preview}
           style={{ minHeight: `calc(${minRows} * 1.7 * 13.5px + 28px)` }}
         >
           {value.trim() ? (
@@ -270,7 +271,7 @@ export default function MarkdownEditor({
 
       {/* 하단 힌트 */}
       {tab === 'write' && (
-        <div className="editor-footer">
+        <div className={styles.footer}>
           <Text type="secondary" style={{ fontSize: '11.5px' }}>
             마크다운 지원 · 이미지는 붙여넣기(Ctrl+V) 또는 드래그앤드롭으로 첨부
           </Text>

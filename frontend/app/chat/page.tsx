@@ -11,6 +11,7 @@ import { useUserChatEvents, type ChatRoomEvent } from '@/hooks/useUserChatEvents
 import ChatSidebar from '@/components/chat/ChatSidebar';
 import type { ChatRoom } from '@/types/chat';
 import type { UserProfile } from '@/types/user';
+import styles from '@/components/chat/ChatLayout.module.css';
 
 const { Text } = Typography;
 
@@ -60,7 +61,7 @@ export default function ChatListPage() {
 
   if (loading) {
     return (
-      <div className="dm-layout">
+      <div className={styles.layout}>
         <Flex align="center" justify="center" style={{ width: '100%' }}>
           <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />
         </Flex>
@@ -69,9 +70,9 @@ export default function ChatListPage() {
   }
 
   return (
-    <div className="dm-layout">
+    <div className={styles.layout}>
       {/* Left panel: room list (전체 너비 on mobile, 320px on desktop) */}
-      <div className="dm-panel-left">
+      <div className={styles.panelLeft}>
         <ChatSidebar
           rooms={rooms}
           currentUserId={currentUser?.id ?? 0}
@@ -81,7 +82,7 @@ export default function ChatListPage() {
       </div>
 
       {/* Right panel: empty state (desktop only) */}
-      <div className="dm-panel-right dm-panel-right-desktop-only">
+      <div className={`${styles.panelRight} ${styles.panelRightDesktopOnly}`}>
         <Flex vertical align="center" justify="center" gap={16} style={{ height: '100%' }}>
           <div style={{
             width: 64, height: 64, borderRadius: '50%',

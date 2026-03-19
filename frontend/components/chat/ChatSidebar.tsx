@@ -4,6 +4,8 @@ import { Flex, Spin, Typography, Button } from 'antd';
 import { LoadingOutlined, MessageOutlined } from '@ant-design/icons';
 import ChatRoomCard from './ChatRoomCard';
 import type { ChatRoom } from '@/types/chat';
+import styles from './ChatSidebar.module.css';
+import roomCardStyles from './ChatRoomCard.module.css';
 
 const { Text } = Typography;
 
@@ -31,7 +33,7 @@ function Section({ title, dotColor, badge, rooms, currentUserId, activeRoomId, o
         <Text style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
           {title}
         </Text>
-        {badge && <div className="dm-section-badge">{badge}</div>}
+        {badge && <div className={styles.sectionBadge}>{badge}</div>}
       </Flex>
       {rooms.length === 0 ? (
         <div style={{ padding: '4px 16px 12px' }}>
@@ -68,13 +70,13 @@ export default function ChatSidebar({ rooms, currentUserId, activeRoomId, onAcce
   const closed  = rooms.filter(r => r.status === 'CLOSED');
 
   return (
-    <div className="dm-sidebar-inner">
+    <div className={styles.sidebarInner}>
       {/* Header */}
-      <div className="dm-sidebar-header">
+      <div className={styles.sidebarHeader}>
         <Flex align="center" gap={8}>
           <Text strong style={{ fontSize: 15, color: 'var(--text-primary)' }}>채팅</Text>
           {totalUnread > 0 && (
-            <div className="dm-unread-badge" style={{ position: 'static' }}>
+            <div className={roomCardStyles.unreadBadge} style={{ position: 'static' }}>
               {totalUnread > 99 ? '99+' : totalUnread}
             </div>
           )}
@@ -82,7 +84,7 @@ export default function ChatSidebar({ rooms, currentUserId, activeRoomId, onAcce
       </div>
 
       {/* Room list */}
-      <div className="dm-sidebar-rooms">
+      <div className={styles.sidebarRooms}>
         {loading ? (
           <Flex align="center" justify="center" style={{ height: 200 }}>
             <Spin indicator={<LoadingOutlined spin />} />

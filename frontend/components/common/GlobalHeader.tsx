@@ -4,15 +4,16 @@ import Link from 'next/link';
 import AuthStatus from '@/components/auth/AuthStatus';
 import ThemeToggle from '@/components/common/ThemeToggle';
 import NotificationBell from '@/components/common/NotificationBell';
+import styles from './GlobalHeader.module.css';
 
 export default function GlobalHeader() {
   return (
-    <header className="global-header">
-      <div className="global-header-inner">
+    <header className={styles.header}>
+      <div className={styles.headerInner}>
         {/* Wordmark */}
-        <Link href="/" className="bugbuddy-wordmark">
-          <span className="bugbuddy-wordmark-bug">Log</span>
-          <span className="bugbuddy-wordmark-buddy">os</span>
+        <Link href="/" className={styles.wordmark}>
+          <span className={styles.wordmarkBug}>Log</span>
+          <span className={styles.wordmarkBuddy}>os</span>
         </Link>
 
         <div style={{ flex: 1 }} />

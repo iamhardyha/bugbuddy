@@ -1,0 +1,17 @@
+.bubble {
+  max-width: min(70%, 480px);
+  padding: 10px 14px;
+  border-radius: 18px;
+  word-break: break-word;
+}
+.bubbleMe {
+  background: var(--accent);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+.bubbleOther {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-faint);
+  color: var(--text-primary);
+  border-bottom-left-radius: 4px;
+}

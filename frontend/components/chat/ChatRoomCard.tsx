@@ -5,6 +5,7 @@ import { Flex, Typography, Button } from 'antd';
 import { PushpinOutlined } from '@ant-design/icons';
 import { acceptChatRoom } from '@/lib/chat';
 import type { ChatRoom } from '@/types/chat';
+import styles from './ChatRoomCard.module.css';
 
 const { Text } = Typography;
 
@@ -68,14 +69,14 @@ export default function ChatRoomCard({ room, currentUserId, onAccepted, isActive
 
   return (
     <button
-      className="dm-room-card"
+      className={styles.roomCard}
       onClick={() => router.push(`/chat/${room.id}`)}
       data-unread={hasUnread}
       data-active={isActive}
     >
       <div style={{ position: 'relative', flexShrink: 0 }}>
         <Avatar name={counterpart} />
-        {hasUnread && !isActive && <div className="dm-unread-dot" />}
+        {hasUnread && !isActive && <div className={styles.unreadDot} />}
       </div>
 
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -109,7 +110,7 @@ export default function ChatRoomCard({ room, currentUserId, onAccepted, isActive
           </Text>
 
           {hasUnread && !isActive && (
-            <div className="dm-unread-badge">
+            <div className={styles.unreadBadge}>
               {room.unreadCount > 99 ? '99+' : room.unreadCount}
             </div>
           )}

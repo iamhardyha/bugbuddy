@@ -1,0 +1,70 @@
+/* ─── Page Layout ────────────────────────────────────── */
+.pageRoot {
+  min-height: 100vh;
+  background: var(--bg-base);
+}
+
+.pageHeader {
+  padding: 16px 24px 0;
+}
+
+.pageTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* ─── Responsive Layout Wrappers ────────────────── */
+.homeMain {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.formPageMain {
+  margin: 0 auto;
+  max-width: 720px;
+  padding: 32px 24px;
+}
+
+/* ─── Responsive Form ─────────────────────────────── */
+.formGrid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+/* ─── Responsive ────────────────────────────────── */
+@media (max-width: 639px) {
+  .pageHeader {
+    padding: 12px 12px 0;
+  }
+
+  .homeMain {
+    padding: 0;
+  }
+
+  .formPageMain {
+    padding: 20px 12px;
+  }
+
+  .formGrid2 {
+    grid-template-columns: 1fr;
+  }
+
+  .formActions {
+    flex-direction: column-reverse;
+  }
+
+  .formActions :global(.ant-btn) {
+    width: 100%;
+    justify-content: center;
+  }
+}

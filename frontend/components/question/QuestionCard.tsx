@@ -5,6 +5,7 @@ import { Flex, Tag, Typography } from 'antd';
 import { CaretUpOutlined, CaretDownOutlined } from '@ant-design/icons';
 import { CATEGORY_META, relativeTime } from '@/lib/questionMeta';
 import type { QuestionSummary } from '@/types/question';
+import styles from './QuestionCard.module.css';
 
 const { Text } = Typography;
 
@@ -57,7 +58,7 @@ export default function QuestionCard({ question }: Props) {
       : String(question.viewCount);
 
   return (
-    <Link href={`/questions/${question.id}`} className="card-link">
+    <Link href={`/questions/${question.id}`} className={styles.cardLink}>
       {/* Left: Vote column */}
       <Flex
         vertical

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Flex, Spin, Switch, Typography } from 'antd';
+import styles from '@/components/notification/NotificationLayout.module.css';
 import {
   LoadingOutlined,
   BellOutlined,
@@ -106,9 +107,9 @@ export default function NotificationsPage() {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <div className="notification-layout">
+    <div className={styles.layout}>
       {/* Left sidebar */}
-      <aside className="notification-sidebar">
+      <aside className={styles.sidebar}>
         <div style={{ padding: '0 16px 16px' }}>
           <Title level={5} style={{ margin: 0, fontSize: 15 }}>알림 센터</Title>
         </div>
@@ -116,7 +117,7 @@ export default function NotificationsPage() {
           <button
             key={item.value}
             onClick={() => setActiveType(item.value)}
-            className={`notification-nav-btn${activeType === item.value ? ' active' : ''}`}
+            className={`${styles.navBtn}${activeType === item.value ? ` ${styles.active}` : ''}`}
           >
             <span style={{ fontSize: 14 }}>{item.icon}</span>
             <span>{item.label}</span>
@@ -125,7 +126,7 @@ export default function NotificationsPage() {
       </aside>
 
       {/* Main content */}
-      <main className="notification-main">
+      <main className={styles.main}>
         <Flex align="center" gap={12} style={{ marginBottom: 20 }}>
           <Title level={5} style={{ margin: 0, fontSize: 16 }}>최근 알림</Title>
           {unreadCount > 0 && (
@@ -158,7 +159,7 @@ export default function NotificationsPage() {
               return (
                 <div
                   key={notification.id}
-                  className={`notification-card${!notification.read ? ' unread' : ''}`}
+                  className={`${styles.card}${!notification.read ? ` ${styles.unread}` : ''}`}
                   onClick={() => !notification.read && handleMarkRead(notification.id)}
                   style={{ cursor: notification.read ? 'default' : 'pointer' }}
                 >
@@ -222,7 +223,7 @@ export default function NotificationsPage() {
       </main>
 
       {/* Right sidebar */}
-      <aside className="notification-right">
+      <aside className={styles.right}>
         {/* 알림 관리 */}
         <div className="feed-sidebar-card" style={{ marginBottom: 16 }}>
           <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 14 }}>알림 관리</Text>

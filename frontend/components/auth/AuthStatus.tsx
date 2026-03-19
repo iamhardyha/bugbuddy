@@ -7,6 +7,8 @@ import { Button, Flex, Avatar, Skeleton, Typography, Badge } from 'antd';
 import { MessageOutlined } from '@ant-design/icons';
 import LoginButton from './LoginButton';
 import { apiFetch } from '@/lib/api';
+import themeBtnStyles from '@/components/common/ThemeToggle.module.css';
+import styles from './AuthStatus.module.css';
 import { getChatRooms } from '@/lib/chat';
 import { getAccessToken, clearTokens } from '@/lib/auth';
 import type { UserProfile } from '@/types/user';
@@ -54,7 +56,7 @@ export default function AuthStatus() {
       <Flex align="center" gap={8}>
         <Badge count={totalUnread} size="small" offset={[-2, 2]}>
           <button
-            className="theme-btn"
+            className={themeBtnStyles.themeBtn}
             onClick={() => router.push('/chat')}
             style={{ width: 32, height: 32 }}
             title="채팅"
@@ -81,7 +83,7 @@ export default function AuthStatus() {
           </Avatar>
 
           <Text
-            className="auth-nickname"
+            className={styles.nickname}
             style={{
               fontSize: 13,
               fontWeight: 500,

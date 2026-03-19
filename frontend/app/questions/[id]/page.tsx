@@ -14,6 +14,8 @@ import type { UserProfile } from '@/types/user';
 import MarkdownRenderer from '@/components/editor/MarkdownRenderer';
 import AnswerList from '@/components/answer/AnswerList';
 import { useModal } from '@/components/common/ModalProvider';
+import styles from '@/components/question/QuestionDetail.module.css';
+import layoutStyles from '@/components/profile/DetailLayout.module.css';
 
 const { Title, Text } = Typography;
 
@@ -171,10 +173,10 @@ export default function QuestionDetailPage() {
       </header>
 
       {/* 2컬럼 레이아웃 */}
-      <div className="detail-two-col-root">
+      <div className={layoutStyles.root}>
         {/* 왼쪽: 질문 + 답변 */}
         <div>
-          <article className="question-article">
+          <article className={styles.article}>
             {/* 배지 영역 */}
             <Flex wrap align="center" gap={8} style={{ marginBottom: 18 }}>
               <Tag
@@ -246,10 +248,10 @@ export default function QuestionDetailPage() {
               align="center"
               gap={6}
               wrap
-              className="question-meta"
+              className={styles.meta}
               style={{ marginBottom: 24, paddingBottom: 20, borderBottom: '1px solid var(--border-faint)' }}
             >
-              <Text strong className="question-meta-author">{question.authorNickname}</Text>
+              <Text strong className={styles.metaAuthor}>{question.authorNickname}</Text>
               <Text type="secondary">·</Text>
               <Text type="secondary"><EyeOutlined style={{ marginRight: 4 }} />{question.viewCount.toLocaleString()} 조회</Text>
               <Text type="secondary">·</Text>
@@ -281,7 +283,7 @@ export default function QuestionDetailPage() {
         {/* 오른쪽: 사이드바 */}
         <aside style={{ position: 'sticky', top: 'calc(var(--global-header-height) + 24px)' }}>
           {/* Question Author 카드 */}
-          <div className="detail-sidebar-card" style={{ marginBottom: 16 }}>
+          <div className={layoutStyles.sidebarCard} style={{ marginBottom: 16 }}>
             <Text style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-tertiary)', display: 'block', marginBottom: 12 }}>
               Question Author
             </Text>
@@ -302,7 +304,7 @@ export default function QuestionDetailPage() {
 
           {/* Similar Questions 카드 */}
           {similarQuestions.length > 0 && (
-            <div className="detail-sidebar-card" style={{ marginBottom: 16 }}>
+            <div className={layoutStyles.sidebarCard} style={{ marginBottom: 16 }}>
               <Text style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-tertiary)', display: 'block', marginBottom: 12 }}>
                 Similar Questions
               </Text>
@@ -320,7 +322,7 @@ export default function QuestionDetailPage() {
 
           {/* Join the Elite 카드 */}
           {isLoggedIn && currentUser?.mentorStatus !== 'APPROVED' && (
-            <div className="detail-sidebar-card" style={{ background: '#2563eb', border: 'none' }}>
+            <div className={layoutStyles.sidebarCard} style={{ background: '#2563eb', border: 'none' }}>
               <Text strong style={{ fontSize: 14, color: '#ffffff', display: 'block', marginBottom: 6 }}>
                 Join the Elite
               </Text>

@@ -5,12 +5,13 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Flex, Spin, Typography } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import { saveTokens } from '@/lib/auth';
+import layoutStyles from '@/components/common/Layout.module.css';
 
 const { Text } = Typography;
 
 function LoadingState() {
   return (
-    <div className="page-root">
+    <div className={layoutStyles.pageRoot}>
       <Flex vertical align="center" justify="center" gap={14} style={{ height: '100%', minHeight: '100vh' }}>
         <Spin indicator={<LoadingOutlined style={{ fontSize: 28 }} spin />} />
         <Text type="secondary" style={{ fontSize: '13.5px' }}>로그인 처리 중...</Text>

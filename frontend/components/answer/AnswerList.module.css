@@ -1,0 +1,43 @@
+.card {
+  border-radius: 12px;
+  border: 1px solid var(--border-faint);
+  background: var(--bg-surface);
+  padding: 24px;
+  transition: border-color 0.15s ease;
+}
+
+.cardAccepted {
+  border-color: var(--status-open);
+  box-shadow: 0 0 0 1px var(--status-open);
+}
+
+.writeCard {
+  border-radius: 12px;
+  border: 1px solid var(--border-faint);
+  background: var(--bg-surface);
+  padding: 24px;
+}
+
+.loginCard {
+  border-radius: 12px;
+  border: 1px solid var(--border-faint);
+  background: var(--bg-subtle);
+  padding: 32px 24px;
+  text-align: center;
+}
+
+@media (max-width: 639px) {
+  .card {
+    padding: 16px;
+  }
+
+  .writeCard {
+    padding: 16px;
+    border-radius: 0;
+  }
+
+  .loginCard {
+    padding: 24px 16px;
+    border-radius: 0;
+  }
+}

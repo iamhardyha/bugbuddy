@@ -22,6 +22,8 @@ import ChatFeedbackModal from '@/components/chat/ChatFeedbackModal';
 import ChatSidebar from '@/components/chat/ChatSidebar';
 import type { ChatRoom, ChatMessage } from '@/types/chat';
 import type { UserProfile } from '@/types/user';
+import layoutStyles from '@/components/chat/ChatLayout.module.css';
+import roomStyles from '@/components/chat/ChatRoom.module.css';
 
 const { Text } = Typography;
 
@@ -160,7 +162,7 @@ export default function ChatRoomPage() {
 
   if (loading) {
     return (
-      <div className="dm-layout">
+      <div className={layoutStyles.layout}>
         <Flex align="center" justify="center" style={{ width: '100%' }}>
           <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />
         </Flex>
@@ -170,7 +172,7 @@ export default function ChatRoomPage() {
 
   if (!room || !currentUser) {
     return (
-      <div className="dm-layout">
+      <div className={layoutStyles.layout}>
         <Flex vertical align="center" justify="center" gap={12} style={{ width: '100%' }}>
           <Text type="secondary">채팅방을 찾을 수 없어요.</Text>
           <Button type="link" onClick={() => router.replace('/chat')}>목록으로</Button>
@@ -190,10 +192,10 @@ export default function ChatRoomPage() {
   const showFeedbackBtn = room.status === 'CLOSED' && !feedbackSubmitted;
 
   return (
-    <div className="dm-layout">
+    <div className={layoutStyles.layout}>
 
       {/* Left panel: sidebar (데스크탑만) */}
-      <div className="dm-panel-left dm-panel-left-desktop-only">
+      <div className={`${layoutStyles.panelLeft} ${layoutStyles.panelLeftDesktopOnly}`}>
         <ChatSidebar
           rooms={allRooms}
           currentUserId={currentUser.id}
@@ -203,10 +205,10 @@ export default function ChatRoomPage() {
       </div>
 
       {/* Right panel: chat */}
-      <div className="dm-panel-right">
+      <div className={layoutStyles.panelRight}>
 
         {/* 채팅 헤더 */}
-        <header className="dm-chat-header">
+        <header className={roomStyles.chatHeader}>
           <Flex align="center" justify="space-between" gap={12}>
             <Flex align="center" gap={10} style={{ minWidth: 0 }}>
               {/* 모바일 전용 뒤로가기 */}
@@ -214,7 +216,7 @@ export default function ChatRoomPage() {
                 type="text"
                 icon={<ArrowLeftOutlined />}
                 onClick={() => router.push('/chat')}
-                className="dm-back-btn"
+                className={roomStyles.backBtn}
                 style={{ flexShrink: 0 }}
               />
               <Flex align="center" gap={8} style={{ minWidth: 0 }}>
@@ -254,7 +256,7 @@ export default function ChatRoomPage() {
         </header>
 
         {/* 메시지 목록 */}
-        <div className="chat-messages-area">
+        <div className={roomStyles.messagesArea}>
           {messages.length === 0 && (
             <Flex align="center" justify="center" style={{ height: '100%' }}>
               <Text type="secondary" style={{ fontSize: 13 }}>
@@ -270,7 +272,7 @@ export default function ChatRoomPage() {
 
         {/* 입력 영역 */}
         {canSend ? (
-          <div className="chat-input-bar">
+          <div className={roomStyles.inputBar}>
             <Input
               value={input}
               onChange={e => setInput(e.target.value)}
@@ -285,13 +287,13 @@ export default function ChatRoomPage() {
             />
           </div>
         ) : canAccept ? (
-          <div className="chat-input-bar">
+          <div className={roomStyles.inputBar}>
             <Flex justify="center" style={{ width: '100%' }}>
               <Button type="primary" onClick={handleAccept}>채팅 수락하기</Button>
             </Flex>
           </div>
         ) : room.status === 'CLOSED' ? (
-          <div className="chat-input-bar">
+          <div className={roomStyles.inputBar}>
             <Flex justify="center" style={{ width: '100%' }}>
               <Text type="secondary" style={{ fontSize: 13 }}>종료된 채팅방입니다.</Text>
             </Flex>

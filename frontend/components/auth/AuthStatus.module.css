@@ -1,0 +1,6 @@
+@media (max-width: 639px) {
+  /* AuthStatus: 모바일에서 닉네임 숨김 */
+  .nickname {
+    display: none;
+  }
+}

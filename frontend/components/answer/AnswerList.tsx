@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import styles from './AnswerList.module.css';
 import { Button, Flex, Typography, Tag, Divider } from 'antd';
 import {
   CheckCircleFilled,
@@ -264,7 +265,7 @@ export default function AnswerList({
 
       {/* 답변 작성 폼 */}
       {canWrite ? (
-        <div className="answer-write-card">
+        <div className={styles.writeCard}>
           <Title level={5} style={{ margin: '0 0 16px', color: 'var(--text-primary)', fontWeight: 600 }}>
             답변 작성
           </Title>
@@ -292,7 +293,7 @@ export default function AnswerList({
           </form>
         </div>
       ) : !isLoggedIn ? (
-        <div className="answer-login-card">
+        <div className={styles.loginCard}>
           <Text style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
             답변을 작성하려면{' '}
             <a
@@ -362,7 +363,7 @@ function AnswerCard({
   const canProposeChat = isQuestionAuthor && answer.allowOneToOne && !existingChatRoom && questionStatus !== 'CLOSED';
 
   return (
-    <article className={`answer-card ${answer.accepted ? 'answer-card-accepted' : ''}`}>
+    <article className={`${styles.card} ${answer.accepted ? styles.cardAccepted : ''}`}>
       {/* 채택 배지 */}
       {answer.accepted && (
         <Flex align="center" gap={6} style={{ marginBottom: '16px', color: 'var(--status-open)' }}>

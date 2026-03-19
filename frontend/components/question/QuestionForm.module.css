@@ -1,0 +1,95 @@
+/* ─── Form Elements ──────────────────────────────────── */
+.formField { display: flex; flex-direction: column; gap: 6px; }
+
+.formLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+.formLabelRequired {
+  color: var(--error-text);
+  margin-left: 2px;
+}
+
+
+/* ─── Tag Input ──────────────────────────────────────── */
+.tagInputContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  min-height: 44px;
+  align-items: center;
+  background: var(--bg-surface);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.tagInputContainer:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+.tagChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--tag-bg);
+  color: var(--tag-text);
+}
+.tagChipRemove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.6;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  transition: opacity 0.12s ease;
+}
+.tagChipRemove:hover { opacity: 1; }
+
+.tagInput {
+  flex: 1;
+  min-width: 80px;
+  font-size: 13px;
+  outline: none;
+  background: transparent;
+  color: var(--text-primary);
+  border: none;
+  font-family: inherit;
+}
+.tagInput::placeholder { color: var(--text-tertiary); }
+
+/* ─── Toggle ─────────────────────────────────────────── */
+.toggleTrack {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  flex-shrink: 0;
+}
+.toggleOff { background: var(--border-strong); }
+.toggleOn  { background: var(--accent); }
+.toggleThumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+  transition: transform 0.18s ease;
+}
+.toggleOn .toggleThumb { transform: translateX(20px); }

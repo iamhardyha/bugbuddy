@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Modal, Rate, Input, Button, Flex, Typography } from 'antd';
 import { StarFilled } from '@ant-design/icons';
+import modalStyles from '@/components/common/Modal.module.css';
 
 const { Text, Title } = Typography;
 const { TextArea } = Input;
@@ -40,7 +41,7 @@ export default function ChatFeedbackModal({ open, onClose, onSubmit }: Props) {
       styles={{ body: { padding: 0 } }}
     >
       <Flex vertical align="center" gap={16} style={{ padding: '28px 24px 20px' }}>
-        <div className="modal-icon modal-icon-success">
+        <div className={`${modalStyles.icon} ${modalStyles.iconSuccess}`}>
           <StarFilled style={{ fontSize: 22 }} />
         </div>
         <Title level={5} style={{ margin: 0 }}>

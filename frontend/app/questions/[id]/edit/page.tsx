@@ -8,6 +8,8 @@ import { getQuestion, updateQuestion } from '@/lib/questions';
 import { CATEGORY_META, QUESTION_TYPE_META } from '@/lib/questionMeta';
 import type { QuestionCategory, QuestionType } from '@/types/question';
 import MarkdownEditor from '@/components/editor/MarkdownEditor';
+import layoutStyles from '@/components/common/Layout.module.css';
+import formStyles from '@/components/question/QuestionForm.module.css';
 
 export default function EditQuestionPage() {
   const router = useRouter();
@@ -94,31 +96,31 @@ export default function EditQuestionPage() {
 
   if (loading) {
     return (
-      <div className="page-root" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className={layoutStyles.pageRoot} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <p style={{ fontSize: '13px', color: 'var(--text-tertiary)' }}>불러오는 중...</p>
       </div>
     );
   }
 
   return (
-    <div className="page-root">
-      <header className="page-header">
+    <div className={layoutStyles.pageRoot}>
+      <header className={layoutStyles.pageHeader}>
         <div style={{ margin: '0 auto', maxWidth: '720px', display: 'flex', alignItems: 'center', gap: '14px' }}>
           <Button type="link" onClick={() => router.back()} style={{ padding: 0, height: 'auto', fontSize: '13px', color: 'var(--text-tertiary)' }}>
             ← 돌아가기
           </Button>
           <span style={{ color: 'var(--border)', fontSize: '16px' }}>|</span>
-          <h1 className="page-title">질문 수정</h1>
+          <h1 className={layoutStyles.pageTitle}>질문 수정</h1>
         </div>
       </header>
 
-      <main className="form-page-main">
+      <main className={layoutStyles.formPageMain}>
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
           {/* 제목 */}
-          <div className="form-field">
-            <label className="form-label">
-              제목 <span className="form-label-required">*</span>
+          <div className={formStyles.formField}>
+            <label className={formStyles.formLabel}>
+              제목 <span className={formStyles.formLabelRequired}>*</span>
             </label>
             <Input
               maxLength={120}
@@ -130,10 +132,10 @@ export default function EditQuestionPage() {
           </div>
 
           {/* 카테고리 + 질문 유형 */}
-          <div className="form-grid-2">
-            <div className="form-field">
-              <label className="form-label">
-                카테고리 <span className="form-label-required">*</span>
+          <div className={layoutStyles.formGrid2}>
+            <div className={formStyles.formField}>
+              <label className={formStyles.formLabel}>
+                카테고리 <span className={formStyles.formLabelRequired}>*</span>
               </label>
               <Select<QuestionCategory>
                 value={category}
@@ -147,9 +149,9 @@ export default function EditQuestionPage() {
               />
             </div>
 
-            <div className="form-field">
-              <label className="form-label">
-                질문 유형 <span className="form-label-required">*</span>
+            <div className={formStyles.formField}>
+              <label className={formStyles.formLabel}>
+                질문 유형 <span className={formStyles.formLabelRequired}>*</span>
               </label>
               <Select<QuestionType>
                 value={questionType}
@@ -165,9 +167,9 @@ export default function EditQuestionPage() {
           </div>
 
           {/* 내용 */}
-          <div className="form-field">
-            <label className="form-label">
-              내용 <span className="form-label-required">*</span>
+          <div className={formStyles.formField}>
+            <label className={formStyles.formLabel}>
+              내용 <span className={formStyles.formLabelRequired}>*</span>
             </label>
             <MarkdownEditor
               value={body}
@@ -180,14 +182,14 @@ export default function EditQuestionPage() {
           </div>
 
           {/* 태그 */}
-          <div className="form-field">
-            <label className="form-label">
+          <div className={formStyles.formField}>
+            <label className={formStyles.formLabel}>
               태그{' '}
               <span style={{ fontWeight: 400, color: 'var(--text-tertiary)' }}>
                 (최대 5개 · Enter 또는 쉼표로 추가)
               </span>
             </label>
-            <div className="tag-input-container">
+            <div className={formStyles.tagInputContainer}>
               {tags.map(tag => (
                 <Tag
                   key={tag}
@@ -206,7 +208,7 @@ export default function EditQuestionPage() {
                   onKeyDown={handleTagKeyDown}
                   onBlur={addTag}
                   placeholder={tags.length === 0 ? '태그 입력...' : ''}
-                  className="tag-input"
+                  className={formStyles.tagInput}
                 />
               )}
             </div>
@@ -216,7 +218,7 @@ export default function EditQuestionPage() {
           {error && <Alert type="error" message={error} showIcon />}
 
           {/* 버튼 */}
-          <div className="form-actions">
+          <div className={layoutStyles.formActions}>
             <Button onClick={() => router.back()}>
               취소
             </Button>
