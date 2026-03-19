@@ -20,7 +20,7 @@ public record UserAnswerSummaryResponse(
                 : answer.getBody();
         return new UserAnswerSummaryResponse(
                 answer.getId(),
-                answer.getQuestionId(),
+                answer.getQuestion().getId(),
                 preview,
                 answer.getAuthorSnapshotRole(),
                 answer.isAccepted(),

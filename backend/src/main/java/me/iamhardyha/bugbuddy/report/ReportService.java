@@ -53,7 +53,7 @@ public class ReportService {
         }
 
         // 중복 신고 방지
-        if (reportRepository.existsByReporterUserIdAndTargetTypeAndTargetIdAndDeletedAtIsNull(
+        if (reportRepository.existsByReporterUserIdAndTargetTypeAndTargetId(
                 reporterUserId, request.targetType(), request.targetId())) {
             throw new BugBuddyException(ErrorCode.REPORT_DUPLICATE);
         }
@@ -145,10 +145,10 @@ public class ReportService {
     private Long resolveTargetUserId(ReportTargetType targetType, Long targetId) {
         return switch (targetType) {
             case QUESTION -> questionRepository.findActiveById(targetId)
-                    .map(q -> q.getAuthorUserId())
+                    .map(q -> q.getAuthor().getId())
                     .orElse(null);
             case ANSWER -> answerRepository.findActiveById(targetId)
-                    .map(a -> a.getAuthorUserId())
+                    .map(a -> a.getAuthor().getId())
                     .orElse(null);
             case CHAT_MESSAGE -> chatMessageRepository.findById(targetId)
                     .filter(m -> !m.isDeleted())

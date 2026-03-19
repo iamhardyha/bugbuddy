@@ -5,8 +5,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import me.iamhardyha.bugbuddy.model.common.BaseSoftDeleteEntity;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
+@SQLRestriction("deleted_at IS NULL")
 @Table(
         name = "tags",
         uniqueConstraints = {

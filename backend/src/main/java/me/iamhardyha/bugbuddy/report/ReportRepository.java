@@ -11,12 +11,12 @@ import org.springframework.data.repository.query.Param;
 
 public interface ReportRepository extends JpaRepository<Report, Long> {
 
-    boolean existsByReporterUserIdAndTargetTypeAndTargetIdAndDeletedAtIsNull(
+    boolean existsByReporterUserIdAndTargetTypeAndTargetId(
             Long reporterUserId, ReportTargetType targetType, Long targetId);
 
-    @Query("SELECT r FROM Report r WHERE r.status = :status AND r.deletedAt IS NULL ORDER BY r.createdAt DESC")
+    @Query("SELECT r FROM Report r WHERE r.status = :status ORDER BY r.createdAt DESC")
     Page<Report> findAllByStatus(@Param("status") ReportStatus status, Pageable pageable);
 
-    @Query("SELECT r FROM Report r WHERE r.deletedAt IS NULL ORDER BY r.createdAt DESC")
+    @Query("SELECT r FROM Report r ORDER BY r.createdAt DESC")
     Page<Report> findAllActive(Pageable pageable);
 }

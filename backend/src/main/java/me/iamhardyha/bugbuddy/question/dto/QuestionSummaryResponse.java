@@ -20,11 +20,11 @@ public record QuestionSummaryResponse(
         List<String> tags,
         Instant createdAt
 ) {
-    public static QuestionSummaryResponse of(Question question, List<String> tags, String authorNickname) {
+    public static QuestionSummaryResponse of(Question question, List<String> tags) {
         return new QuestionSummaryResponse(
                 question.getId(),
-                question.getAuthorUserId(),
-                authorNickname,
+                question.getAuthor().getId(),
+                question.getAuthor().getNickname(),
                 question.getTitle(),
                 question.getCategory(),
                 question.getQuestionType(),

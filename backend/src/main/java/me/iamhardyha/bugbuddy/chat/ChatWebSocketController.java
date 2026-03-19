@@ -11,10 +11,10 @@ import java.security.Principal;
 @Controller
 public class ChatWebSocketController {
 
-    private final ChatService chatService;
+    private final ChatMessageService chatMessageService;
 
-    public ChatWebSocketController(ChatService chatService) {
-        this.chatService = chatService;
+    public ChatWebSocketController(ChatMessageService chatMessageService) {
+        this.chatMessageService = chatMessageService;
     }
 
     /**
@@ -28,7 +28,7 @@ public class ChatWebSocketController {
             Principal principal
     ) {
         Long senderUserId = Long.parseLong(principal.getName());
-        ChatMessageResponse response = chatService.handleWebSocketMessage(roomId, senderUserId, payload);
-        // 브로드캐스트는 ChatService 내 SimpMessagingTemplate에서 처리
+        ChatMessageResponse response = chatMessageService.sendMessage(roomId, senderUserId, payload);
+        // 브로드캐스트는 ChatNotificationService에서 처리
     }
 }

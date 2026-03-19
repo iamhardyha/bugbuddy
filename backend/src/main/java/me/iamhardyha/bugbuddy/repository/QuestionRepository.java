@@ -15,28 +15,34 @@ import java.util.Optional;
 
 public interface QuestionRepository extends JpaRepository<Question, Long> {
 
-    @Query("SELECT q FROM Question q WHERE q.deletedAt IS NULL ORDER BY q.createdAt DESC")
+    @Query(value = "SELECT q FROM Question q JOIN FETCH q.author ORDER BY q.createdAt DESC",
+           countQuery = "SELECT COUNT(q) FROM Question q")
     Page<Question> findAllActive(Pageable pageable);
 
-    @Query("SELECT q FROM Question q WHERE q.deletedAt IS NULL AND q.category = :category ORDER BY q.createdAt DESC")
+    @Query(value = "SELECT q FROM Question q JOIN FETCH q.author WHERE q.category = :category ORDER BY q.createdAt DESC",
+           countQuery = "SELECT COUNT(q) FROM Question q WHERE q.category = :category")
     Page<Question> findAllActiveByCategory(@Param("category") QuestionCategory category, Pageable pageable);
 
-    @Query("SELECT q FROM Question q WHERE q.deletedAt IS NULL AND q.questionType = :type ORDER BY q.createdAt DESC")
+    @Query(value = "SELECT q FROM Question q JOIN FETCH q.author WHERE q.questionType = :type ORDER BY q.createdAt DESC",
+           countQuery = "SELECT COUNT(q) FROM Question q WHERE q.questionType = :type")
     Page<Question> findAllActiveByType(@Param("type") QuestionType type, Pageable pageable);
 
-    @Query("SELECT q FROM Question q WHERE q.deletedAt IS NULL AND q.status = :status ORDER BY q.createdAt DESC")
+    @Query(value = "SELECT q FROM Question q JOIN FETCH q.author WHERE q.status = :status ORDER BY q.createdAt DESC",
+           countQuery = "SELECT COUNT(q) FROM Question q WHERE q.status = :status")
     Page<Question> findAllActiveByStatus(@Param("status") QuestionStatus status, Pageable pageable);
 
-    @Query("SELECT q FROM Question q WHERE q.deletedAt IS NULL AND q.category = :category AND q.questionType = :type ORDER BY q.createdAt DESC")
+    @Query(value = "SELECT q FROM Question q JOIN FETCH q.author WHERE q.category = :category AND q.questionType = :type ORDER BY q.createdAt DESC",
+           countQuery = "SELECT COUNT(q) FROM Question q WHERE q.category = :category AND q.questionType = :type")
     Page<Question> findAllActiveByCategoryAndType(@Param("category") QuestionCategory category, @Param("type") QuestionType type, Pageable pageable);
 
-    @Query("SELECT q FROM Question q WHERE q.deletedAt IS NULL AND q.id = :id")
+    @Query("SELECT q FROM Question q JOIN FETCH q.author WHERE q.id = :id")
     Optional<Question> findActiveById(@Param("id") Long id);
 
-    @Query("SELECT q FROM Question q WHERE q.deletedAt IS NULL AND q.authorUserId = :authorUserId ORDER BY q.createdAt DESC")
+    @Query(value = "SELECT q FROM Question q JOIN FETCH q.author WHERE q.author.id = :authorUserId ORDER BY q.createdAt DESC",
+           countQuery = "SELECT COUNT(q) FROM Question q WHERE q.author.id = :authorUserId")
     Page<Question> findAllActiveByAuthorUserId(@Param("authorUserId") Long authorUserId, Pageable pageable);
 
-    @Query("SELECT COUNT(q) FROM Question q WHERE q.deletedAt IS NULL AND q.authorUserId = :authorUserId")
+    @Query("SELECT COUNT(q) FROM Question q WHERE q.author.id = :authorUserId")
     long countAllActiveByAuthorUserId(@Param("authorUserId") Long authorUserId);
 
     @Modifying

@@ -9,7 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -31,18 +31,18 @@ public class UserController {
     /** 프로필 수정 */
     @PutMapping("/me")
     public ResponseEntity<ApiResponse<Void>> updateProfile(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @Valid @RequestBody ProfileUpdateRequest request
     ) {
-        Long userId = (Long) authentication.getPrincipal();
         userService.updateProfile(userId, request);
         return ResponseEntity.ok(ApiResponse.ok(null));
     }
 
     /** 회원 탈퇴 */
     @DeleteMapping("/me")
-    public ResponseEntity<ApiResponse<Void>> deactivate(Authentication authentication) {
-        Long userId = (Long) authentication.getPrincipal();
+    public ResponseEntity<ApiResponse<Void>> deactivate(
+            @AuthenticationPrincipal Long userId
+    ) {
         userService.deactivate(userId);
         return ResponseEntity.ok(ApiResponse.ok(null));
     }

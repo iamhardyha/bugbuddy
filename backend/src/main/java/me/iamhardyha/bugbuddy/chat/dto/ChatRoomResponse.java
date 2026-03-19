@@ -22,8 +22,6 @@ public record ChatRoomResponse(
 ) {
     public static ChatRoomResponse of(
             ChatRoom room,
-            String mentorNickname,
-            String menteeNickname,
             String questionTitle,
             int unreadCount,
             String lastMessageContent,
@@ -32,12 +30,12 @@ public record ChatRoomResponse(
     ) {
         return new ChatRoomResponse(
                 room.getId(),
-                room.getQuestionId(),
+                room.getQuestion() != null ? room.getQuestion().getId() : null,
                 questionTitle,
-                room.getMentorUserId(),
-                mentorNickname,
-                room.getMenteeUserId(),
-                menteeNickname,
+                room.getMentor().getId(),
+                room.getMentor().getNickname(),
+                room.getMentee().getId(),
+                room.getMentee().getNickname(),
                 room.getStatus().name(),
                 unreadCount,
                 lastMessageContent,

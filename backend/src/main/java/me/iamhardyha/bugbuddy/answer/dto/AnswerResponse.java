@@ -19,12 +19,12 @@ public record AnswerResponse(
         Instant createdAt,
         Instant updatedAt
 ) {
-    public static AnswerResponse of(Answer answer, long helpfulCount, boolean myHelpful, String authorNickname) {
+    public static AnswerResponse of(Answer answer, long helpfulCount, boolean myHelpful) {
         return new AnswerResponse(
                 answer.getId(),
-                answer.getQuestionId(),
-                answer.getAuthorUserId(),
-                authorNickname,
+                answer.getQuestion().getId(),
+                answer.getAuthor().getId(),
+                answer.getAuthor().getNickname(),
                 answer.getBody(),
                 answer.getAuthorSnapshotRole(),
                 answer.isAccepted(),

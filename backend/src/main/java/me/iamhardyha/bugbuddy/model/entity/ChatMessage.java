@@ -6,8 +6,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import me.iamhardyha.bugbuddy.model.common.BaseSoftDeleteEntity;
 import me.iamhardyha.bugbuddy.model.enums.ChatMessageType;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
+@SQLRestriction("deleted_at IS NULL")
 @Table(
         name = "chat_messages",
         indexes = {

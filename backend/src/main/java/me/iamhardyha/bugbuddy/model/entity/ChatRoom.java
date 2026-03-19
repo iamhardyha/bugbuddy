@@ -6,10 +6,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import me.iamhardyha.bugbuddy.model.common.BaseSoftDeleteEntity;
 import me.iamhardyha.bugbuddy.model.enums.ChatRoomStatus;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.Instant;
 
 @Entity
+@SQLRestriction("deleted_at IS NULL")
 @Table(
         name = "chat_rooms",
         uniqueConstraints = {
@@ -33,14 +35,17 @@ public class ChatRoom extends BaseSoftDeleteEntity {
     private Long id;
 
     /** Optional question from which the chat was created. */
-    @Column(name = "question_id")
-    private Long questionId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "question_id")
+    private Question question;
 
-    @Column(name = "mentor_user_id", nullable = false)
-    private Long mentorUserId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mentor_user_id", nullable = false)
+    private UserEntity mentor;
 
-    @Column(name = "mentee_user_id", nullable = false)
-    private Long menteeUserId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mentee_user_id", nullable = false)
+    private UserEntity mentee;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)

@@ -9,7 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,85 +18,86 @@ import java.util.List;
 @RequestMapping("/api/chat/rooms")
 public class ChatController {
 
-    private final ChatService chatService;
+    private final ChatRoomService chatRoomService;
+    private final ChatMessageService chatMessageService;
+    private final ChatFeedbackService chatFeedbackService;
 
-    public ChatController(ChatService chatService) {
-        this.chatService = chatService;
+    public ChatController(ChatRoomService chatRoomService,
+                          ChatMessageService chatMessageService,
+                          ChatFeedbackService chatFeedbackService) {
+        this.chatRoomService = chatRoomService;
+        this.chatMessageService = chatMessageService;
+        this.chatFeedbackService = chatFeedbackService;
     }
 
     /** POST /api/chat/rooms — 채팅 신청 (질문자만) */
     @PostMapping
     public ResponseEntity<ApiResponse<ChatRoomResponse>> propose(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @RequestBody @Valid ChatRoomCreateRequest request
     ) {
-        Long userId = (Long) authentication.getPrincipal();
-        ChatRoomResponse response = chatService.proposeChat(userId, request);
+        ChatRoomResponse response = chatRoomService.proposeChat(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(response));
     }
 
     /** PATCH /api/chat/rooms/{id}/accept — 채팅 수락 (멘토) */
     @PatchMapping("/{id}/accept")
     public ResponseEntity<ApiResponse<ChatRoomResponse>> accept(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable Long id
     ) {
-        Long userId = (Long) authentication.getPrincipal();
-        ChatRoomResponse response = chatService.acceptChat(userId, id);
+        ChatRoomResponse response = chatRoomService.acceptChat(userId, id);
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
     /** GET /api/chat/rooms — 내 채팅방 목록 */
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ChatRoomResponse>>> getMyRooms(Authentication authentication) {
-        Long userId = (Long) authentication.getPrincipal();
-        List<ChatRoomResponse> response = chatService.getMyRooms(userId);
+    public ResponseEntity<ApiResponse<List<ChatRoomResponse>>> getMyRooms(
+            @AuthenticationPrincipal Long userId
+    ) {
+        List<ChatRoomResponse> response = chatRoomService.getMyRooms(userId);
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
     /** PATCH /api/chat/rooms/{id}/read — 읽음 처리 */
     @PatchMapping("/{id}/read")
     public ResponseEntity<ApiResponse<Void>> markAsRead(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable Long id
     ) {
-        Long userId = (Long) authentication.getPrincipal();
-        chatService.markAsRead(userId, id);
+        chatMessageService.markAsRead(id, userId);
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
     /** GET /api/chat/rooms/{id}/messages — 메시지 히스토리 (페이징) */
     @GetMapping("/{id}/messages")
     public ResponseEntity<ApiResponse<Page<ChatMessageResponse>>> getMessages(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable Long id,
             @PageableDefault(size = 50, sort = "createdAt", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-        Long userId = (Long) authentication.getPrincipal();
-        Page<ChatMessageResponse> response = chatService.getMessages(userId, id, pageable);
+        Page<ChatMessageResponse> response = chatMessageService.getMessages(id, userId, pageable);
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
     /** PATCH /api/chat/rooms/{id}/close — 세션 종료 */
     @PatchMapping("/{id}/close")
     public ResponseEntity<ApiResponse<ChatRoomResponse>> close(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable Long id
     ) {
-        Long userId = (Long) authentication.getPrincipal();
-        ChatRoomResponse response = chatService.closeRoom(userId, id);
+        ChatRoomResponse response = chatRoomService.closeRoom(userId, id);
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
     /** POST /api/chat/rooms/{id}/feedback — 피드백 제출 */
     @PostMapping("/{id}/feedback")
     public ResponseEntity<ApiResponse<Void>> submitFeedback(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @PathVariable Long id,
             @RequestBody @Valid ChatFeedbackRequest request
     ) {
-        Long userId = (Long) authentication.getPrincipal();
-        chatService.submitFeedback(userId, id, request);
+        chatFeedbackService.submitFeedback(id, userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok());
     }
 }

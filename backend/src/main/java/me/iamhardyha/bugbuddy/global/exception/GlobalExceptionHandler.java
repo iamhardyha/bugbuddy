@@ -1,9 +1,12 @@
 package me.iamhardyha.bugbuddy.global.exception;
 
+import jakarta.servlet.http.HttpServletRequest;
 import me.iamhardyha.bugbuddy.global.response.ApiResponse;
 import me.iamhardyha.bugbuddy.global.response.ErrorCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -61,9 +64,23 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail(ErrorCode.NOT_FOUND.name(), ErrorCode.NOT_FOUND.getMessage()));
     }
 
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDataIntegrity(DataIntegrityViolationException e, HttpServletRequest request) {
+        log.warn("Data integrity violation: {} {} - {}", request.getMethod(), request.getRequestURI(), e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.fail("DATA_INTEGRITY_VIOLATION", "데이터 무결성 위반이 발생했습니다."));
+    }
+
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    public ResponseEntity<ApiResponse<Void>> handleOptimisticLock(OptimisticLockingFailureException e, HttpServletRequest request) {
+        log.warn("Optimistic lock failure: {} {} - {}", request.getMethod(), request.getRequestURI(), e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.fail("OPTIMISTIC_LOCK_FAILURE", "동시 수정이 감지되었습니다. 다시 시도해주세요."));
+    }
+
     @ExceptionHandler
-    public ResponseEntity<ApiResponse<Void>> handleGeneric(Exception ex) {
-        log.error("unhandled_exception", ex);
+    public ResponseEntity<ApiResponse<Void>> handleGeneric(Exception ex, HttpServletRequest request) {
+        log.error("Unhandled exception: {} {} - {}", request.getMethod(), request.getRequestURI(), ex.getMessage(), ex);
         ErrorCode code = ErrorCode.INTERNAL_SERVER_ERROR;
         return ResponseEntity
                 .status(code.getStatus())

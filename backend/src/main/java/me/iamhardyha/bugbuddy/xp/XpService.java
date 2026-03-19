@@ -1,6 +1,5 @@
 package me.iamhardyha.bugbuddy.xp;
 
-import me.iamhardyha.bugbuddy.model.entity.UserEntity;
 import me.iamhardyha.bugbuddy.model.entity.XpEvent;
 import me.iamhardyha.bugbuddy.model.enums.ReferenceType;
 import me.iamhardyha.bugbuddy.model.enums.XpEventType;
@@ -27,9 +26,11 @@ public class XpService {
     }
 
     /**
-     * XP 지급: 이벤트 기록 + UserEntity.xp / level 갱신.
-     * 트랜잭션은 호출 측에서 열려 있다고 가정하므로 @Transactional 없이 동작.
-     * 단독 호출 시에도 안전하게 동작하도록 @Transactional 선언.
+     * XP 지급: 이벤트 기록 + UserEntity.xp 원자적 갱신 + 레벨 재계산.
+     * <p>
+     * 1) XpEvent 저장
+     * 2) atomic UPDATE (addXp) — 동시 호출 시에도 xp 유실 없음
+     * 3) 레벨이 변경된 경우에만 추가 save
      */
     @Transactional
     public void grantXp(Long userId, XpEventType eventType,
@@ -42,10 +43,15 @@ public class XpService {
         event.setDeltaXp(deltaXp);
         xpEventRepository.save(event);
 
+        // 원자적 XP 증감
+        userRepository.addXp(userId, deltaXp);
+
+        // 레벨 재계산 — 변경된 경우에만 save
         userRepository.findById(userId).ifPresent(user -> {
-            int newXp = user.getXp() + deltaXp;
-            user.setXp(newXp);
-            user.setLevel(calculateLevel(newXp));
+            int newLevel = calculateLevel(user.getXp());
+            if (newLevel != user.getLevel()) {
+                user.setLevel(newLevel);
+            }
         });
     }
 
