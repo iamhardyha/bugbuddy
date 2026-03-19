@@ -14,6 +14,10 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     boolean existsByNickname(String nickname);
 
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("UPDATE UserEntity u SET u.xp = u.xp + :delta WHERE u.id = :userId")
+    void addXp(@Param("userId") Long userId, @Param("delta") int delta);
+
     @Modifying
     @Query("UPDATE UserEntity u SET u.mentorAvgRating = (SELECT COALESCE(AVG(f.rating), 0) FROM ChatRoomFeedback f WHERE f.roomId IN (SELECT r.id FROM ChatRoom r WHERE r.mentor.id = :userId)), u.mentorRatingCount = (SELECT COUNT(f) FROM ChatRoomFeedback f WHERE f.roomId IN (SELECT r.id FROM ChatRoom r WHERE r.mentor.id = :userId)) WHERE u.id = :userId")
     void recalculateMentorRating(@Param("userId") Long userId);
