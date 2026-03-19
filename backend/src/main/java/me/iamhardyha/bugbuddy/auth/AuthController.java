@@ -1,8 +1,7 @@
-package me.iamhardyha.bugbuddy.controller;
+package me.iamhardyha.bugbuddy.auth;
 
-import me.iamhardyha.bugbuddy.auth.JwtProvider;
 import me.iamhardyha.bugbuddy.auth.dto.TokenResponse;
-import me.iamhardyha.bugbuddy.controller.dto.UserProfileResponse;
+import me.iamhardyha.bugbuddy.user.dto.UserProfileResponse;
 import me.iamhardyha.bugbuddy.global.exception.BugBuddyException;
 import me.iamhardyha.bugbuddy.global.response.ApiResponse;
 import me.iamhardyha.bugbuddy.global.response.ErrorCode;
@@ -47,6 +46,6 @@ public class AuthController {
             @AuthenticationPrincipal Long userId
     ) {
         UserEntity user = userService.findById(userId);
-        return ResponseEntity.ok(ApiResponse.ok(UserProfileResponse.from(user)));
+        return ResponseEntity.ok(ApiResponse.ok(UserProfileResponse.of(user)));
     }
 }

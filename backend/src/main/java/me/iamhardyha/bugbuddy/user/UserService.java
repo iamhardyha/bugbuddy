@@ -6,10 +6,12 @@ import me.iamhardyha.bugbuddy.model.entity.Answer;
 import me.iamhardyha.bugbuddy.model.entity.Question;
 import me.iamhardyha.bugbuddy.model.entity.UserEntity;
 import me.iamhardyha.bugbuddy.model.enums.ReactionType;
+import me.iamhardyha.bugbuddy.question.TagService;
 import me.iamhardyha.bugbuddy.question.dto.QuestionSummaryResponse;
-import me.iamhardyha.bugbuddy.model.entity.Tag;
-import me.iamhardyha.bugbuddy.model.entity.QuestionTag;
-import me.iamhardyha.bugbuddy.repository.*;
+import me.iamhardyha.bugbuddy.repository.AnswerReactionRepository;
+import me.iamhardyha.bugbuddy.repository.AnswerRepository;
+import me.iamhardyha.bugbuddy.repository.QuestionRepository;
+import me.iamhardyha.bugbuddy.repository.UserRepository;
 import me.iamhardyha.bugbuddy.user.dto.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -25,23 +29,20 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final QuestionRepository questionRepository;
-    private final QuestionTagRepository questionTagRepository;
-    private final TagRepository tagRepository;
     private final AnswerRepository answerRepository;
     private final AnswerReactionRepository answerReactionRepository;
+    private final TagService tagService;
 
     public UserService(UserRepository userRepository,
                        QuestionRepository questionRepository,
-                       QuestionTagRepository questionTagRepository,
-                       TagRepository tagRepository,
                        AnswerRepository answerRepository,
-                       AnswerReactionRepository answerReactionRepository) {
+                       AnswerReactionRepository answerReactionRepository,
+                       TagService tagService) {
         this.userRepository = userRepository;
         this.questionRepository = questionRepository;
-        this.questionTagRepository = questionTagRepository;
-        this.tagRepository = tagRepository;
         this.answerRepository = answerRepository;
         this.answerReactionRepository = answerReactionRepository;
+        this.tagService = tagService;
     }
 
     public UserEntity findById(Long id) {
@@ -59,14 +60,14 @@ public class UserService {
     @Transactional
     public void updateProfile(Long userId, ProfileUpdateRequest request) {
         UserEntity user = findActiveUser(userId);
-        String newNickname = request.getNickname();
+        String newNickname = request.nickname();
 
         if (!newNickname.equals(user.getNickname()) && userRepository.existsByNickname(newNickname)) {
             throw new BugBuddyException(ErrorCode.DUPLICATE_NICKNAME);
         }
 
         user.setNickname(newNickname);
-        user.setBio(request.getBio());
+        user.setBio(request.bio());
     }
 
     @Transactional
@@ -75,23 +76,54 @@ public class UserService {
         user.setDeactivatedAt(Instant.now());
     }
 
+    /**
+     * Batch tag loading pattern (Phase 1):
+     * 1 query for questions page (JOIN FETCH author),
+     * 1 query for all tags of those questions.
+     */
     public Page<QuestionSummaryResponse> getUserQuestions(Long userId, Pageable pageable) {
         findActiveUser(userId);
         Page<Question> questions = questionRepository.findAllActiveByAuthorUserId(userId, pageable);
+
+        List<Long> questionIds = questions.getContent().stream()
+                .map(Question::getId)
+                .toList();
+
+        Map<Long, List<String>> tagsMap = tagService.getTagNamesByQuestionIds(questionIds);
+
         return questions.map(q -> {
-            List<QuestionTag> questionTags = questionTagRepository.findByQuestionId(q.getId());
-            List<String> tags = questionTags.isEmpty() ? List.of()
-                    : tagRepository.findAllById(questionTags.stream().map(QuestionTag::getTagId).toList())
-                            .stream().map(Tag::getName).toList();
+            List<String> tags = tagsMap.getOrDefault(q.getId(), List.of());
             return QuestionSummaryResponse.of(q, tags);
         });
     }
 
+    /**
+     * Batch helpful-count loading pattern (Phase 2):
+     * 1 query for answers page (JOIN FETCH author),
+     * 1 query for helpful counts of those answers.
+     */
     public Page<UserAnswerSummaryResponse> getUserAnswers(Long userId, Pageable pageable) {
         findActiveUser(userId);
         Page<Answer> answers = answerRepository.findAllActiveByAuthorUserId(userId, pageable);
+
+        if (answers.isEmpty()) {
+            return answers.map(a -> UserAnswerSummaryResponse.of(a, 0L));
+        }
+
+        List<Long> answerIds = answers.getContent().stream()
+                .map(Answer::getId)
+                .toList();
+
+        Map<Long, Long> helpfulCountMap = answerReactionRepository
+                .countByAnswerIdsAndReactionType(answerIds, ReactionType.HELPFUL)
+                .stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> (Long) row[1]
+                ));
+
         return answers.map(a -> {
-            long helpfulCount = answerReactionRepository.countActiveByAnswerIdAndReactionType(a.getId(), ReactionType.HELPFUL);
+            long helpfulCount = helpfulCountMap.getOrDefault(a.getId(), 0L);
             return UserAnswerSummaryResponse.of(a, helpfulCount);
         });
     }
@@ -102,7 +134,7 @@ public class UserService {
         long answerCount = answerRepository.countAllActiveByAuthorUserId(userId);
         long helpfulReceivedCount = answerReactionRepository.countHelpfulReceivedByAuthorUserId(userId, ReactionType.HELPFUL);
         long acceptedAnswerCount = answerRepository.countAllAcceptedByAuthorUserId(userId);
-        return new UserStatsResponse(questionCount, answerCount, helpfulReceivedCount, acceptedAnswerCount);
+        return UserStatsResponse.of(questionCount, answerCount, helpfulReceivedCount, acceptedAnswerCount);
     }
 
     private UserEntity findActiveUser(Long userId) {
