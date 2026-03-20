@@ -44,7 +44,10 @@ public enum ErrorCode {
 
     // 멘토 신청
     MENTOR_APPLICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "멘토 신청을 찾을 수 없습니다."),
-    MENTOR_APPLICATION_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 멘토 신청이 존재합니다."),
+    MENTOR_ALREADY_PENDING(HttpStatus.CONFLICT, "이미 심사 중인 멘토 신청이 있습니다."),
+    MENTOR_ALREADY_APPROVED(HttpStatus.CONFLICT, "이미 인증 멘토입니다."),
+    MENTOR_REAPPLY_TOO_EARLY(HttpStatus.BAD_REQUEST, "재신청 대기 기간입니다. 7일 후 다시 시도해주세요."),
+    MENTOR_APPLICATION_NOT_PENDING(HttpStatus.BAD_REQUEST, "심사 대기 중인 신청이 아닙니다."),
 
     // 신고
     REPORT_NOT_FOUND(HttpStatus.NOT_FOUND, "신고를 찾을 수 없습니다."),

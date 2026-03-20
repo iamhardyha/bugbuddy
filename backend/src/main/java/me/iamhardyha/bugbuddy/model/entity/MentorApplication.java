@@ -7,14 +7,14 @@ import lombok.Setter;
 import me.iamhardyha.bugbuddy.model.common.BaseSoftDeleteEntity;
 import me.iamhardyha.bugbuddy.model.enums.MentorApplicationStatus;
 
+import org.hibernate.annotations.SQLRestriction;
+
 import java.time.Instant;
 
 @Entity
+@SQLRestriction("deleted_at IS NULL")
 @Table(
         name = "mentor_applications",
-        uniqueConstraints = {
-                @UniqueConstraint(name = "uk_mentor_applications_user", columnNames = {"user_id"})
-        },
         indexes = {
                 @Index(name = "idx_mentor_applications_status_created", columnList = "status, created_at"),
                 @Index(name = "idx_mentor_applications_deleted", columnList = "deleted_at")
