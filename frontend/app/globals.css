@@ -5,6 +5,7 @@
 :root {
   /* Layout */
   --global-header-height: 56px;
+  --bottom-nav-height: 56px;
 
   /* Fonts */
   --font-pretendard: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
@@ -289,5 +290,9 @@ body {
 @media (max-width: 639px) {
   :root {
     --global-header-height: 52px;
+  }
+
+  body {
+    padding-bottom: var(--bottom-nav-height);
   }
 }

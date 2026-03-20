@@ -189,4 +189,8 @@
   .sidebarRight {
     display: none;
   }
+
+  .fabAsk {
+    bottom: calc(var(--bottom-nav-height) + 16px);
+  }
 }

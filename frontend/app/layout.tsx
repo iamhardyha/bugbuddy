@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/components/common/ThemeProvider';
 import { AntdProvider } from '@/components/common/AntdProvider';
 import { ModalProvider } from '@/components/common/ModalProvider';
 import GlobalHeader from '@/components/common/GlobalHeader';
+import BottomNav from '@/components/common/BottomNav';
 import './globals.css';
 
 const syne = Syne({
@@ -47,6 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <ModalProvider>
                 <GlobalHeader />
                 {children}
+                <BottomNav />
               </ModalProvider>
             </AntdProvider>
           </ThemeProvider>

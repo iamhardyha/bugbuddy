@@ -19,7 +19,7 @@ export default function GlobalHeader() {
         <div style={{ flex: 1 }} />
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <NotificationBell />
+          <span className={styles.hideOnMobile}><NotificationBell /></span>
           <ThemeToggle />
           <AuthStatus />
         </div>

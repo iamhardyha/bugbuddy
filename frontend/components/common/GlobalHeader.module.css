@@ -53,4 +53,8 @@
   .wordmark {
     font-size: 17px;
   }
+
+  .hideOnMobile {
+    display: none;
+  }
 }
