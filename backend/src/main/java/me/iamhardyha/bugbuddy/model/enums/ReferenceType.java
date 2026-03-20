@@ -5,5 +5,7 @@ public enum ReferenceType {
     ANSWER,
     CHAT_MESSAGE,
     CHAT_ROOM,
-    USER
+    USER,
+    FEED,
+    FEED_COMMENT
 }

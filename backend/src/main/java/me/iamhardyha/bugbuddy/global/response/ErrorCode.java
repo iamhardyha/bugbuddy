@@ -63,7 +63,19 @@ public enum ErrorCode {
 
     // 알림
     NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "알림을 찾을 수 없습니다."),
-    NOTIFICATION_ACCESS_DENIED(HttpStatus.FORBIDDEN, "알림 접근 권한이 없습니다.");
+    NOTIFICATION_ACCESS_DENIED(HttpStatus.FORBIDDEN, "알림 접근 권한이 없습니다."),
+
+    // 테크피드
+    FEED_NOT_FOUND(HttpStatus.NOT_FOUND, "피드를 찾을 수 없습니다."),
+    FEED_FORBIDDEN(HttpStatus.FORBIDDEN, "피드 삭제 권한이 없습니다."),
+    FEED_ALREADY_LIKED(HttpStatus.CONFLICT, "이미 추천한 피드입니다."),
+    FEED_LIKE_NOT_FOUND(HttpStatus.NOT_FOUND, "추천 기록을 찾을 수 없습니다."),
+    FEED_ALREADY_BOOKMARKED(HttpStatus.CONFLICT, "이미 북마크한 피드입니다."),
+    FEED_BOOKMARK_NOT_FOUND(HttpStatus.NOT_FOUND, "북마크를 찾을 수 없습니다."),
+    FEED_COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "댓글을 찾을 수 없습니다."),
+    FEED_COMMENT_FORBIDDEN(HttpStatus.FORBIDDEN, "댓글 삭제 권한이 없습니다."),
+    FEED_OG_PARSE_FAILED(HttpStatus.BAD_REQUEST, "URL에서 정보를 가져올 수 없습니다."),
+    FEED_SELF_LIKE(HttpStatus.BAD_REQUEST, "자신의 피드는 추천할 수 없습니다.");
 
     private final HttpStatus status;
     private final String message;

@@ -128,6 +128,7 @@ public class NotificationService {
                 case ANSWER -> answerTitleMap.get(n.getRefId());
                 case CHAT_ROOM -> chatRoomTitleMap.get(n.getRefId());
                 case USER -> null;
+                case FEED -> null;
                 default -> null;
             };
             String linkUrl = switch (n.getRefType()) {
@@ -135,6 +136,7 @@ public class NotificationService {
                 case ANSWER -> "/questions/" + answerQuestionIdMap.getOrDefault(n.getRefId(), n.getRefId());
                 case CHAT_ROOM -> "/chat";
                 case USER -> "/settings/profile";
+                case FEED -> "/feeds/" + n.getRefId();
                 default -> "/notifications";
             };
             return NotificationResponse.of(n, nickname, title, linkUrl);

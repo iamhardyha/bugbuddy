@@ -8,5 +8,7 @@ public enum NotificationType {
     CHAT_ACCEPTED,        // 채팅 신청 수락
     CHAT_REJECTED,        // 채팅 신청 거절 (타입만 선언, 거절 기능 구현 시 연결)
     MENTOR_APPROVED,      // 멘토 인증 승인
-    MENTOR_REJECTED       // 멘토 신청 거절
+    MENTOR_REJECTED,      // 멘토 신청 거절
+    FEED_LIKED,           // 내 피드에 추천
+    FEED_COMMENTED        // 내 피드에 댓글
 }
