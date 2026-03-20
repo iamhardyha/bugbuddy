@@ -69,19 +69,19 @@ export default function FeedList() {
 
   return (
     <div>
-      {/* Filter bar: category scroll + sort toggle */}
+      {/* Filter bar: category text links + sort toggle */}
       <div className={styles.filterBar}>
-        <div className={styles.categoryScroll}>
+        <nav className={styles.categoryNav}>
           {CATEGORY_OPTIONS.map(c => (
             <button
               key={c.value}
               onClick={() => setCategory(c.value)}
-              className={`${styles.catPill}${category === c.value ? ` ${styles.catActive}` : ''}`}
+              className={`${styles.catLink}${category === c.value ? ` ${styles.catActive}` : ''}`}
             >
               {c.label}
             </button>
           ))}
-        </div>
+        </nav>
         <div className={styles.sortToggle}>
           <button
             onClick={() => setSort('createdAt')}
@@ -98,18 +98,18 @@ export default function FeedList() {
         </div>
       </div>
 
-      {/* Feed list */}
+      {/* Feed grid */}
       {loading ? (
-        <Flex vertical gap={8}>
+        <div className={styles.feedGrid}>
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton
               key={i}
               active
-              paragraph={{ rows: 2 }}
-              style={{ padding: '14px 16px', borderRadius: 8, background: 'var(--bg-surface)' }}
+              paragraph={{ rows: 3 }}
+              style={{ padding: '14px 16px', borderRadius: 12, background: 'var(--bg-surface)' }}
             />
           ))}
-        </Flex>
+        </div>
       ) : feeds.length === 0 ? (
         <Flex vertical align="center" justify="center" gap={10} style={{ padding: '80px 0' }}>
           <Text style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>
@@ -118,7 +118,7 @@ export default function FeedList() {
         </Flex>
       ) : (
         <>
-          <Flex vertical gap={8}>
+          <div className={styles.feedGrid}>
             {feeds.map(feed => (
               <FeedCard
                 key={feed.id}
@@ -126,7 +126,7 @@ export default function FeedList() {
                 onClick={() => router.push(`/feeds/${feed.id}`)}
               />
             ))}
-          </Flex>
+          </div>
 
           {totalElements > 20 && (
             <Flex justify="center" style={{ padding: '24px 0 8px' }}>
