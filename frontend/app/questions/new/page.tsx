@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button, Input, Select, Tag, Alert } from 'antd';
 import { getAccessToken } from '@/lib/auth';
 import { createQuestion } from '@/lib/questions';
+import { deleteImage } from '@/lib/uploads';
 import { CATEGORY_META, QUESTION_TYPE_META } from '@/lib/questionMeta';
 import type { QuestionCategory, QuestionType } from '@/types/question';
 import MarkdownEditor from '@/components/editor/MarkdownEditor';
@@ -20,6 +21,7 @@ export default function NewQuestionPage() {
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [uploadIds, setUploadIds] = useState<number[]>([]);
+  const [uploadedImages, setUploadedImages] = useState<{ uploadId: number; fileUrl: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -153,7 +155,16 @@ export default function NewQuestionPage() {
             <MarkdownEditor
               value={body}
               onChange={setBody}
-              onUpload={id => setUploadIds(prev => [...prev, id])}
+              onUpload={(id, fileUrl) => {
+                setUploadIds(prev => [...prev, id]);
+                setUploadedImages(prev => [...prev, { uploadId: id, fileUrl }]);
+              }}
+              onRemoveUpload={id => {
+                setUploadIds(prev => prev.filter(uid => uid !== id));
+                setUploadedImages(prev => prev.filter(img => img.uploadId !== id));
+                deleteImage(id);
+              }}
+              uploadedImages={uploadedImages}
               placeholder="문제 상황, 시도한 것, 에러 메시지 등을 상세히 적어주세요&#10;&#10;이미지는 붙여넣기(Ctrl+V) 또는 드래그앤드롭으로 첨부할 수 있어요"
               minRows={12}
               required

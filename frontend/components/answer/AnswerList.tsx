@@ -25,6 +25,7 @@ import {
   removeHelpful,
 } from '@/lib/answers';
 import { createChatRoom, getChatRooms } from '@/lib/chat';
+import { deleteImage } from '@/lib/uploads';
 import { relativeTime } from '@/lib/questionMeta';
 import type { Answer } from '@/types/answer';
 import type { ChatRoom } from '@/types/chat';
@@ -55,11 +56,13 @@ export default function AnswerList({
 
   const [writeBody, setWriteBody] = useState('');
   const [writeUploadIds, setWriteUploadIds] = useState<number[]>([]);
+  const [writeUploadedImages, setWriteUploadedImages] = useState<{ uploadId: number; fileUrl: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editBody, setEditBody] = useState('');
   const [editUploadIds, setEditUploadIds] = useState<number[]>([]);
+  const [editUploadedImages, setEditUploadedImages] = useState<{ uploadId: number; fileUrl: string }[]>([]);
   const [editSubmitting, setEditSubmitting] = useState(false);
 
   const [reacted, setReacted] = useState<Set<number>>(new Set());
@@ -99,6 +102,7 @@ export default function AnswerList({
       setAnswers(prev => [...prev, res.data!]);
       setWriteBody('');
       setWriteUploadIds([]);
+      setWriteUploadedImages([]);
     }
     setSubmitting(false);
   }
@@ -107,6 +111,7 @@ export default function AnswerList({
     setEditingId(answer.id);
     setEditBody(answer.body);
     setEditUploadIds([]);
+    setEditUploadedImages([]);
   }
 
   function cancelEdit() {
@@ -250,7 +255,16 @@ export default function AnswerList({
               existingChatRoom={findChatRoomForAnswer(answer.authorUserId)}
               proposingChat={proposingAnswerId === answer.id}
               onEditBodyChange={setEditBody}
-              onEditUpload={id => setEditUploadIds(prev => [...prev, id])}
+              onEditUpload={(id: number, fileUrl: string) => {
+                setEditUploadIds(prev => [...prev, id]);
+                setEditUploadedImages(prev => [...prev, { uploadId: id, fileUrl }]);
+              }}
+              onEditRemoveUpload={(id: number) => {
+                setEditUploadIds(prev => prev.filter(uid => uid !== id));
+                setEditUploadedImages(prev => prev.filter(img => img.uploadId !== id));
+                deleteImage(id);
+              }}
+              editUploadedImages={editUploadedImages}
               onStartEdit={() => startEdit(answer)}
               onCancelEdit={cancelEdit}
               onUpdate={() => handleUpdate(answer.id)}
@@ -274,7 +288,16 @@ export default function AnswerList({
               <MarkdownEditor
                 value={writeBody}
                 onChange={setWriteBody}
-                onUpload={id => setWriteUploadIds(prev => [...prev, id])}
+                onUpload={(id, fileUrl) => {
+                  setWriteUploadIds(prev => [...prev, id]);
+                  setWriteUploadedImages(prev => [...prev, { uploadId: id, fileUrl }]);
+                }}
+                onRemoveUpload={id => {
+                  setWriteUploadIds(prev => prev.filter(uid => uid !== id));
+                  setWriteUploadedImages(prev => prev.filter(img => img.uploadId !== id));
+                  deleteImage(id);
+                }}
+                uploadedImages={writeUploadedImages}
                 placeholder="답변을 마크다운으로 작성하세요&#10;이미지는 붙여넣기(Ctrl+V) 또는 드래그앤드롭으로 첨부할 수 있어요"
                 minRows={8}
                 required
@@ -326,7 +349,9 @@ interface AnswerCardProps {
   existingChatRoom: ChatRoom | null;
   proposingChat: boolean;
   onEditBodyChange: (v: string) => void;
-  onEditUpload: (uploadId: number) => void;
+  onEditUpload: (uploadId: number, fileUrl: string) => void;
+  onEditRemoveUpload: (uploadId: number) => void;
+  editUploadedImages: { uploadId: number; fileUrl: string }[];
   onStartEdit: () => void;
   onCancelEdit: () => void;
   onUpdate: () => void;
@@ -349,6 +374,8 @@ function AnswerCard({
   proposingChat,
   onEditBodyChange,
   onEditUpload,
+  onEditRemoveUpload,
+  editUploadedImages,
   onStartEdit,
   onCancelEdit,
   onUpdate,
@@ -412,6 +439,8 @@ function AnswerCard({
             value={editBody}
             onChange={onEditBodyChange}
             onUpload={onEditUpload}
+            onRemoveUpload={onEditRemoveUpload}
+            uploadedImages={editUploadedImages}
             minRows={6}
             required
           />

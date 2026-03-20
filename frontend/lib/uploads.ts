@@ -14,6 +14,23 @@ export interface UploadResult {
  * 이미지 파일을 업로드하고 URL을 반환한다.
  * 실패 시 null 반환.
  */
+/**
+ * 업로드된 이미지를 삭제한다. 실패해도 무시.
+ */
+export async function deleteImage(uploadId: number): Promise<void> {
+  const token = getAccessToken();
+  if (!token) return;
+
+  try {
+    await fetch(`${BASE_URL}/api/uploads/${uploadId}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } catch {
+    // 삭제 실패 시 무시 — 고아 파일 스케줄러가 정리
+  }
+}
+
 export async function uploadImage(file: File): Promise<UploadResult | null> {
   const token = getAccessToken();
   if (!token) return null;

@@ -19,7 +19,9 @@ const { Text } = Typography;
 interface Props {
   value: string;
   onChange: (value: string) => void;
-  onUpload?: (uploadId: number) => void;
+  onUpload?: (uploadId: number, fileUrl: string) => void;
+  onRemoveUpload?: (uploadId: number) => void;
+  uploadedImages?: { uploadId: number; fileUrl: string }[];
   placeholder?: string;
   minRows?: number;
   required?: boolean;
@@ -73,6 +75,8 @@ export default function MarkdownEditor({
   value,
   onChange,
   onUpload,
+  onRemoveUpload,
+  uploadedImages = [],
   placeholder = '마크다운으로 작성하세요\n이미지는 붙여넣기, 드래그앤드롭, 또는 이미지 버튼으로 첨부할 수 있어요',
   minRows = 12,
   required = false,
@@ -82,6 +86,21 @@ export default function MarkdownEditor({
   const [isDragging, setIsDragging] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  /** 에디터 내용 변경 시 삭제된 이미지 감지 */
+  const handleChange = useCallback(
+    (newValue: string) => {
+      onChange(newValue);
+      if (onRemoveUpload && uploadedImages.length > 0) {
+        for (const img of uploadedImages) {
+          if (!newValue.includes(img.fileUrl)) {
+            onRemoveUpload(img.uploadId);
+          }
+        }
+      }
+    },
+    [onChange, onRemoveUpload, uploadedImages]
+  );
 
   const insertText = useCallback(
     (insertFn: (current: string, selStart: number, selEnd: number) => [string, number, number]) => {
@@ -145,7 +164,7 @@ export default function MarkdownEditor({
         return;
       }
 
-      onUpload?.(result.uploadId);
+      onUpload?.(result.uploadId, result.fileUrl);
 
       insertText((cur, s, _e) => {
         const markdown = `![${result.originalFilename}](${result.fileUrl})`;
@@ -245,7 +264,7 @@ export default function MarkdownEditor({
         <textarea
           ref={textareaRef}
           value={value}
-          onChange={e => onChange(e.target.value)}
+          onChange={e => handleChange(e.target.value)}
           onPaste={handlePaste}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
