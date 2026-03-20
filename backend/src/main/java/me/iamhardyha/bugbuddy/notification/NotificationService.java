@@ -66,7 +66,7 @@ public class NotificationService {
 
         // 2) If empty, return mapped empty page
         if (notifications.isEmpty()) {
-            return notifications.map(n -> NotificationResponse.of(n, null, null));
+            return notifications.map(n -> NotificationResponse.of(n, null, null, null));
         }
 
         // 3) Batch fetch trigger user nicknames
@@ -107,9 +107,12 @@ public class NotificationService {
                     questionTitleMap.put(q.getId(), q.getTitle()));
         }
 
+        Map<Long, Long> answerQuestionIdMap = new HashMap<>();
         if (!answerIds.isEmpty()) {
-            answerRepository.findAllActiveByIds(answerIds).forEach(a ->
-                    answerTitleMap.put(a.getId(), a.getQuestion().getTitle()));
+            answerRepository.findAllActiveByIds(answerIds).forEach(a -> {
+                answerTitleMap.put(a.getId(), a.getQuestion().getTitle());
+                answerQuestionIdMap.put(a.getId(), a.getQuestion().getId());
+            });
         }
 
         if (!chatRoomIds.isEmpty()) {
@@ -126,7 +129,13 @@ public class NotificationService {
                 case CHAT_ROOM -> chatRoomTitleMap.get(n.getRefId());
                 default -> null;
             };
-            return NotificationResponse.of(n, nickname, title);
+            String linkUrl = switch (n.getRefType()) {
+                case QUESTION -> "/questions/" + n.getRefId();
+                case ANSWER -> "/questions/" + answerQuestionIdMap.getOrDefault(n.getRefId(), n.getRefId());
+                case CHAT_ROOM -> "/chat";
+                default -> "/notifications";
+            };
+            return NotificationResponse.of(n, nickname, title, linkUrl);
         });
     }
 
