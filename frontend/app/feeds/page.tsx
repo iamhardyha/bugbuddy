@@ -1,13 +1,13 @@
 'use client';
 
-import QuestionFeed from '@/components/question/QuestionFeed';
+import FeedList from '@/components/feed/FeedList';
 import layoutStyles from '@/components/common/Layout.module.css';
 
-export default function Home() {
+export default function FeedsPage() {
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-base)' }}>
       <main className={layoutStyles.homeMain}>
-        <QuestionFeed />
+        <FeedList />
       </main>
     </div>
   );

@@ -45,6 +45,32 @@
   color: var(--accent);
 }
 
+/* ─── Navigation Links ───────────────────────────── */
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 16px;
+}
+
+.navLink {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.navLink:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+.navLinkActive {
+  color: var(--accent);
+  font-weight: 600;
+}
+
 @media (max-width: 639px) {
   .headerInner {
     padding: 0 16px;
@@ -56,5 +82,15 @@
 
   .hideOnMobile {
     display: none;
+  }
+
+  .nav {
+    margin-left: 8px;
+    gap: 0;
+  }
+
+  .navLink {
+    padding: 4px 8px;
+    font-size: 12.5px;
   }
 }
