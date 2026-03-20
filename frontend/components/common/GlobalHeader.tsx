@@ -31,7 +31,7 @@ export default function GlobalHeader() {
             href="/feeds"
             className={`${styles.navLink}${pathname.startsWith('/feeds') ? ` ${styles.navLinkActive}` : ''}`}
           >
-            테크피드
+            TechFeed
           </Link>
         </nav>
 

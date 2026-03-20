@@ -113,7 +113,7 @@ export default function FeedList() {
       ) : feeds.length === 0 ? (
         <Flex vertical align="center" justify="center" gap={10} style={{ padding: '80px 0' }}>
           <Text style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>
-            공유된 테크피드가 없습니다
+            공유된 TechFeed가 없습니다
           </Text>
         </Flex>
       ) : (
