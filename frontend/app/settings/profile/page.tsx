@@ -7,10 +7,12 @@ import { LoadingOutlined } from '@ant-design/icons';
 import { apiFetch } from '@/lib/api';
 import { getAccessToken, clearTokens } from '@/lib/auth';
 import { updateProfile, deactivateAccount } from '@/lib/users';
+import { getMyApplication } from '@/lib/mentor';
 import { useModal } from '@/components/common/ModalProvider';
 import layoutStyles from '@/components/common/Layout.module.css';
 import formStyles from '@/components/question/QuestionForm.module.css';
 import type { UserProfile } from '@/types/user';
+import type { MentorApplication } from '@/types/mentor';
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -30,6 +32,9 @@ export default function ProfileSettingsPage() {
 
   const [deactivating, setDeactivating] = useState(false);
 
+  const [mentorApp, setMentorApp] = useState<MentorApplication | null>(null);
+  const [mentorLoading, setMentorLoading] = useState(true);
+
   useEffect(() => {
     if (!getAccessToken()) {
       router.replace('/');
@@ -44,6 +49,12 @@ export default function ProfileSettingsPage() {
         router.replace('/');
       }
       setLoading(false);
+    });
+    getMyApplication().then(res => {
+      if (res.success) {
+        setMentorApp(res.data ?? null);
+      }
+      setMentorLoading(false);
     });
   }, [router]);
 
@@ -216,6 +227,81 @@ export default function ProfileSettingsPage() {
             </div>
           </Flex>
         </div>
+
+        {/* Mentor Status */}
+        {!mentorLoading && (
+          <div
+            style={{
+              borderRadius: 14,
+              border: '1px solid var(--border-faint)',
+              background: 'var(--bg-surface)',
+              padding: '24px 28px',
+              marginBottom: 20,
+              boxShadow: 'var(--shadow-sm)',
+            }}
+          >
+            {!mentorApp && (
+              <Flex align="center" justify="space-between" gap={12}>
+                <div>
+                  <Text
+                    style={{
+                      display: 'block',
+                      fontSize: 14,
+                      fontWeight: 600,
+                      color: 'var(--text-primary)',
+                      marginBottom: 4,
+                    }}
+                  >
+                    인증 멘토가 되어보세요
+                  </Text>
+                  <Text style={{ fontSize: 12.5, color: 'var(--text-tertiary)' }}>
+                    경험을 나누고 후배 개발자를 도와주세요.
+                  </Text>
+                </div>
+                <Button type="primary" onClick={() => router.push('/mentor/apply')}>
+                  멘토 신청하기
+                </Button>
+              </Flex>
+            )}
+
+            {mentorApp?.status === 'PENDING' && (
+              <Flex align="center" justify="space-between" gap={12}>
+                <Flex align="center" gap={8}>
+                  <span style={{ fontSize: 18 }}>⏳</span>
+                  <Text style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
+                    심사 진행 중입니다
+                  </Text>
+                </Flex>
+                <Button type="link" onClick={() => router.push('/mentor/apply')} style={{ padding: 0 }}>
+                  상태 확인
+                </Button>
+              </Flex>
+            )}
+
+            {mentorApp?.status === 'APPROVED' && (
+              <Flex align="center" gap={8}>
+                <span style={{ fontSize: 18 }}>🎓</span>
+                <Text style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
+                  인증 멘토
+                </Text>
+              </Flex>
+            )}
+
+            {mentorApp?.status === 'REJECTED' && (
+              <Flex align="center" justify="space-between" gap={12}>
+                <Flex align="center" gap={8}>
+                  <span style={{ fontSize: 18 }}>❌</span>
+                  <Text style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
+                    반려됨
+                  </Text>
+                </Flex>
+                <Button type="link" onClick={() => router.push('/mentor/apply')} style={{ padding: 0 }}>
+                  재신청하기
+                </Button>
+              </Flex>
+            )}
+          </div>
+        )}
 
         {/* Danger Zone */}
         <div

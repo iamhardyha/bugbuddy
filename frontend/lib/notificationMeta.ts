@@ -6,6 +6,8 @@ import {
   TeamOutlined,
   CheckOutlined,
   BellOutlined,
+  TrophyOutlined,
+  CloseCircleOutlined,
 } from '@ant-design/icons';
 import { createElement } from 'react';
 
@@ -52,6 +54,20 @@ export const NOTIFICATION_META: Record<string, NotificationMeta> = {
     color: '#16a34a',
     bg: 'rgba(22,163,74,0.1)',
     filterGroup: 'CHAT',
+  },
+  MENTOR_APPROVED: {
+    text: () => '멘토 인증이 승인되었습니다',
+    icon: createElement(TrophyOutlined),
+    color: '#16a34a',
+    bg: 'rgba(22,163,74,0.1)',
+    filterGroup: null,
+  },
+  MENTOR_REJECTED: {
+    text: () => '멘토 신청이 반려되었습니다',
+    icon: createElement(CloseCircleOutlined),
+    color: '#dc2626',
+    bg: 'rgba(220,38,38,0.1)',
+    filterGroup: null,
   },
 };
 

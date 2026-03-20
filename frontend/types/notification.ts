@@ -4,7 +4,9 @@ export type NotificationType =
   | 'ANSWER_ACCEPTED'
   | 'CHAT_REQUESTED'
   | 'CHAT_ACCEPTED'
-  | 'CHAT_REJECTED';
+  | 'CHAT_REJECTED'
+  | 'MENTOR_APPROVED'
+  | 'MENTOR_REJECTED';
 
 export type ReferenceType = 'QUESTION' | 'ANSWER' | 'CHAT_MESSAGE' | 'CHAT_ROOM' | 'USER';
 

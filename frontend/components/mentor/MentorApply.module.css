@@ -1,0 +1,81 @@
+.pageLayout {
+  min-height: calc(100vh - var(--global-header-height));
+  background: var(--bg-base);
+  padding: 24px 16px;
+}
+
+.container {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.section {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-faint);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.linkRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.linkRow > :first-child {
+  width: 140px;
+  flex-shrink: 0;
+}
+
+.linkRow > :nth-child(2) {
+  flex: 1;
+}
+
+.statusCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-faint);
+  border-radius: 12px;
+  padding: 32px;
+  text-align: center;
+}
+
+.statusIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  font-size: 22px;
+}
+
+.reasonBox {
+  background: rgba(220, 38, 38, 0.05);
+  border: 1px solid rgba(220, 38, 38, 0.15);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.compactCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-faint);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+@media (max-width: 639px) {
+  .pageLayout {
+    padding: 16px 12px;
+  }
+  .linkRow {
+    flex-direction: column;
+  }
+  .linkRow > :first-child {
+    width: 100%;
+  }
+}
