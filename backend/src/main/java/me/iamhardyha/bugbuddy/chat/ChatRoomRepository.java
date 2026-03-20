@@ -19,4 +19,7 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 
     boolean existsByMentorIdAndMenteeIdAndQuestionIdAndStatusNot(
             Long mentorId, Long menteeId, Long questionId, ChatRoomStatus status);
+
+    @Query("SELECT r FROM ChatRoom r LEFT JOIN FETCH r.question WHERE r.id IN :ids")
+    List<ChatRoom> findAllActiveByIds(@Param("ids") List<Long> ids);
 }

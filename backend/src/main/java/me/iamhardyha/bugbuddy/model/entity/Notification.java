@@ -13,7 +13,8 @@ import me.iamhardyha.bugbuddy.model.enums.ReferenceType;
         name = "notifications",
         indexes = {
                 @Index(name = "idx_notifications_user_read", columnList = "user_id, is_read, created_at"),
-                @Index(name = "idx_notifications_user_created", columnList = "user_id, created_at")
+                @Index(name = "idx_notifications_user_created", columnList = "user_id, created_at"),
+                @Index(name = "idx_notifications_dedup", columnList = "trigger_user_id, ref_type, ref_id, type")
         }
 )
 @Getter
@@ -28,6 +29,10 @@ public class Notification extends TimestampedEntity {
     /** 수신자 */
     @Column(name = "user_id", nullable = false)
     private Long userId;
+
+    /** 알림을 발생시킨 사용자 */
+    @Column(name = "trigger_user_id", nullable = false)
+    private Long triggerUserId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 40)

@@ -12,7 +12,10 @@ import me.iamhardyha.bugbuddy.model.enums.ChatRoomStatus;
 import me.iamhardyha.bugbuddy.repository.AnswerRepository;
 import me.iamhardyha.bugbuddy.repository.QuestionRepository;
 import me.iamhardyha.bugbuddy.repository.UserRepository;
+import me.iamhardyha.bugbuddy.notification.event.ChatAcceptedEvent;
+import me.iamhardyha.bugbuddy.notification.event.ChatRequestedEvent;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +35,7 @@ public class ChatRoomService {
     private final AnswerRepository answerRepository;
     private final QuestionRepository questionRepository;
     private final UserRepository userRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     /** 질문자(멘티) → 채팅 신청 (PENDING 상태로 생성). */
     @Transactional
@@ -67,6 +71,8 @@ public class ChatRoomService {
 
         ChatRoom saved = chatRoomRepository.save(room);
 
+        eventPublisher.publishEvent(new ChatRequestedEvent(menteeUserId, mentor.getId(), saved.getId()));
+
         return ChatRoomResponse.of(
                 saved,
                 question.getTitle(),
@@ -95,6 +101,8 @@ public class ChatRoomService {
 
         // 멘티에게 수락 이벤트 브로드캐스트 (채팅 목록 실시간 업데이트)
         chatNotificationService.sendRoomEvent(room.getMentee().getId(), ChatRoomEvent.roomAccepted(roomId));
+
+        eventPublisher.publishEvent(new ChatAcceptedEvent(mentorUserId, room.getMentee().getId(), roomId));
 
         return buildSingleRoomResponse(room, mentorUserId);
     }

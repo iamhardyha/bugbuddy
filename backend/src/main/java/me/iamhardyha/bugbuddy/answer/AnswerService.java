@@ -19,8 +19,12 @@ import me.iamhardyha.bugbuddy.repository.AnswerReactionRepository;
 import me.iamhardyha.bugbuddy.repository.AnswerRepository;
 import me.iamhardyha.bugbuddy.repository.QuestionRepository;
 import me.iamhardyha.bugbuddy.repository.UserRepository;
+import me.iamhardyha.bugbuddy.notification.event.AnswerAcceptedEvent;
+import me.iamhardyha.bugbuddy.notification.event.AnswerCreatedEvent;
+import me.iamhardyha.bugbuddy.notification.event.AnswerHelpfulEvent;
 import me.iamhardyha.bugbuddy.upload.UploadService;
 import me.iamhardyha.bugbuddy.xp.XpService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -42,6 +46,7 @@ public class AnswerService {
     private final UserRepository userRepository;
     private final UploadService uploadService;
     private final XpService xpService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public AnswerService(
             AnswerRepository answerRepository,
@@ -49,7 +54,8 @@ public class AnswerService {
             QuestionRepository questionRepository,
             UserRepository userRepository,
             UploadService uploadService,
-            XpService xpService
+            XpService xpService,
+            ApplicationEventPublisher eventPublisher
     ) {
         this.answerRepository = answerRepository;
         this.answerReactionRepository = answerReactionRepository;
@@ -57,6 +63,7 @@ public class AnswerService {
         this.userRepository = userRepository;
         this.uploadService = uploadService;
         this.xpService = xpService;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -85,6 +92,7 @@ public class AnswerService {
         Answer saved = answerRepository.save(answer);
         uploadService.linkUploads(request.uploadIds(), userId, ReferenceType.ANSWER, saved.getId());
         xpService.grantXp(userId, XpEventType.ANSWER_CREATED, ReferenceType.ANSWER, saved.getId(), 5);
+        eventPublisher.publishEvent(new AnswerCreatedEvent(userId, question.getAuthor().getId(), questionId));
         return AnswerResponse.of(saved, 0L, false);
     }
 
@@ -184,6 +192,7 @@ public class AnswerService {
         question.setStatus(QuestionStatus.SOLVED);
         xpService.grantXp(answer.getAuthor().getId(), XpEventType.ANSWER_ACCEPTED,
                 ReferenceType.ANSWER, answerId, 30);
+        eventPublisher.publishEvent(new AnswerAcceptedEvent(userId, answer.getAuthor().getId(), answerId));
 
         long helpfulCount = answerReactionRepository
                 .countActiveByAnswerIdAndReactionType(answerId, ReactionType.HELPFUL);
@@ -221,6 +230,7 @@ public class AnswerService {
 
         xpService.grantXp(answer.getAuthor().getId(), XpEventType.ANSWER_HELPFUL_RECEIVED,
                 ReferenceType.ANSWER, answerId, 20);
+        eventPublisher.publishEvent(new AnswerHelpfulEvent(userId, answer.getAuthor().getId(), answerId));
 
         long helpfulCount = answerReactionRepository
                 .countActiveByAnswerIdAndReactionType(answerId, ReactionType.HELPFUL);
