@@ -78,6 +78,45 @@ public class UploadService {
         if (mimeType == null || !ALLOWED_MIME_TYPES.contains(mimeType)) {
             throw new BugBuddyException(ErrorCode.UPLOAD_INVALID_TYPE);
         }
+        validateMagicBytes(file);
+    }
+
+    /** 파일 매직 바이트를 검사하여 Content-Type 위조를 방지한다. */
+    private void validateMagicBytes(MultipartFile file) {
+        try {
+            byte[] header = new byte[12];
+            int read = file.getInputStream().read(header);
+            if (read < 4) {
+                throw new BugBuddyException(ErrorCode.UPLOAD_INVALID_TYPE);
+            }
+            if (!isValidImageMagic(header)) {
+                throw new BugBuddyException(ErrorCode.UPLOAD_INVALID_TYPE);
+            }
+        } catch (IOException e) {
+            throw new BugBuddyException(ErrorCode.UPLOAD_FAILED);
+        }
+    }
+
+    private boolean isValidImageMagic(byte[] header) {
+        // JPEG: FF D8 FF
+        if (header[0] == (byte) 0xFF && header[1] == (byte) 0xD8 && header[2] == (byte) 0xFF) {
+            return true;
+        }
+        // PNG: 89 50 4E 47
+        if (header[0] == (byte) 0x89 && header[1] == 0x50 && header[2] == 0x4E && header[3] == 0x47) {
+            return true;
+        }
+        // GIF: 47 49 46 38
+        if (header[0] == 0x47 && header[1] == 0x49 && header[2] == 0x46 && header[3] == 0x38) {
+            return true;
+        }
+        // WebP: RIFF....WEBP (bytes 0-3 = "RIFF", bytes 8-11 = "WEBP")
+        if (header[0] == 0x52 && header[1] == 0x49 && header[2] == 0x46 && header[3] == 0x46
+                && header.length >= 12
+                && header[8] == 0x57 && header[9] == 0x45 && header[10] == 0x42 && header[11] == 0x50) {
+            return true;
+        }
+        return false;
     }
 
     private String buildFileKey(Long userId, String originalFilename) {
