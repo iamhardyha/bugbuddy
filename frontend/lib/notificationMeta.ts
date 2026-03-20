@@ -8,6 +8,8 @@ import {
   BellOutlined,
   TrophyOutlined,
   CloseCircleOutlined,
+  LinkOutlined,
+  CommentOutlined,
 } from '@ant-design/icons';
 import { createElement } from 'react';
 
@@ -67,6 +69,20 @@ export const NOTIFICATION_META: Record<string, NotificationMeta> = {
     icon: createElement(CloseCircleOutlined),
     color: '#dc2626',
     bg: 'rgba(220,38,38,0.1)',
+    filterGroup: null,
+  },
+  FEED_LIKED: {
+    text: (n) => `${n}님이 테크피드를 추천했습니다`,
+    icon: createElement(LinkOutlined),
+    color: '#5548e0',
+    bg: 'rgba(85,72,224,0.1)',
+    filterGroup: null,
+  },
+  FEED_COMMENTED: {
+    text: (n) => `${n}님이 테크피드에 댓글을 남겼습니다`,
+    icon: createElement(CommentOutlined),
+    color: '#2563eb',
+    bg: 'rgba(37,99,235,0.1)',
     filterGroup: null,
   },
 };
