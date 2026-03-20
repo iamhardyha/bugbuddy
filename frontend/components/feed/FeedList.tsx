@@ -69,59 +69,34 @@ export default function FeedList() {
 
   return (
     <div>
-      {/* Category pills */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
-        {CATEGORY_OPTIONS.map(c => {
-          const isActive = category === c.value;
-          const meta = c.value !== ALL ? FEED_CATEGORY_META[c.value] : null;
-          return (
+      {/* Filter bar: category scroll + sort toggle */}
+      <div className={styles.filterBar}>
+        <div className={styles.categoryScroll}>
+          {CATEGORY_OPTIONS.map(c => (
             <button
               key={c.value}
               onClick={() => setCategory(c.value)}
-              style={{
-                padding: '6px 14px',
-                borderRadius: 999,
-                border: isActive ? '1px solid transparent' : '1px solid var(--border-faint)',
-                background: isActive ? (meta?.bg ?? 'var(--accent-subtle)') : 'transparent',
-                color: isActive ? (meta?.color ?? 'var(--accent)') : 'var(--text-secondary)',
-                fontSize: 12,
-                fontWeight: isActive ? 600 : 400,
-                cursor: 'pointer',
-                fontFamily: 'inherit',
-                transition: 'all 0.15s',
-              }}
+              className={`${styles.catPill}${category === c.value ? ` ${styles.catActive}` : ''}`}
             >
               {c.label}
             </button>
-          );
-        })}
-      </div>
-
-      {/* Sort toggle */}
-      <Flex align="center" gap={6} style={{ marginBottom: 16 }}>
-        {([
-          { value: 'createdAt' as SortOption, label: '최신순' },
-          { value: 'likeCount' as SortOption, label: '추천순' },
-        ]).map(opt => (
+          ))}
+        </div>
+        <div className={styles.sortToggle}>
           <button
-            key={opt.value}
-            onClick={() => setSort(opt.value)}
-            style={{
-              padding: '4px 12px',
-              borderRadius: 999,
-              border: sort === opt.value ? '1px solid transparent' : '1px solid var(--border-faint)',
-              background: sort === opt.value ? 'var(--accent-subtle)' : 'transparent',
-              color: sort === opt.value ? 'var(--accent)' : 'var(--text-secondary)',
-              fontSize: 12,
-              fontWeight: sort === opt.value ? 600 : 400,
-              cursor: 'pointer',
-              fontFamily: 'inherit',
-            }}
+            onClick={() => setSort('createdAt')}
+            className={`${styles.sortBtn}${sort === 'createdAt' ? ` ${styles.sortActive}` : ''}`}
           >
-            {opt.label}
+            최신
           </button>
-        ))}
-      </Flex>
+          <button
+            onClick={() => setSort('likeCount')}
+            className={`${styles.sortBtn}${sort === 'likeCount' ? ` ${styles.sortActive}` : ''}`}
+          >
+            추천
+          </button>
+        </div>
+      </div>
 
       {/* Feed list */}
       {loading ? (
