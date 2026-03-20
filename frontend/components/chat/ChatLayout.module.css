@@ -1,9 +1,13 @@
-/* ─── DM Layout (Instagram DM 스타일) ─────────────── */
+/* ─── DM Layout ─────────────────────────────────────── */
 .layout {
   display: flex;
   height: calc(100dvh - var(--global-header-height));
   overflow: hidden;
   background: var(--bg-base);
+  max-width: 1280px;
+  margin: 0 auto;
+  border-left: 1px solid var(--border-faint);
+  border-right: 1px solid var(--border-faint);
 }
 
 /* Left panel */
@@ -58,9 +62,20 @@
 
 /* Mobile (< 768px) overrides */
 @media (max-width: 767px) {
+  .layout {
+    border-left: none;
+    border-right: none;
+  }
+
   /* /chat page: 왼쪽 패널이 전체 너비 */
   .panelLeft {
     width: 100%;
     border-right: none;
+  }
+}
+
+@media (max-width: 639px) {
+  .layout {
+    height: calc(100dvh - var(--global-header-height) - var(--bottom-nav-height));
   }
 }
