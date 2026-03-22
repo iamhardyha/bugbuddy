@@ -75,7 +75,13 @@ public enum ErrorCode {
     FEED_COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "댓글을 찾을 수 없습니다."),
     FEED_COMMENT_FORBIDDEN(HttpStatus.FORBIDDEN, "댓글 삭제 권한이 없습니다."),
     FEED_OG_PARSE_FAILED(HttpStatus.BAD_REQUEST, "URL에서 정보를 가져올 수 없습니다."),
-    FEED_SELF_LIKE(HttpStatus.BAD_REQUEST, "자신의 피드는 추천할 수 없습니다.");
+    FEED_SELF_LIKE(HttpStatus.BAD_REQUEST, "자신의 피드는 추천할 수 없습니다."),
+
+    // 관리자
+    ADMIN_NOT_FOUND(HttpStatus.NOT_FOUND, "관리자를 찾을 수 없습니다."),
+    ADMIN_LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 일치하지 않습니다."),
+    ADMIN_CONTENT_NOT_FOUND(HttpStatus.NOT_FOUND, "관리 대상 콘텐츠를 찾을 수 없습니다."),
+    ADMIN_ALREADY_UNSUSPENDED(HttpStatus.BAD_REQUEST, "이미 정지 해제된 사용자입니다.");
 
     private final HttpStatus status;
     private final String message;

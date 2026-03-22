@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import me.iamhardyha.bugbuddy.model.common.BaseSoftDeleteEntity;
 import me.iamhardyha.bugbuddy.model.enums.MentorStatus;
-import me.iamhardyha.bugbuddy.model.enums.UserRole;
 
 import java.time.Instant;
 
@@ -48,11 +47,6 @@ public class UserEntity extends BaseSoftDeleteEntity {
 
     @Column(length = 280)
     private String bio;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    @Builder.Default
-    private UserRole role = UserRole.USER;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "mentor_status", nullable = false, length = 20)

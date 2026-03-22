@@ -1,6 +1,7 @@
 package me.iamhardyha.bugbuddy.feed;
 
 import lombok.RequiredArgsConstructor;
+import me.iamhardyha.bugbuddy.feed.dto.AdminFeedResponse;
 import me.iamhardyha.bugbuddy.feed.dto.FeedCommentCreateRequest;
 import me.iamhardyha.bugbuddy.feed.dto.FeedCommentResponse;
 import me.iamhardyha.bugbuddy.feed.dto.FeedCreateRequest;
@@ -25,6 +26,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -291,11 +294,51 @@ public class FeedService {
 
         if (category == null) {
             return sortByLikes
-                    ? feedRepository.findAllByOrderByLikeCountDescCreatedAtDesc(pageable)
-                    : feedRepository.findAllByOrderByCreatedAtDesc(pageable);
+                    ? feedRepository.findAllByHiddenFalseOrderByLikeCountDescCreatedAtDesc(pageable)
+                    : feedRepository.findAllByHiddenFalseOrderByCreatedAtDesc(pageable);
         }
         return sortByLikes
-                ? feedRepository.findAllByCategoryOrderByLikeCountDescCreatedAtDesc(category, pageable)
-                : feedRepository.findAllByCategoryOrderByCreatedAtDesc(category, pageable);
+                ? feedRepository.findAllByHiddenFalseAndCategoryOrderByLikeCountDescCreatedAtDesc(category, pageable)
+                : feedRepository.findAllByHiddenFalseAndCategoryOrderByCreatedAtDesc(category, pageable);
+    }
+
+    // ── Admin operations ──
+
+    public Page<AdminFeedResponse> findAllForAdmin(Pageable pageable) {
+        return feedRepository.findAllForAdmin(pageable)
+                .map(this::mapToAdminFeedResponse);
+    }
+
+    @Transactional
+    public void adminHide(Long feedId) {
+        feedRepository.updateHidden(feedId, true);
+    }
+
+    @Transactional
+    public void adminRestore(Long feedId) {
+        feedRepository.restoreById(feedId);
+    }
+
+    @Transactional
+    public void adminDelete(Long feedId) {
+        feedRepository.softDeleteById(feedId);
+    }
+
+    private AdminFeedResponse mapToAdminFeedResponse(Object[] row) {
+        return new AdminFeedResponse(
+                ((Number) row[0]).longValue(),
+                (String) row[1],
+                (String) row[2],
+                (String) row[3],
+                (String) row[4],
+                (String) row[5],
+                ((Number) row[6]).intValue(),
+                ((Number) row[7]).intValue(),
+                ((Number) row[8]).intValue() == 1,
+                row[9] != null ? ((Timestamp) row[9]).toInstant() : null,
+                row[10] != null ? ((Timestamp) row[10]).toInstant() : null,
+                ((Number) row[11]).longValue(),
+                (String) row[12]
+        );
     }
 }

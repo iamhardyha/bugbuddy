@@ -3,7 +3,6 @@ package me.iamhardyha.bugbuddy.auth;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import me.iamhardyha.bugbuddy.model.enums.UserRole;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -27,12 +26,20 @@ public class JwtProvider {
         this.refreshTokenExpiration = refreshTokenExpiration;
     }
 
-    public String generateAccessToken(Long userId, UserRole role) {
-        return buildToken(userId, role, accessTokenExpiration, "access");
+    public String generateAccessToken(Long userId) {
+        return buildToken(userId, "user", accessTokenExpiration, "access");
     }
 
-    public String generateRefreshToken(Long userId, UserRole role) {
-        return buildToken(userId, role, refreshTokenExpiration, "refresh");
+    public String generateRefreshToken(Long userId) {
+        return buildToken(userId, "user", refreshTokenExpiration, "refresh");
+    }
+
+    public String generateAdminAccessToken(Long adminId) {
+        return buildToken(adminId, "admin", accessTokenExpiration, "access");
+    }
+
+    public String generateAdminRefreshToken(Long adminId) {
+        return buildToken(adminId, "admin", refreshTokenExpiration, "refresh");
     }
 
     public boolean validateToken(String token) {
@@ -48,19 +55,19 @@ public class JwtProvider {
         return Long.parseLong(getClaims(token).getSubject());
     }
 
-    public UserRole getRole(String token) {
-        return UserRole.valueOf(getClaims(token).get("role", String.class));
+    public String getJwtType(String token) {
+        return getClaims(token).get("jwtType", String.class);
     }
 
     public String getTokenType(String token) {
         return getClaims(token).get("type", String.class);
     }
 
-    private String buildToken(Long userId, UserRole role, long expiration, String tokenType) {
+    private String buildToken(Long id, String jwtType, long expiration, String tokenType) {
         Date now = new Date();
         return Jwts.builder()
-                .subject(userId.toString())
-                .claim("role", role.name())
+                .subject(id.toString())
+                .claim("jwtType", jwtType)
                 .claim("type", tokenType)
                 .issuedAt(now)
                 .expiration(new Date(now.getTime() + expiration))

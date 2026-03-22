@@ -7,7 +7,6 @@ public record UserProfileResponse(
         String nickname,
         String email,
         String bio,
-        String role,
         String mentorStatus,
         int xp,
         int level
@@ -18,7 +17,6 @@ public record UserProfileResponse(
                 user.getNickname(),
                 user.getEmail(),
                 user.getBio(),
-                user.getRole().name(),
                 user.getMentorStatus().name(),
                 user.getXp(),
                 user.getLevel()

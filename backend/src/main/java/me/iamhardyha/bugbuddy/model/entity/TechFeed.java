@@ -54,4 +54,7 @@ public class TechFeed extends BaseSoftDeleteEntity {
 
     @Column(name = "bookmark_count", nullable = false)
     private int bookmarkCount = 0;
+
+    @Column(nullable = false)
+    private boolean hidden = false;
 }

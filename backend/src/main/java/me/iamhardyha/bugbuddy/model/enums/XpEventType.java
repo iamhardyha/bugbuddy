@@ -9,5 +9,6 @@ public enum XpEventType {
     CHAT_FEEDBACK_NEGATIVE,
     FEED_CREATED,
     FEED_LIKED_RECEIVED,
+    ADMIN_ADJUST,
     OTHER
 }

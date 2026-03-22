@@ -34,9 +34,9 @@ public class AuthController {
         }
 
         Long userId = jwtProvider.getUserId(refreshToken);
-        UserEntity user = userService.findById(userId);
-        String newAccessToken = jwtProvider.generateAccessToken(userId, user.getRole());
-        String newRefreshToken = jwtProvider.generateRefreshToken(userId, user.getRole());
+        userService.findById(userId); // verify user exists
+        String newAccessToken = jwtProvider.generateAccessToken(userId);
+        String newRefreshToken = jwtProvider.generateRefreshToken(userId);
 
         return ResponseEntity.ok(ApiResponse.ok(new TokenResponse(newAccessToken, newRefreshToken)));
     }

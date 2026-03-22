@@ -32,7 +32,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             user.setEmail(userInfo.getEmail());
         }
 
-        return new BugBuddyOAuth2User(oAuth2User, user.getId(), user.getRole());
+        return new BugBuddyOAuth2User(oAuth2User, user.getId());
     }
 
     private UserEntity createUser(GitHubOAuth2UserInfo userInfo) {

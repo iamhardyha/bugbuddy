@@ -1,5 +1,6 @@
 package me.iamhardyha.bugbuddy.answer;
 
+import me.iamhardyha.bugbuddy.answer.dto.AdminAnswerResponse;
 import me.iamhardyha.bugbuddy.answer.dto.AnswerCreateRequest;
 import me.iamhardyha.bugbuddy.answer.dto.AnswerResponse;
 import me.iamhardyha.bugbuddy.answer.dto.AnswerUpdateRequest;
@@ -30,6 +31,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -264,5 +267,42 @@ public class AnswerService {
         }
 
         return answer;
+    }
+
+    // ── Admin operations ──
+
+    public Page<AdminAnswerResponse> findAllForAdmin(Pageable pageable) {
+        return answerRepository.findAllForAdmin(pageable)
+                .map(this::mapToAdminAnswerResponse);
+    }
+
+    @Transactional
+    public void adminHide(Long answerId) {
+        answerRepository.updateHidden(answerId, true);
+    }
+
+    @Transactional
+    public void adminRestore(Long answerId) {
+        answerRepository.restoreById(answerId);
+    }
+
+    @Transactional
+    public void adminDelete(Long answerId) {
+        answerRepository.softDeleteById(answerId);
+    }
+
+    private AdminAnswerResponse mapToAdminAnswerResponse(Object[] row) {
+        return new AdminAnswerResponse(
+                ((Number) row[0]).longValue(),
+                ((Number) row[1]).longValue(),
+                (String) row[2],
+                (String) row[3],
+                ((Number) row[4]).intValue() == 1,
+                ((Number) row[5]).intValue() == 1,
+                row[6] != null ? ((Timestamp) row[6]).toInstant() : null,
+                row[7] != null ? ((Timestamp) row[7]).toInstant() : null,
+                ((Number) row[8]).longValue(),
+                (String) row[9]
+        );
     }
 }

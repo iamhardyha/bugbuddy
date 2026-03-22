@@ -31,8 +31,8 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
             Authentication authentication
     ) throws IOException {
         BugBuddyOAuth2User principal = (BugBuddyOAuth2User) authentication.getPrincipal();
-        String accessToken = jwtProvider.generateAccessToken(principal.getUserId(), principal.getRole());
-        String refreshToken = jwtProvider.generateRefreshToken(principal.getUserId(), principal.getRole());
+        String accessToken = jwtProvider.generateAccessToken(principal.getUserId());
+        String refreshToken = jwtProvider.generateRefreshToken(principal.getUserId());
 
         String redirectUrl = UriComponentsBuilder.fromUriString(frontendUrl + "/oauth/callback")
                 .queryParam("accessToken", accessToken)

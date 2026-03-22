@@ -56,4 +56,7 @@ public class Question extends BaseSoftDeleteEntity {
 
     @Column(name = "view_count", nullable = false)
     private int viewCount = 0;
+
+    @Column(nullable = false)
+    private boolean hidden = false;
 }

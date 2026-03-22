@@ -9,6 +9,7 @@ import me.iamhardyha.bugbuddy.model.enums.QuestionStatus;
 import me.iamhardyha.bugbuddy.model.enums.QuestionType;
 import me.iamhardyha.bugbuddy.model.enums.ReferenceType;
 import me.iamhardyha.bugbuddy.model.enums.XpEventType;
+import me.iamhardyha.bugbuddy.question.dto.AdminQuestionResponse;
 import me.iamhardyha.bugbuddy.question.dto.QuestionCreateRequest;
 import me.iamhardyha.bugbuddy.question.dto.QuestionDetailResponse;
 import me.iamhardyha.bugbuddy.question.dto.QuestionSummaryResponse;
@@ -22,6 +23,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -164,5 +167,44 @@ public class QuestionService {
 
         List<String> tags = tagService.getTagNames(questionId);
         return QuestionDetailResponse.of(question, tags);
+    }
+
+    // ── Admin operations ──
+
+    public Page<AdminQuestionResponse> findAllForAdmin(Pageable pageable) {
+        return questionRepository.findAllForAdmin(pageable)
+                .map(this::mapToAdminQuestionResponse);
+    }
+
+    @Transactional
+    public void adminHide(Long questionId) {
+        questionRepository.updateHidden(questionId, true);
+    }
+
+    @Transactional
+    public void adminRestore(Long questionId) {
+        questionRepository.restoreById(questionId);
+    }
+
+    @Transactional
+    public void adminDelete(Long questionId) {
+        questionRepository.softDeleteById(questionId);
+    }
+
+    private AdminQuestionResponse mapToAdminQuestionResponse(Object[] row) {
+        return new AdminQuestionResponse(
+                ((Number) row[0]).longValue(),
+                (String) row[1],
+                (String) row[2],
+                (String) row[3],
+                (String) row[4],
+                (String) row[5],
+                ((Number) row[6]).intValue(),
+                ((Number) row[7]).intValue() == 1,
+                row[8] != null ? ((Timestamp) row[8]).toInstant() : null,
+                row[9] != null ? ((Timestamp) row[9]).toInstant() : null,
+                ((Number) row[10]).longValue(),
+                (String) row[11]
+        );
     }
 }
