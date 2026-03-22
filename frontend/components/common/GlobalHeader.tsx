@@ -10,6 +10,9 @@ import styles from './GlobalHeader.module.css';
 export default function GlobalHeader() {
   const pathname = usePathname();
 
+  // Admin pages use their own layout
+  if (pathname.startsWith('/admin')) return null;
+
   return (
     <header className={styles.header}>
       <div className={styles.headerInner}>

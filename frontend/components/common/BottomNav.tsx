@@ -82,6 +82,9 @@ export default function BottomNav() {
     router.push(tab.path);
   }
 
+  // Admin pages use their own layout
+  if (pathname.startsWith('/admin')) return null;
+
   return (
     <nav className={styles.bottomNav}>
       {TABS.map(tab => {

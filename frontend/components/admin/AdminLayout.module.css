@@ -1,0 +1,50 @@
+.layout {
+  min-height: 100vh;
+}
+
+.sider {
+  overflow: auto;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 10;
+}
+
+.logo {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ant-color-primary);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.logoCollapsed {
+  font-size: 14px;
+}
+
+.header {
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.adminLabel {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.content {
+  margin: 24px;
+  min-height: 280px;
+}
