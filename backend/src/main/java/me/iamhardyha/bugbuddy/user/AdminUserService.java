@@ -75,6 +75,9 @@ public class AdminUserService {
             throw new BugBuddyException(ErrorCode.ADMIN_ALREADY_UNSUSPENDED);
         }
         user.setSuspendedUntil(null);
+        if (user.getMentorStatus() == MentorStatus.SUSPENDED) {
+            user.setMentorStatus(MentorStatus.APPROVED);
+        }
     }
 
     @Transactional

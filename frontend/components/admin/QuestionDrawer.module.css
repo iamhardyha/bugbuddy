@@ -1,0 +1,10 @@
+.sectionTitle {
+  margin-top: 24px;
+}
+
+.bodyContent {
+  padding: 12px;
+  background: var(--bg-subtle);
+  border-radius: 8px;
+  border: 1px solid var(--border-faint);
+}

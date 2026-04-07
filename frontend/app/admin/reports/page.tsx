@@ -1,14 +1,13 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Table, Tabs, Tag, Typography } from 'antd';
+import { message, Table, Tabs, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import AdminLayout from '@/components/admin/AdminLayout';
 import ReportDrawer from '@/components/admin/ReportDrawer';
 import type { AdminReport } from '@/types/admin';
 import { getAdminReports } from '@/lib/admin/reports';
-
-const { Title } = Typography;
+import styles from './page.module.css';
 
 const REASON_CODE_LABEL: Record<string, string> = {
   SPAM: '스팸',
@@ -68,8 +67,8 @@ export default function AdminReportsPage() {
       if (!res.success || !res.data) throw new Error(res.error?.message);
       setReports(res.data.content);
       setTotal(res.data.totalElements);
-    } catch {
-      // handled silently
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : '데이터를 불러오는데 실패했습니다');
     } finally {
       setLoading(false);
     }
@@ -139,13 +138,11 @@ export default function AdminReportsPage() {
 
   return (
     <AdminLayout>
-      <Title level={3}>신고 관리</Title>
-
       <Tabs
         activeKey={status}
         onChange={handleTabChange}
         items={STATUS_TABS.map((tab) => ({ key: tab.key, label: tab.label }))}
-        style={{ marginBottom: 16 }}
+        className={styles.tabs}
       />
 
       <Table<AdminReport>

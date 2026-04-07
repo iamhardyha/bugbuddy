@@ -1,0 +1,26 @@
+.wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 24px;
+  background: var(--bg-base);
+}
+
+.card {
+  width: 400px;
+  max-width: 100%;
+}
+
+.titleArea {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.title {
+  margin: 0 !important;
+}
+
+.lastFormItem {
+  margin-bottom: 0;
+}

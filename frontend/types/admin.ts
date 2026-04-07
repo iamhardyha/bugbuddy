@@ -15,7 +15,6 @@ export interface AdminLoginRequest {
 
 export interface AdminLoginResponse {
   accessToken: string;
-  refreshToken: string;
 }
 
 // Dashboard

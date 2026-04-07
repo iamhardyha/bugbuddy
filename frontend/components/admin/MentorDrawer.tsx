@@ -18,9 +18,19 @@ import {
 } from 'antd';
 import type { AdminMentorApp } from '@/types/admin';
 import { getAdminMentorApp, approveMentor, rejectMentor } from '@/lib/admin/mentors';
+import styles from './MentorDrawer.module.css';
 
 const { Text } = Typography;
 const { TextArea } = Input;
+
+function isSafeUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return ['http:', 'https:'].includes(parsed.protocol);
+  } catch {
+    return false;
+  }
+}
 
 const STATUS_COLOR: Record<string, string> = {
   PENDING: 'orange',
@@ -108,7 +118,7 @@ export default function MentorDrawer({ applicationId, open, onClose, onActionCom
         destroyOnClose
       >
         {loading ? (
-          <div style={{ textAlign: 'center', padding: 48 }}>
+          <div className={styles.loading}>
             <Spin size="large" />
           </div>
         ) : detail ? (
@@ -134,17 +144,17 @@ export default function MentorDrawer({ applicationId, open, onClose, onActionCom
               )}
             </Descriptions>
 
-            <Card title="질문 1 답변" size="small" style={{ marginTop: 24 }}>
-              <Text style={{ whiteSpace: 'pre-wrap' }}>{detail.q1Answer}</Text>
+            <Card title="질문 1 답변" size="small" className={styles.q1Card}>
+              <Text className={styles.preWrap}>{detail.q1Answer}</Text>
             </Card>
 
-            <Card title="질문 2 답변" size="small" style={{ marginTop: 16 }}>
-              <Text style={{ whiteSpace: 'pre-wrap' }}>{detail.q2Answer}</Text>
+            <Card title="질문 2 답변" size="small" className={styles.q2Card}>
+              <Text className={styles.preWrap}>{detail.q2Answer}</Text>
             </Card>
 
             {detail.links.length > 0 && (
               <>
-                <Typography.Title level={5} style={{ marginTop: 24 }}>
+                <Typography.Title level={5} className={styles.sectionTitle}>
                   포트폴리오 링크
                 </Typography.Title>
                 <List
@@ -155,9 +165,13 @@ export default function MentorDrawer({ applicationId, open, onClose, onActionCom
                     <List.Item>
                       <Space>
                         <Tag>{LINK_TYPE_LABEL[link.linkType] ?? link.linkType}</Tag>
-                        <a href={link.url} target="_blank" rel="noopener noreferrer">
-                          {link.url}
-                        </a>
+                        {isSafeUrl(link.url) ? (
+                          <a href={link.url} target="_blank" rel="noopener noreferrer">
+                            {link.url}
+                          </a>
+                        ) : (
+                          <Text type="danger">유효하지 않은 URL</Text>
+                        )}
                       </Space>
                     </List.Item>
                   )}
@@ -167,7 +181,7 @@ export default function MentorDrawer({ applicationId, open, onClose, onActionCom
 
             {detail.status === 'PENDING' && (
               <>
-                <Typography.Title level={5} style={{ marginTop: 24 }}>
+                <Typography.Title level={5} className={styles.sectionTitle}>
                   관리 액션
                 </Typography.Title>
                 <Space>
@@ -210,7 +224,7 @@ export default function MentorDrawer({ applicationId, open, onClose, onActionCom
         cancelText="취소"
         okButtonProps={{ danger: true, disabled: !rejectionReason.trim() }}
       >
-        <Space direction="vertical" style={{ width: '100%' }}>
+        <Space direction="vertical" className={styles.fullWidth}>
           <Text>거절 사유:</Text>
           <TextArea
             rows={4}

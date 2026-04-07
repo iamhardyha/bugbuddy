@@ -1,9 +1,10 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Button, message, Popconfirm, Space, Table, Tag, Typography } from 'antd';
+import { Button, message, Popconfirm, Space, Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import AdminLayout from '@/components/admin/AdminLayout';
+import FeedDrawer from '@/components/admin/FeedDrawer';
 import type { AdminFeed } from '@/types/admin';
 import {
   getAdminFeeds,
@@ -11,8 +12,6 @@ import {
   restoreFeed,
   deleteFeed,
 } from '@/lib/admin/feeds';
-
-const { Title } = Typography;
 
 function getContentStatusTag(hidden: boolean, deletedAt: string | null) {
   if (deletedAt) return <Tag color="default">삭제됨</Tag>;
@@ -25,6 +24,8 @@ export default function AdminFeedsPage() {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
+  const [selectedFeed, setSelectedFeed] = useState<AdminFeed | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -33,8 +34,8 @@ export default function AdminFeedsPage() {
       if (!res.success || !res.data) throw new Error(res.error?.message);
       setFeeds(res.data.content);
       setTotal(res.data.totalElements);
-    } catch {
-      // handled silently
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : '데이터를 불러오는데 실패했습니다');
     } finally {
       setLoading(false);
     }
@@ -111,17 +112,7 @@ export default function AdminFeedsPage() {
               <Button size="small">숨김</Button>
             </Popconfirm>
           )}
-          {record.hidden && (
-            <Popconfirm
-              title="이 피드를 복원하시겠습니까?"
-              onConfirm={() => handleAction(() => restoreFeed(record.id), '복원되었습니다')}
-              okText="확인"
-              cancelText="취소"
-            >
-              <Button size="small">복원</Button>
-            </Popconfirm>
-          )}
-          {record.deletedAt && (
+          {(record.hidden || record.deletedAt) && (
             <Popconfirm
               title="이 피드를 복원하시겠습니까?"
               onConfirm={() => handleAction(() => restoreFeed(record.id), '복원되었습니다')}
@@ -151,7 +142,6 @@ export default function AdminFeedsPage() {
 
   return (
     <AdminLayout>
-      <Title level={3}>피드 관리</Title>
       <Table<AdminFeed>
         columns={columns}
         dataSource={feeds}
@@ -163,6 +153,24 @@ export default function AdminFeedsPage() {
           pageSize: 20,
           showSizeChanger: false,
           onChange: (p) => setPage(p),
+        }}
+        onRow={(record) => ({
+          onClick: () => {
+            setSelectedFeed(record);
+            setDrawerOpen(true);
+          },
+          style: { cursor: 'pointer' },
+        })}
+      />
+
+      <FeedDrawer
+        feed={selectedFeed}
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        onActionComplete={() => {
+          setDrawerOpen(false);
+          setSelectedFeed(null);
+          fetchData();
         }}
       />
     </AdminLayout>

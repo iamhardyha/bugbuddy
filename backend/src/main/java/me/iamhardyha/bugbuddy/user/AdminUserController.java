@@ -2,7 +2,9 @@ package me.iamhardyha.bugbuddy.user;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import me.iamhardyha.bugbuddy.global.exception.BugBuddyException;
 import me.iamhardyha.bugbuddy.global.response.ApiResponse;
+import me.iamhardyha.bugbuddy.global.response.ErrorCode;
 import me.iamhardyha.bugbuddy.model.enums.MentorStatus;
 import me.iamhardyha.bugbuddy.user.dto.AdminMentorStatusRequest;
 import me.iamhardyha.bugbuddy.user.dto.AdminNicknameRequest;
@@ -35,7 +37,14 @@ public class AdminUserController {
             @RequestParam(required = false) String mentorStatus,
             @RequestParam(required = false) Boolean suspended,
             Pageable pageable) {
-        MentorStatus parsedStatus = (mentorStatus != null) ? MentorStatus.valueOf(mentorStatus) : null;
+        MentorStatus parsedStatus = null;
+        if (mentorStatus != null) {
+            try {
+                parsedStatus = MentorStatus.valueOf(mentorStatus.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new BugBuddyException(ErrorCode.INVALID_INPUT);
+            }
+        }
         return ResponseEntity.ok(ApiResponse.ok(adminUserService.listUsers(keyword, parsedStatus, suspended, pageable)));
     }
 

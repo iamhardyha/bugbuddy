@@ -1,9 +1,10 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Button, message, Popconfirm, Space, Table, Tag, Typography } from 'antd';
+import { Button, message, Popconfirm, Space, Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import AdminLayout from '@/components/admin/AdminLayout';
+import QuestionDrawer from '@/components/admin/QuestionDrawer';
 import type { AdminQuestion } from '@/types/admin';
 import {
   getAdminQuestions,
@@ -11,8 +12,6 @@ import {
   restoreQuestion,
   deleteQuestion,
 } from '@/lib/admin/questions';
-
-const { Title } = Typography;
 
 const STATUS_COLOR: Record<string, string> = {
   OPEN: 'blue',
@@ -31,6 +30,8 @@ export default function AdminQuestionsPage() {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
+  const [selectedQuestion, setSelectedQuestion] = useState<AdminQuestion | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -39,8 +40,8 @@ export default function AdminQuestionsPage() {
       if (!res.success || !res.data) throw new Error(res.error?.message);
       setQuestions(res.data.content);
       setTotal(res.data.totalElements);
-    } catch {
-      // handled silently
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : '데이터를 불러오는데 실패했습니다');
     } finally {
       setLoading(false);
     }
@@ -120,19 +121,7 @@ export default function AdminQuestionsPage() {
               <Button size="small">숨김</Button>
             </Popconfirm>
           )}
-          {record.hidden && (
-            <Popconfirm
-              title="이 질문을 복원하시겠습니까?"
-              onConfirm={() =>
-                handleAction(() => restoreQuestion(record.id), '복원되었습니다')
-              }
-              okText="확인"
-              cancelText="취소"
-            >
-              <Button size="small">복원</Button>
-            </Popconfirm>
-          )}
-          {record.deletedAt && (
+          {(record.hidden || record.deletedAt) && (
             <Popconfirm
               title="이 질문을 복원하시겠습니까?"
               onConfirm={() =>
@@ -166,7 +155,6 @@ export default function AdminQuestionsPage() {
 
   return (
     <AdminLayout>
-      <Title level={3}>질문 관리</Title>
       <Table<AdminQuestion>
         columns={columns}
         dataSource={questions}
@@ -178,6 +166,24 @@ export default function AdminQuestionsPage() {
           pageSize: 20,
           showSizeChanger: false,
           onChange: (p) => setPage(p),
+        }}
+        onRow={(record) => ({
+          onClick: () => {
+            setSelectedQuestion(record);
+            setDrawerOpen(true);
+          },
+          style: { cursor: 'pointer' },
+        })}
+      />
+
+      <QuestionDrawer
+        question={selectedQuestion}
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        onActionComplete={() => {
+          setDrawerOpen(false);
+          setSelectedQuestion(null);
+          fetchData();
         }}
       />
     </AdminLayout>

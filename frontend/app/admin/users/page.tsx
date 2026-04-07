@@ -1,14 +1,13 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Input, Select, Table, Tag, Typography } from 'antd';
+import { Input, message, Select, Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import AdminLayout from '@/components/admin/AdminLayout';
 import UserDrawer from '@/components/admin/UserDrawer';
 import type { AdminUser } from '@/types/admin';
 import { getAdminUsers } from '@/lib/admin/users';
-
-const { Title } = Typography;
+import styles from './page.module.css';
 
 const MENTOR_TAG_COLOR: Record<string, string> = {
   APPROVED: 'green',
@@ -65,8 +64,8 @@ export default function AdminUsersPage() {
       if (!res.success || !res.data) throw new Error(res.error?.message);
       setUsers(res.data.content);
       setTotal(res.data.totalElements);
-    } catch {
-      // error handled silently; table shows empty
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : '데이터를 불러오는데 실패했습니다');
     } finally {
       setLoading(false);
     }
@@ -139,27 +138,25 @@ export default function AdminUsersPage() {
 
   return (
     <AdminLayout>
-      <Title level={3}>사용자 관리</Title>
-
-      <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+      <div className={styles.filterBar}>
         <Input.Search
           placeholder="닉네임 또는 이메일 검색"
           onSearch={handleSearch}
           allowClear
-          style={{ width: 280 }}
+          className={styles.searchInput}
         />
         <Select
           value={mentorStatus}
           onChange={handleMentorStatusChange}
           options={MENTOR_STATUS_OPTIONS}
-          style={{ width: 150 }}
+          className={styles.mentorSelect}
           placeholder="멘토 상태"
         />
         <Select
           value={suspended}
           onChange={handleSuspendedChange}
           options={SUSPENDED_OPTIONS}
-          style={{ width: 130 }}
+          className={styles.suspendedSelect}
           placeholder="정지 여부"
         />
       </div>

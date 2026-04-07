@@ -217,6 +217,9 @@ public class AdminDashboardService {
     // ── private helpers ──
 
     private long countFrom(String table) {
+        if (!TYPE_TO_TABLE.containsValue(table)) {
+            throw new IllegalArgumentException("Invalid table name: " + table);
+        }
         return ((Number) em.createNativeQuery(
                 "SELECT COUNT(*) FROM " + table + " WHERE deleted_at IS NULL"
         ).getSingleResult()).longValue();

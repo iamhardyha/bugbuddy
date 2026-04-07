@@ -1,5 +1,6 @@
 package me.iamhardyha.bugbuddy.report;
 
+import jakarta.validation.Valid;
 import me.iamhardyha.bugbuddy.global.response.ApiResponse;
 import me.iamhardyha.bugbuddy.model.enums.ReportStatus;
 import me.iamhardyha.bugbuddy.report.dto.AdminResolveRequest;
@@ -44,7 +45,7 @@ public class AdminReportController {
     public ResponseEntity<ApiResponse<ReportResponse>> resolveReport(
             @PathVariable Long id,
             @AuthenticationPrincipal Long adminUserId,
-            @RequestBody(required = false) AdminResolveRequest request) {
+            @RequestBody(required = false) @Valid AdminResolveRequest request) {
         AdminResolveRequest resolveRequest = request != null ? request : new AdminResolveRequest(false, 0);
         return ResponseEntity.ok(ApiResponse.ok(reportService.resolveReport(id, adminUserId, resolveRequest)));
     }

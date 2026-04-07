@@ -1,15 +1,21 @@
 .layout {
   min-height: 100vh;
+  background: var(--bg-base);
 }
 
+/* ─── Sidebar ─── */
 .sider {
-  overflow: auto;
+  overflow: hidden;
   height: 100vh;
-  position: fixed;
+  position: fixed !important;
   left: 0;
   top: 0;
   bottom: 0;
   z-index: 10;
+  background: var(--bg-surface) !important;
+  border-right: 1px solid var(--border-faint);
+  display: flex;
+  flex-direction: column;
 }
 
 .logo {
@@ -17,34 +23,76 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  gap: 10px;
+  font-size: 15px;
   font-weight: 700;
-  color: var(--ant-color-primary);
+  color: var(--color-primary, #5548e0);
   white-space: nowrap;
   overflow: hidden;
+  border-bottom: 1px solid var(--border-faint);
+  letter-spacing: -0.3px;
+  flex-shrink: 0;
+}
+
+.logoIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #5548e0 0%, #7c6fef 100%);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  flex-shrink: 0;
 }
 
 .logoCollapsed {
   font-size: 14px;
 }
 
-.header {
-  padding: 0 24px;
+.menu {
+  flex: 1;
+  overflow-y: auto;
+  border-inline-end: none !important;
+}
+
+.siderBottom {
+  flex-shrink: 0;
+  border-top: 1px solid var(--border-faint);
+  padding: 8px;
   display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 16px;
-  position: sticky;
-  top: 0;
-  z-index: 5;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.adminLabel {
-  font-size: 14px;
-  font-weight: 500;
+.collapseButton {
+  width: 100%;
+  text-align: center;
 }
 
+.logoutButton {
+  width: 100%;
+  text-align: center;
+}
+
+/* ─── Inner layout ─── */
+.innerLayout {
+  transition: margin-left 0.2s;
+  background: var(--bg-base);
+}
+
+.innerLayoutExpanded {
+  margin-left: 220px;
+}
+
+.innerLayoutCollapsed {
+  margin-left: 64px;
+}
+
+/* ─── Content ─── */
 .content {
-  margin: 24px;
-  min-height: 280px;
+  padding: 24px;
+  min-height: 100vh;
 }

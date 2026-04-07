@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import StatCard from '@/components/admin/StatCard';
 import TrendChart from '@/components/admin/TrendChart';
@@ -31,6 +31,7 @@ import {
   List,
   Badge,
   Typography,
+  theme,
 } from 'antd';
 import {
   UserOutlined,
@@ -40,8 +41,9 @@ import {
   UserAddOutlined,
 } from '@ant-design/icons';
 import type { TableColumnsType } from 'antd';
+import styles from './page.module.css';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const TREND_TYPE_OPTIONS = [
   { label: '사용자', value: 'USERS' },
@@ -61,7 +63,10 @@ const XP_COLUMNS: TableColumnsType<LevelCount> = [
   { title: '사용자 수', dataIndex: 'userCount', key: 'userCount' },
 ];
 
+const PRIMARY_COLOR = '#5548e0';
+
 export default function AdminDashboardPage() {
+  const { token } = theme.useToken();
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [trendPoints, setTrendPoints] = useState<TrendPoint[]>([]);
   const [activeUsers, setActiveUsers] = useState<ActiveUsers | null>(null);
@@ -105,23 +110,21 @@ export default function AdminDashboardPage() {
   }, []);
 
   // Fetch trends when type or period changes
-  const fetchTrends = useCallback(async (type: string, period: string) => {
-    setTrendLoading(true);
-    const res = await getTrends(type, period);
-    if (res.success && res.data) {
-      setTrendPoints(res.data.points);
-    }
-    setTrendLoading(false);
-  }, []);
-
   useEffect(() => {
-    fetchTrends(trendType, trendPeriod);
-  }, [trendType, trendPeriod, fetchTrends]);
+    let cancelled = false;
+    setTrendLoading(true);
+    getTrends(trendType, trendPeriod).then((res) => {
+      if (cancelled) return;
+      if (res.success && res.data) {
+        setTrendPoints(res.data.points);
+      }
+      setTrendLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, [trendType, trendPeriod]);
 
   return (
     <AdminLayout>
-      <Title level={3}>대시보드</Title>
-
       {/* Summary stat cards */}
       <Spin spinning={loading}>
         <Row gutter={[16, 16]}>
@@ -131,6 +134,7 @@ export default function AdminDashboardPage() {
               value={summary?.totalUsers ?? 0}
               icon={<UserOutlined />}
               loading={loading}
+              color="#5548e0"
             />
           </Col>
           <Col xs={24} sm={12} lg={6}>
@@ -139,6 +143,7 @@ export default function AdminDashboardPage() {
               value={summary?.totalQuestions ?? 0}
               icon={<QuestionCircleOutlined />}
               loading={loading}
+              color="#0891b2"
             />
           </Col>
           <Col xs={24} sm={12} lg={6}>
@@ -147,6 +152,7 @@ export default function AdminDashboardPage() {
               value={summary?.totalAnswers ?? 0}
               icon={<MessageOutlined />}
               loading={loading}
+              color="#059669"
             />
           </Col>
           <Col xs={24} sm={12} lg={6}>
@@ -155,39 +161,38 @@ export default function AdminDashboardPage() {
               value={summary?.totalFeeds ?? 0}
               icon={<ReadOutlined />}
               loading={loading}
+              color="#d97706"
             />
           </Col>
         </Row>
 
         {summary && (
-          <Row style={{ marginTop: 8 }}>
-            <Col>
-              <Text type="secondary">
-                <UserAddOutlined style={{ marginRight: 4 }} />
-                오늘 가입자: {summary.todaySignups}명
-              </Text>
-            </Col>
-          </Row>
+          <div className={styles.todaySignups}>
+            <UserAddOutlined className={styles.todaySignupsIcon} />
+            <Text type="secondary">
+              오늘 가입자: <strong>{summary.todaySignups}명</strong>
+            </Text>
+          </div>
         )}
       </Spin>
 
       {/* Trend chart */}
       <Card
         title="트렌드"
-        style={{ marginTop: 24 }}
+        className={styles.trendCard}
         extra={
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div className={styles.trendSelects}>
             <Select
               value={trendType}
               onChange={setTrendType}
               options={TREND_TYPE_OPTIONS}
-              style={{ width: 100 }}
+              className={styles.trendSelect}
             />
             <Select
               value={trendPeriod}
               onChange={setTrendPeriod}
               options={TREND_PERIOD_OPTIONS}
-              style={{ width: 100 }}
+              className={styles.trendSelect}
             />
           </div>
         }
@@ -196,7 +201,7 @@ export default function AdminDashboardPage() {
       </Card>
 
       {/* Active users + Report summary */}
-      <Row gutter={[16, 16]} style={{ marginTop: 24 }}>
+      <Row gutter={[16, 16]} className={styles.sectionRow}>
         <Col xs={24} lg={12}>
           <Card title="활성 사용자" loading={loading}>
             {activeUsers && (
@@ -224,32 +229,32 @@ export default function AdminDashboardPage() {
                     <Statistic
                       title="접수"
                       value={reportSummary.openCount}
-                      valueStyle={{ color: '#cf1322' }}
+                      valueStyle={{ color: token.colorError }}
                     />
                   </Col>
                   <Col span={6}>
                     <Statistic
                       title="검토 중"
                       value={reportSummary.reviewingCount}
-                      valueStyle={{ color: '#d46b08' }}
+                      valueStyle={{ color: token.colorWarning }}
                     />
                   </Col>
                   <Col span={6}>
                     <Statistic
                       title="처리 완료"
                       value={reportSummary.resolvedCount}
-                      valueStyle={{ color: '#389e0d' }}
+                      valueStyle={{ color: token.colorSuccess }}
                     />
                   </Col>
                   <Col span={6}>
                     <Statistic
                       title="반려"
                       value={reportSummary.rejectedCount}
-                      valueStyle={{ color: '#8c8c8c' }}
+                      valueStyle={{ color: token.colorTextTertiary }}
                     />
                   </Col>
                 </Row>
-                <div style={{ marginTop: 12 }}>
+                <div className={styles.pendingMentors}>
                   <Text type="secondary">
                     대기 중 멘토 신청: {reportSummary.pendingMentorApps}건
                   </Text>
@@ -261,7 +266,7 @@ export default function AdminDashboardPage() {
       </Row>
 
       {/* Tag ranking + XP distribution */}
-      <Row gutter={[16, 16]} style={{ marginTop: 24 }}>
+      <Row gutter={[16, 16]} className={styles.sectionRow}>
         <Col xs={24} lg={12}>
           <Card title="인기 태그 Top 10" loading={loading}>
             <List
@@ -269,7 +274,7 @@ export default function AdminDashboardPage() {
               renderItem={(tag, index) => (
                 <List.Item>
                   <Text>{index + 1}. {tag.tagName}</Text>
-                  <Badge count={tag.count} showZero style={{ backgroundColor: '#1677ff' }} />
+                  <Badge count={tag.count} showZero style={{ backgroundColor: PRIMARY_COLOR }} />
                 </List.Item>
               )}
             />

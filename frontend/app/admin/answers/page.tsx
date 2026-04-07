@@ -1,9 +1,10 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Button, message, Popconfirm, Space, Table, Tag, Typography } from 'antd';
+import { Button, message, Popconfirm, Space, Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import AdminLayout from '@/components/admin/AdminLayout';
+import AnswerDrawer from '@/components/admin/AnswerDrawer';
 import type { AdminAnswer } from '@/types/admin';
 import {
   getAdminAnswers,
@@ -11,8 +12,6 @@ import {
   restoreAnswer,
   deleteAnswer,
 } from '@/lib/admin/answers';
-
-const { Title } = Typography;
 
 function getContentStatusTag(hidden: boolean, deletedAt: string | null) {
   if (deletedAt) return <Tag color="default">삭제됨</Tag>;
@@ -25,6 +24,8 @@ export default function AdminAnswersPage() {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
+  const [selectedAnswer, setSelectedAnswer] = useState<AdminAnswer | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -33,8 +34,8 @@ export default function AdminAnswersPage() {
       if (!res.success || !res.data) throw new Error(res.error?.message);
       setAnswers(res.data.content);
       setTotal(res.data.totalElements);
-    } catch {
-      // handled silently
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : '데이터를 불러오는데 실패했습니다');
     } finally {
       setLoading(false);
     }
@@ -114,17 +115,7 @@ export default function AdminAnswersPage() {
               <Button size="small">숨김</Button>
             </Popconfirm>
           )}
-          {record.hidden && (
-            <Popconfirm
-              title="이 답변을 복원하시겠습니까?"
-              onConfirm={() => handleAction(() => restoreAnswer(record.id), '복원되었습니다')}
-              okText="확인"
-              cancelText="취소"
-            >
-              <Button size="small">복원</Button>
-            </Popconfirm>
-          )}
-          {record.deletedAt && (
+          {(record.hidden || record.deletedAt) && (
             <Popconfirm
               title="이 답변을 복원하시겠습니까?"
               onConfirm={() => handleAction(() => restoreAnswer(record.id), '복원되었습니다')}
@@ -154,7 +145,6 @@ export default function AdminAnswersPage() {
 
   return (
     <AdminLayout>
-      <Title level={3}>답변 관리</Title>
       <Table<AdminAnswer>
         columns={columns}
         dataSource={answers}
@@ -166,6 +156,24 @@ export default function AdminAnswersPage() {
           pageSize: 20,
           showSizeChanger: false,
           onChange: (p) => setPage(p),
+        }}
+        onRow={(record) => ({
+          onClick: () => {
+            setSelectedAnswer(record);
+            setDrawerOpen(true);
+          },
+          style: { cursor: 'pointer' },
+        })}
+      />
+
+      <AnswerDrawer
+        answer={selectedAnswer}
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        onActionComplete={() => {
+          setDrawerOpen(false);
+          setSelectedAnswer(null);
+          fetchData();
         }}
       />
     </AdminLayout>

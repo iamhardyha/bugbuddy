@@ -1,14 +1,13 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Table, Tabs, Tag, Typography } from 'antd';
+import { message, Table, Tabs, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import AdminLayout from '@/components/admin/AdminLayout';
 import MentorDrawer from '@/components/admin/MentorDrawer';
 import type { AdminMentorApp } from '@/types/admin';
 import { getAdminMentorApps } from '@/lib/admin/mentors';
-
-const { Title } = Typography;
+import styles from './page.module.css';
 
 const STATUS_COLOR: Record<string, string> = {
   PENDING: 'orange',
@@ -39,8 +38,8 @@ export default function AdminMentorsPage() {
       if (!res.success || !res.data) throw new Error(res.error?.message);
       setApps(res.data.content);
       setTotal(res.data.totalElements);
-    } catch {
-      // handled silently
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : '데이터를 불러오는데 실패했습니다');
     } finally {
       setLoading(false);
     }
@@ -91,13 +90,11 @@ export default function AdminMentorsPage() {
 
   return (
     <AdminLayout>
-      <Title level={3}>멘토 신청 관리</Title>
-
       <Tabs
         activeKey={status}
         onChange={handleTabChange}
         items={STATUS_TABS.map((tab) => ({ key: tab.key, label: tab.label }))}
-        style={{ marginBottom: 16 }}
+        className={styles.tabs}
       />
 
       <Table<AdminMentorApp>
