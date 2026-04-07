@@ -59,7 +59,6 @@ export default function ChatRoomPage() {
     if (msg.messageType === 'SYSTEM' && msg.content.includes('종료')) {
       setRoom(prev => prev ? { ...prev, status: 'CLOSED', closedAt: msg.createdAt } : prev);
       setAllRooms(prev => prev.map(r => r.id === roomId ? { ...r, status: 'CLOSED' as const } : r));
-      setFeedbackOpen(true);
     }
 
     markAsRead(roomId);
@@ -73,7 +72,6 @@ export default function ChatRoomPage() {
       setAllRooms(prev => prev.map(r => r.id === event.roomId ? { ...r, status: 'CLOSED' as const } : r));
       if (event.roomId === roomId) {
         setRoom(prev => prev ? { ...prev, status: 'CLOSED' } : prev);
-        setFeedbackOpen(true);
       }
     } else if (event.type === 'NEW_MESSAGE' && event.lastMessageContent) {
       setAllRooms(prev => prev.map(r =>
@@ -101,23 +99,28 @@ export default function ChatRoomPage() {
       return;
     }
     async function load() {
-      const [roomsRes, messagesRes, userRes] = await Promise.all([
-        getChatRooms(),
-        getChatMessages(roomId),
-        apiFetch<UserProfile>('/api/auth/me'),
-      ]);
-      if (roomsRes.success && roomsRes.data) {
-        setAllRooms(roomsRes.data);
-        const found = roomsRes.data.find(r => r.id === roomId);
-        if (found) {
-          setRoom(found);
-          if (found.myFeedbackSubmitted) setFeedbackSubmitted(true);
+      try {
+        const [roomsRes, messagesRes, userRes] = await Promise.all([
+          getChatRooms(),
+          getChatMessages(roomId),
+          apiFetch<UserProfile>('/api/auth/me'),
+        ]);
+        if (roomsRes.success && roomsRes.data) {
+          setAllRooms(roomsRes.data);
+          const found = roomsRes.data.find(r => r.id === roomId);
+          if (found) {
+            setRoom(found);
+            if (found.myFeedbackSubmitted) setFeedbackSubmitted(true);
+          }
         }
+        if (messagesRes.success && messagesRes.data) setMessages(messagesRes.data.content);
+        if (userRes.success && userRes.data) setCurrentUser(userRes.data);
+        markAsRead(roomId);
+      } catch {
+        // 네트워크 오류 시에도 로딩 해제
+      } finally {
+        setLoading(false);
       }
-      if (messagesRes.success && messagesRes.data) setMessages(messagesRes.data.content);
-      if (userRes.success && userRes.data) setCurrentUser(userRes.data);
-      setLoading(false);
-      markAsRead(roomId);
     }
     load();
   }, [roomId, router]);

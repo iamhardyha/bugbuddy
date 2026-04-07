@@ -27,13 +27,18 @@ export default function ChatListPage() {
       return;
     }
     async function load() {
-      const [roomsRes, userRes] = await Promise.all([
-        getChatRooms(),
-        apiFetch<UserProfile>('/api/auth/me'),
-      ]);
-      if (roomsRes.success && roomsRes.data) setRooms(roomsRes.data);
-      if (userRes.success && userRes.data) setCurrentUser(userRes.data);
-      setLoading(false);
+      try {
+        const [roomsRes, userRes] = await Promise.all([
+          getChatRooms(),
+          apiFetch<UserProfile>('/api/auth/me'),
+        ]);
+        if (roomsRes.success && roomsRes.data) setRooms(roomsRes.data);
+        if (userRes.success && userRes.data) setCurrentUser(userRes.data);
+      } catch {
+        // 네트워크 오류 시에도 빈 상태로 렌더링
+      } finally {
+        setLoading(false);
+      }
     }
     load();
   }, [router]);

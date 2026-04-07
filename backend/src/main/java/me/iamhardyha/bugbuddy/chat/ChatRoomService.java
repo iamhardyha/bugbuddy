@@ -122,52 +122,12 @@ public class ChatRoomService {
                 .stream()
                 .collect(Collectors.toMap(ChatMessage::getRoomId, m -> m));
 
-        // 3. Batch unread counts — split into "read" and "never read" rooms
-        Map<Long, Long> lastReadIdMap = new HashMap<>();
-        List<Long> neverReadRoomIds = new ArrayList<>();
-        List<Long> readRoomIds = new ArrayList<>();
-
-        for (ChatRoom room : rooms) {
-            Long lastReadId = room.getMentor().getId().equals(userId)
-                    ? room.getMentorLastReadMessageId()
-                    : room.getMenteeLastReadMessageId();
-            if (lastReadId != null) {
-                lastReadIdMap.put(room.getId(), lastReadId);
-                readRoomIds.add(room.getId());
-            } else {
-                neverReadRoomIds.add(room.getId());
-            }
-        }
-
+        // 3. Batch unread counts — 단일 네이티브 쿼리로 방별 lastReadId 기반 안읽음 카운트 (N+1 제거)
         Map<Long, Long> unreadCountMap = new HashMap<>();
 
-        // For rooms with lastReadId, query unread per-room using the minimum lastReadId
-        // We need per-room unread counts, so we query rooms that have been read
-        if (!readRoomIds.isEmpty()) {
-            // We need to query each group by lastReadId — but for simplicity, use per-room single-query approach
-            // For batch: query all with min lastReadId, then filter in memory
-            Long minLastReadId = lastReadIdMap.values().stream().min(Long::compareTo).orElse(0L);
-            List<Object[]> unreadResults = chatMessageRepository.countUnreadByRoomIdsAfter(readRoomIds, userId, minLastReadId);
-            Map<Long, Long> rawUnreadMap = new HashMap<>();
-            for (Object[] row : unreadResults) {
-                rawUnreadMap.put((Long) row[0], (Long) row[1]);
-            }
-            // The batch query used minLastReadId which may over-count for rooms with a higher lastReadId.
-            // For correctness, we re-query per room or accept the slight over-count.
-            // Better approach: use individual per-room lastReadId via the existing single queries.
-            // Since the batch approach with a single lastReadId is imprecise, let's use per-room queries for read rooms.
-            for (Long roomId : readRoomIds) {
-                Long lastReadId = lastReadIdMap.get(roomId);
-                long count = chatMessageRepository.countUnreadAfter(roomId, lastReadId, userId);
-                unreadCountMap.put(roomId, count);
-            }
-        }
-
-        if (!neverReadRoomIds.isEmpty()) {
-            List<Object[]> neverReadResults = chatMessageRepository.countAllFromOthersByRoomIds(neverReadRoomIds, userId);
-            for (Object[] row : neverReadResults) {
-                unreadCountMap.put((Long) row[0], (Long) row[1]);
-            }
+        List<Object[]> unreadResults = chatMessageRepository.countUnreadByRoomIdsWithPerRoomLastRead(roomIds, userId);
+        for (Object[] row : unreadResults) {
+            unreadCountMap.put(((Number) row[0]).longValue(), ((Number) row[1]).longValue());
         }
 
         // 4. Batch feedback submitted — 1 query

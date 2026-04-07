@@ -8,4 +8,6 @@ import java.util.List;
 public interface MentorApplicationLinkRepository extends JpaRepository<MentorApplicationLink, Long> {
 
     List<MentorApplicationLink> findAllByMentorApplicationId(Long mentorApplicationId);
+
+    List<MentorApplicationLink> findAllByMentorApplicationIdIn(java.util.Collection<Long> mentorApplicationIds);
 }

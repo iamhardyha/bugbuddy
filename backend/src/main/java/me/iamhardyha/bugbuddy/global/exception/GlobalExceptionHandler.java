@@ -12,8 +12,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.stream.Collectors;
@@ -62,6 +64,23 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(ApiResponse.fail(ErrorCode.NOT_FOUND.name(), ErrorCode.NOT_FOUND.getMessage()));
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ApiResponse<Void>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        String paramName = ex.getName();
+        String message = String.format("잘못된 값입니다: '%s'", paramName);
+        return ResponseEntity
+                .badRequest()
+                .body(ApiResponse.fail(ErrorCode.INVALID_INPUT.name(), message));
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ApiResponse<Void>> handleMissingParam(MissingServletRequestParameterException ex) {
+        String message = String.format("필수 파라미터가 누락되었습니다: '%s'", ex.getParameterName());
+        return ResponseEntity
+                .badRequest()
+                .body(ApiResponse.fail(ErrorCode.INVALID_INPUT.name(), message));
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)

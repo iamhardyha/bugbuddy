@@ -16,7 +16,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -61,13 +64,20 @@ public class ChatMessageService {
         return response;
     }
 
-    /** 메시지 히스토리 조회 (페이징). */
+    /** 메시지 히스토리 조회 (페이징) — 배치 닉네임 조회로 N+1 방지. */
     public Page<ChatMessageResponse> getMessages(Long roomId, Long userId, Pageable pageable) {
         ChatRoom room = findActiveRoom(roomId);
         assertRoomAccess(room, userId);
 
-        return chatMessageRepository.findActiveByRoomId(roomId, pageable)
-                .map(msg -> ChatMessageResponse.of(msg, userNicknameResolver.resolve(msg.getSenderUserId())));
+        Page<ChatMessage> messages = chatMessageRepository.findActiveByRoomId(roomId, pageable);
+
+        Set<Long> senderIds = messages.getContent().stream()
+                .map(ChatMessage::getSenderUserId)
+                .collect(Collectors.toSet());
+        Map<Long, String> nicknameMap = userNicknameResolver.resolveAll(senderIds);
+
+        return messages.map(msg -> ChatMessageResponse.of(
+                msg, nicknameMap.getOrDefault(msg.getSenderUserId(), "알 수 없는 사용자")));
     }
 
     /** 채팅방 읽음 처리 — 마지막 메시지 ID를 lastReadMessageId에 저장. */

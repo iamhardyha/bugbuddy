@@ -37,6 +37,7 @@ export default function EditQuestionPage() {
       if (res.success && res.data) {
         const q = res.data;
         if (q.status === 'CLOSED') {
+          setLoading(false);
           router.replace(`/questions/${id}`);
           return;
         }
@@ -73,6 +74,14 @@ export default function EditQuestionPage() {
     e.preventDefault();
     if (!category || !questionType) {
       setError('카테고리와 질문 유형을 선택해주세요.');
+      return;
+    }
+    if (!title.trim()) {
+      setError('제목을 입력해주세요.');
+      return;
+    }
+    if (!body.trim()) {
+      setError('내용을 입력해주세요.');
       return;
     }
 

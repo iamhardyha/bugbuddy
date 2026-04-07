@@ -70,7 +70,8 @@ export async function apiFetch<T>(
     if (newToken) {
       return apiFetch<T>(path, options, false);
     }
-    window.location.href = '/';
+    if (typeof window !== 'undefined') window.location.href = '/';
+    return { success: false, data: null, error: { code: 'UNAUTHORIZED', message: '로그인이 필요합니다.' } };
   }
 
   try {

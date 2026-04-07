@@ -50,21 +50,38 @@ public class TagService {
             return List.of();
         }
 
-        return tagNames.stream().map(name -> {
-            Tag tag = tagRepository.findActiveByName(name)
-                    .orElseGet(() -> {
-                        Tag newTag = new Tag();
-                        newTag.setName(name);
-                        newTag.setOfficial(false);
-                        return tagRepository.save(newTag);
-                    });
+        // 1. 배치 조회: 기존 태그를 한 번에 가져오기
+        List<Tag> existingTags = tagRepository.findAllActive();
+        Map<String, Tag> existingTagMap = existingTags.stream()
+                .collect(Collectors.toMap(Tag::getName, t -> t));
 
-            QuestionTag questionTag = new QuestionTag();
-            questionTag.setQuestionId(questionId);
-            questionTag.setTagId(tag.getId());
-            questionTagRepository.save(questionTag);
+        // 2. 새 태그 생성 + 기존 태그 매핑
+        List<Tag> newTags = new ArrayList<>();
+        List<Tag> resolvedTags = new ArrayList<>();
+        for (String name : tagNames) {
+            Tag existing = existingTagMap.get(name);
+            if (existing != null) {
+                resolvedTags.add(existing);
+            } else {
+                Tag newTag = new Tag();
+                newTag.setName(name);
+                newTag.setOfficial(false);
+                newTags.add(newTag);
+            }
+        }
+        if (!newTags.isEmpty()) {
+            resolvedTags.addAll(tagRepository.saveAll(newTags));
+        }
 
-            return tag.getName();
+        // 3. QuestionTag 배치 저장
+        List<QuestionTag> questionTags = resolvedTags.stream().map(tag -> {
+            QuestionTag qt = new QuestionTag();
+            qt.setQuestionId(questionId);
+            qt.setTagId(tag.getId());
+            return qt;
         }).toList();
+        questionTagRepository.saveAll(questionTags);
+
+        return resolvedTags.stream().map(Tag::getName).toList();
     }
 }

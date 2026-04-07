@@ -28,6 +28,10 @@ export function useStompChat(roomId: number, onMessage: (msg: ChatMessage) => vo
       const client = new Client({
         webSocketFactory: () => new SockJS(`${BASE_URL}/ws`),
         connectHeaders: { Authorization: `Bearer ${token ?? ''}` },
+        beforeConnect: () => {
+          const freshToken = getAccessToken();
+          client.connectHeaders = { Authorization: `Bearer ${freshToken ?? ''}` };
+        },
         reconnectDelay: 3000,
         onConnect: () => {
           if (!active) { client.deactivate(); return; }

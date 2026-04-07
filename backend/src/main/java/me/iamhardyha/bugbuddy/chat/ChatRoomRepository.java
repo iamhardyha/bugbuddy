@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 
-    @Query("SELECT r FROM ChatRoom r WHERE r.id = :id")
+    @Query("SELECT r FROM ChatRoom r JOIN FETCH r.mentor JOIN FETCH r.mentee LEFT JOIN FETCH r.question WHERE r.id = :id")
     Optional<ChatRoom> findActiveById(@Param("id") Long id);
 
     @Query("SELECT r FROM ChatRoom r JOIN FETCH r.mentor JOIN FETCH r.mentee LEFT JOIN FETCH r.question WHERE (r.mentor.id = :userId OR r.mentee.id = :userId) ORDER BY r.createdAt DESC")

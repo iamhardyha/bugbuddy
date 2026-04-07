@@ -33,9 +33,21 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
     @Query("SELECT m FROM ChatMessage m WHERE m.id IN (SELECT MAX(m2.id) FROM ChatMessage m2 WHERE m2.roomId IN :roomIds GROUP BY m2.roomId)")
     List<ChatMessage> findLastMessagesByRoomIds(@Param("roomIds") Collection<Long> roomIds);
 
-    /** Batch: unread count per room (for users who have read before). */
+    /** Batch: unread count per room (for users who have read before) — uses per-room lastReadId via temp table pattern. */
     @Query("SELECT m.roomId, COUNT(m) FROM ChatMessage m WHERE m.roomId IN :roomIds AND m.senderUserId != :userId AND m.id > :lastReadId GROUP BY m.roomId")
     List<Object[]> countUnreadByRoomIdsAfter(@Param("roomIds") Collection<Long> roomIds, @Param("userId") Long userId, @Param("lastReadId") Long lastReadId);
+
+    /** Batch: per-room unread count with individual lastReadId per room. */
+    @Query(value = "SELECT m.room_id, COUNT(*) FROM chat_messages m " +
+            "INNER JOIN chat_rooms r ON r.id = m.room_id " +
+            "WHERE m.room_id IN :roomIds " +
+            "AND m.sender_user_id != :userId " +
+            "AND m.id > CASE " +
+            "  WHEN r.mentor_user_id = :userId THEN COALESCE(r.mentor_last_read_message_id, 0) " +
+            "  ELSE COALESCE(r.mentee_last_read_message_id, 0) " +
+            "END " +
+            "GROUP BY m.room_id", nativeQuery = true)
+    List<Object[]> countUnreadByRoomIdsWithPerRoomLastRead(@Param("roomIds") Collection<Long> roomIds, @Param("userId") Long userId);
 
     /** Batch: total message count from others per room (for users who never read). */
     @Query("SELECT m.roomId, COUNT(m) FROM ChatMessage m WHERE m.roomId IN :roomIds AND m.senderUserId != :userId GROUP BY m.roomId")

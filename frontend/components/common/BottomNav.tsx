@@ -4,13 +4,17 @@ import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   HomeOutlined, HomeFilled,
+  ReadOutlined, ReadFilled,
   MessageOutlined, MessageFilled,
   BellOutlined, BellFilled,
-  UserOutlined,
+  UserOutlined, UserSwitchOutlined,
 } from '@ant-design/icons';
+import { message } from 'antd';
 import { getAccessToken } from '@/lib/auth';
 import { getUnreadCount } from '@/lib/notifications';
 import styles from './BottomNav.module.css';
+
+const AUTH_FREE_TABS = new Set(['home', 'feeds']);
 
 interface Tab {
   key: string;
@@ -24,11 +28,19 @@ interface Tab {
 const TABS: Tab[] = [
   {
     key: 'home',
-    label: '홈',
+    label: 'Q&A',
     path: '/',
     icon: <HomeOutlined />,
     activeIcon: <HomeFilled />,
     matchPaths: ['/', '/questions'],
+  },
+  {
+    key: 'feeds',
+    label: 'TechFeed',
+    path: '/feeds',
+    icon: <ReadOutlined />,
+    activeIcon: <ReadFilled />,
+    matchPaths: ['/feeds'],
   },
   {
     key: 'chat',
@@ -51,7 +63,7 @@ const TABS: Tab[] = [
     label: 'MY',
     path: '/settings/profile',
     icon: <UserOutlined />,
-    activeIcon: <UserOutlined />,
+    activeIcon: <UserSwitchOutlined />,
     matchPaths: ['/settings', '/users'],
   },
 ];
@@ -69,14 +81,13 @@ export default function BottomNav() {
   }, [pathname]); // refetch on navigation
 
   function isActive(tab: Tab): boolean {
-    if (tab.key === 'home') return pathname === '/';
+    if (tab.key === 'home') return pathname === '/' || pathname.startsWith('/questions');
     return tab.matchPaths.some(p => pathname.startsWith(p));
   }
 
   function handleClick(tab: Tab) {
-    if (!getAccessToken() && tab.key !== 'home') {
-      // Not logged in — could redirect to login or just go home
-      router.push('/');
+    if (!getAccessToken() && !AUTH_FREE_TABS.has(tab.key)) {
+      message.info('로그인이 필요합니다.');
       return;
     }
     router.push(tab.path);

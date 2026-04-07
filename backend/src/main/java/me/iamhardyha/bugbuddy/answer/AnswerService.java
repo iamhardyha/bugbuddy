@@ -31,8 +31,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -136,9 +137,6 @@ public class AnswerService {
 
     @Transactional
     public AnswerResponse update(Long userId, Long questionId, Long answerId, AnswerUpdateRequest request) {
-        questionRepository.findActiveById(questionId)
-                .orElseThrow(() -> new BugBuddyException(ErrorCode.QUESTION_NOT_FOUND));
-
         Answer answer = findActiveAnswerInQuestion(answerId, questionId);
 
         if (!answer.getAuthor().getId().equals(userId)) {
@@ -147,9 +145,7 @@ public class AnswerService {
 
         answer.setBody(request.body());
 
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new BugBuddyException(ErrorCode.USER_NOT_FOUND));
-        boolean isMentor = user.getMentorStatus() == MentorStatus.APPROVED;
+        boolean isMentor = answer.getAuthor().getMentorStatus() == MentorStatus.APPROVED;
         answer.setAllowOneToOne(request.allowOneToOne() && isMentor);
 
         uploadService.linkUploads(request.uploadIds(), userId, ReferenceType.ANSWER, answerId);
@@ -164,9 +160,6 @@ public class AnswerService {
 
     @Transactional
     public void delete(Long userId, Long questionId, Long answerId) {
-        questionRepository.findActiveById(questionId)
-                .orElseThrow(() -> new BugBuddyException(ErrorCode.QUESTION_NOT_FOUND));
-
         Answer answer = findActiveAnswerInQuestion(answerId, questionId);
 
         if (!answer.getAuthor().getId().equals(userId)) {
@@ -204,9 +197,6 @@ public class AnswerService {
 
     @Transactional
     public AnswerResponse addReaction(Long userId, Long questionId, Long answerId) {
-        questionRepository.findActiveById(questionId)
-                .orElseThrow(() -> new BugBuddyException(ErrorCode.QUESTION_NOT_FOUND));
-
         Answer answer = findActiveAnswerInQuestion(answerId, questionId);
 
         if (answer.getAuthor().getId().equals(userId)) {
@@ -242,9 +232,6 @@ public class AnswerService {
 
     @Transactional
     public AnswerResponse removeReaction(Long userId, Long questionId, Long answerId) {
-        questionRepository.findActiveById(questionId)
-                .orElseThrow(() -> new BugBuddyException(ErrorCode.QUESTION_NOT_FOUND));
-
         Answer answer = findActiveAnswerInQuestion(answerId, questionId);
 
         AnswerReaction reaction = answerReactionRepository
@@ -297,12 +284,25 @@ public class AnswerService {
                 ((Number) row[1]).longValue(),
                 (String) row[2],
                 (String) row[3],
-                ((Number) row[4]).intValue() == 1,
-                ((Number) row[5]).intValue() == 1,
-                row[6] != null ? ((Timestamp) row[6]).toInstant() : null,
-                row[7] != null ? ((Timestamp) row[7]).toInstant() : null,
+                toBoolean(row[4]),
+                toBoolean(row[5]),
+                toInstant(row[6]),
+                toInstant(row[7]),
                 ((Number) row[8]).longValue(),
                 (String) row[9]
         );
+    }
+
+    private static boolean toBoolean(Object value) {
+        if (value instanceof Boolean b) return b;
+        if (value instanceof Number n) return n.intValue() == 1;
+        return false;
+    }
+
+    private static Instant toInstant(Object value) {
+        if (value == null) return null;
+        if (value instanceof LocalDateTime ldt) return ldt.toInstant(ZoneOffset.UTC);
+        if (value instanceof java.sql.Timestamp ts) return ts.toInstant();
+        return Instant.parse(value.toString());
     }
 }

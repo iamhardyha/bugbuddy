@@ -41,8 +41,8 @@
   display: none;
 }
 
-/* Desktop (≥ 768px) overrides */
-@media (min-width: 768px) {
+/* Desktop (≥ 640px) overrides — BottomNav 브레이크포인트와 통일 */
+@media (min-width: 640px) {
   /* /chat/[id] — 사이드바 보이기 */
   .panelLeftDesktopOnly {
     display: flex;
@@ -60,8 +60,8 @@
   }
 }
 
-/* Mobile (< 768px) overrides */
-@media (max-width: 767px) {
+/* Mobile (< 640px) overrides — BottomNav 브레이크포인트와 통일 */
+@media (max-width: 639px) {
   .layout {
     border-left: none;
     border-right: none;

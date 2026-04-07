@@ -32,17 +32,15 @@
   flex-shrink: 0;
 }
 
-/* Desktop (≥ 768px) overrides */
-@media (min-width: 768px) {
-  /* 뒤로가기 버튼 숨김 */
+/* Desktop (≥ 640px) overrides — BottomNav 브레이크포인트와 통일 */
+@media (min-width: 640px) {
   .backBtn {
     display: none;
   }
 }
 
-/* Mobile (< 768px) overrides */
-@media (max-width: 767px) {
-  /* /chat/[id]: 뒤로가기 버튼 보이기 */
+/* Mobile (< 640px) overrides */
+@media (max-width: 639px) {
   .backBtn {
     display: inline-flex;
   }

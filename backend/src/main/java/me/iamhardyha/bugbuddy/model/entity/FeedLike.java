@@ -11,6 +11,8 @@ import org.hibernate.annotations.SQLRestriction;
 @SQLRestriction("deleted_at IS NULL")
 @Table(name = "feed_likes", uniqueConstraints = {
         @UniqueConstraint(name = "uk_feed_likes", columnNames = {"feed_id", "user_id"})
+}, indexes = {
+        @Index(name = "idx_feed_likes_user_feed", columnList = "user_id, feed_id")
 })
 @Getter @Setter @NoArgsConstructor
 public class FeedLike extends BaseSoftDeleteEntity {

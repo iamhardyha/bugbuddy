@@ -104,14 +104,18 @@ public class MentorService {
             return page.map(app -> AdminMentorApplicationResponse.of(app, List.of(), null));
         }
 
-        // N+1 방지: batch user 조회
+        // N+1 방지: batch user + batch links 조회
         List<Long> userIds = page.stream().map(MentorApplication::getUserId).distinct().toList();
         Map<Long, UserEntity> userMap = userRepository.findAllById(userIds).stream()
                 .collect(Collectors.toMap(UserEntity::getId, u -> u));
 
+        List<Long> appIds = page.stream().map(MentorApplication::getId).toList();
+        Map<Long, List<MentorApplicationLink>> linksMap = mentorApplicationLinkRepository
+                .findAllByMentorApplicationIdIn(appIds).stream()
+                .collect(Collectors.groupingBy(MentorApplicationLink::getMentorApplicationId));
+
         return page.map(app -> {
-            List<MentorApplicationLink> links =
-                    mentorApplicationLinkRepository.findAllByMentorApplicationId(app.getId());
+            List<MentorApplicationLink> links = linksMap.getOrDefault(app.getId(), List.of());
             UserEntity user = userMap.get(app.getUserId());
             return AdminMentorApplicationResponse.of(app, links, user);
         });

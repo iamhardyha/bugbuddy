@@ -27,8 +27,14 @@ export default function AuthStatus() {
       return;
     }
     apiFetch<UserProfile>('/api/auth/me')
-      .then(res => { if (res.success && res.data) setUser(res.data); })
-      .catch(() => {})
+      .then(res => {
+        if (res.success && res.data) {
+          setUser(res.data);
+        } else {
+          clearTokens();
+        }
+      })
+      .catch(() => { clearTokens(); })
       .finally(() => setLoading(false));
 
     getChatRooms()
