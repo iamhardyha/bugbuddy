@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Button,
   Descriptions,
@@ -38,6 +38,13 @@ interface FeedDrawerProps {
 }
 
 export default function FeedDrawer({ feed, open, onClose, onActionComplete }: FeedDrawerProps) {
+  const [drawerWidth, setDrawerWidth] = useState<string | number>(600);
+  useEffect(() => {
+    const update = () => setDrawerWidth(window.innerWidth < 640 ? '100%' : 600);
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
   const [actionLoading, setActionLoading] = useState(false);
 
   const handleAction = async (action: () => Promise<unknown>, successMsg: string) => {
@@ -64,7 +71,7 @@ export default function FeedDrawer({ feed, open, onClose, onActionComplete }: Fe
       title="피드 상세"
       open={open}
       onClose={onClose}
-      width={600}
+      width={drawerWidth}
       destroyOnClose
     >
       {feed ? (

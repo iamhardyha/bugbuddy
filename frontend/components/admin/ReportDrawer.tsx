@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Button,
   Checkbox,
@@ -16,6 +16,7 @@ import {
 } from 'antd';
 import type { AdminReport } from '@/types/admin';
 import { reviewReport, resolveReport, rejectReport } from '@/lib/admin/reports';
+import styles from './ReportDrawer.module.css';
 
 const { Text } = Typography;
 
@@ -61,6 +62,13 @@ interface ReportDrawerProps {
 }
 
 export default function ReportDrawer({ report, open, onClose, onActionComplete }: ReportDrawerProps) {
+  const [drawerWidth, setDrawerWidth] = useState<string | number>(520);
+  useEffect(() => {
+    const update = () => setDrawerWidth(window.innerWidth < 640 ? '100%' : 520);
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
   const [actionLoading, setActionLoading] = useState(false);
   const [resolveModalOpen, setResolveModalOpen] = useState(false);
   const [suspend, setSuspend] = useState(false);
@@ -106,7 +114,7 @@ export default function ReportDrawer({ report, open, onClose, onActionComplete }
         title="신고 상세"
         open={open}
         onClose={onClose}
-        width={520}
+        width={drawerWidth}
         destroyOnClose
       >
         {report ? (
@@ -146,7 +154,7 @@ export default function ReportDrawer({ report, open, onClose, onActionComplete }
 
             {(report.status === 'OPEN' || report.status === 'REVIEWING') && (
               <>
-                <Typography.Title level={5} style={{ marginTop: 24 }}>
+                <Typography.Title level={5} className={styles.sectionTitle}>
                   관리 액션
                 </Typography.Title>
                 <Space>
@@ -201,7 +209,7 @@ export default function ReportDrawer({ report, open, onClose, onActionComplete }
         okText="처리 완료"
         cancelText="취소"
       >
-        <Space direction="vertical" style={{ width: '100%' }}>
+        <Space direction="vertical" className={styles.fullWidth}>
           <Checkbox checked={suspend} onChange={(e) => setSuspend(e.target.checked)}>
             사용자 정지
           </Checkbox>
@@ -213,7 +221,7 @@ export default function ReportDrawer({ report, open, onClose, onActionComplete }
                 max={365}
                 value={suspendDays}
                 onChange={(v) => setSuspendDays(v ?? 1)}
-                style={{ width: '100%' }}
+                className={styles.fullWidth}
               />
             </>
           )}

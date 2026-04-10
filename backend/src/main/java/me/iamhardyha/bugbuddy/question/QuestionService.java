@@ -23,8 +23,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 
@@ -200,11 +201,24 @@ public class QuestionService {
                 (String) row[4],
                 (String) row[5],
                 ((Number) row[6]).intValue(),
-                ((Number) row[7]).intValue() == 1,
-                row[8] != null ? ((Timestamp) row[8]).toInstant() : null,
-                row[9] != null ? ((Timestamp) row[9]).toInstant() : null,
+                toBoolean(row[7]),
+                toInstant(row[8]),
+                toInstant(row[9]),
                 ((Number) row[10]).longValue(),
                 (String) row[11]
         );
+    }
+
+    private static boolean toBoolean(Object value) {
+        if (value instanceof Boolean b) return b;
+        if (value instanceof Number n) return n.intValue() == 1;
+        return false;
+    }
+
+    private static Instant toInstant(Object value) {
+        if (value == null) return null;
+        if (value instanceof LocalDateTime ldt) return ldt.toInstant(ZoneOffset.UTC);
+        if (value instanceof java.sql.Timestamp ts) return ts.toInstant();
+        return Instant.parse(value.toString());
     }
 }

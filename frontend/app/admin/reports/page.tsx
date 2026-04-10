@@ -150,6 +150,7 @@ export default function AdminReportsPage() {
         dataSource={reports}
         rowKey="id"
         loading={loading}
+        scroll={{ x: 'max-content' }}
         pagination={{
           current: page,
           total,

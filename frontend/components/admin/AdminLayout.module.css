@@ -7,7 +7,7 @@
 .sider {
   overflow: hidden;
   height: 100vh;
-  position: fixed !important;
+  position: fixed;
   left: 0;
   top: 0;
   bottom: 0;
@@ -95,4 +95,19 @@
 .content {
   padding: 24px;
   min-height: 100vh;
+}
+
+@media (max-width: 639px) {
+  .sider {
+    display: none;
+  }
+
+  .innerLayoutExpanded,
+  .innerLayoutCollapsed {
+    margin-left: 0;
+  }
+
+  .content {
+    padding: 16px;
+  }
 }

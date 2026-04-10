@@ -147,6 +147,7 @@ export default function AdminFeedsPage() {
         dataSource={feeds}
         rowKey="id"
         loading={loading}
+        scroll={{ x: 'max-content' }}
         pagination={{
           current: page,
           total,

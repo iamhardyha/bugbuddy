@@ -1,0 +1,34 @@
+.filterBar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.searchInput {
+  width: 280px;
+}
+
+.mentorSelect {
+  width: 150px;
+}
+
+.suspendedSelect {
+  width: 130px;
+}
+
+@media (max-width: 639px) {
+  .searchInput {
+    width: 100%;
+  }
+
+  .mentorSelect {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .suspendedSelect {
+    flex: 1;
+    min-width: 0;
+  }
+}

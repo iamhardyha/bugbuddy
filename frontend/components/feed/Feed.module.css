@@ -1,47 +1,107 @@
-/* ─── Filter Bar ─────────────────────────────── */
-.filterBar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-  border-bottom: 1px solid var(--border-faint);
-  padding-bottom: 0;
-}
+/* ═══════════════════════════════════════════════
+   Feed Layout — 3-column (sidebar + main)
+   ═══════════════════════════════════════════════ */
 
-.categoryNav {
-  flex: 1;
-  min-width: 0;
+.feedRoot {
   display: flex;
   gap: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
+  align-items: flex-start;
 }
-.categoryNav::-webkit-scrollbar { display: none; }
 
-.catLink {
+.feedSidebarLeft {
+  width: 210px;
   flex-shrink: 0;
-  padding: 10px 14px;
+  border-right: 1px solid var(--border-faint);
+  padding-right: 0;
+  min-height: calc(100vh - var(--global-header-height));
+}
+
+.feedMainContent {
+  padding: 24px 28px 64px;
+}
+
+/* ─── Sidebar Nav Button ─────────────────────── */
+.feedNavBtn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 8px;
   border: none;
-  border-bottom: 2px solid transparent;
   background: transparent;
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 400;
   font-family: inherit;
   cursor: pointer;
-  white-space: nowrap;
-  transition: color 0.15s ease, border-color 0.15s ease;
+  text-align: left;
+  transition: background 0.12s ease, color 0.12s ease;
+  position: relative;
 }
-.catLink:hover {
+.feedNavBtn:hover {
+  background: var(--bg-hover);
   color: var(--text-primary);
 }
-.catLink.catActive {
+.feedNavBtnActive {
+  background: var(--accent-subtle);
   color: var(--accent);
   font-weight: 600;
-  border-bottom-color: var(--accent);
 }
 
+/* ─── Mobile View Mode Bar ──────────────────── */
+.feedMobileViewBar {
+  display: flex;
+  gap: 6px;
+  padding: 2px 0 8px;
+  margin-bottom: 2px;
+}
+
+@media (min-width: 1024px) {
+  .feedMobileViewBar { display: none; }
+}
+
+/* ─── Mobile Category Bar ────────────────────── */
+.feedMobileCatBar {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 2px 0 10px;
+  margin-bottom: 4px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.feedMobileCatBar::-webkit-scrollbar { display: none; }
+
+@media (min-width: 1024px) {
+  .feedMobileCatBar { display: none; }
+}
+
+.feedMobileCatBtn {
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding: 5px 13px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+.feedMobileCatBtn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+.feedMobileCatBtnActive {
+  background: var(--accent-subtle);
+  color: var(--accent);
+  border-color: var(--accent-ring);
+  font-weight: 600;
+}
+
+/* ─── Sort Toggle ────────────────────────────── */
 .sortToggle {
   flex-shrink: 0;
   display: flex;
@@ -51,7 +111,6 @@
   border: 1px solid var(--border-faint);
   border-radius: 8px;
   padding: 2px;
-  margin-bottom: 10px;
 }
 
 .sortBtn {
@@ -75,52 +134,89 @@
   font-weight: 600;
 }
 
-/* ─── Feed Card (SO Blog Style) ──────────────── */
-.feedCard {
+/* ═══════════════════════════════════════════════
+   Instagram-style Feed Stream (1 column)
+   ═══════════════════════════════════════════════ */
+
+.feedStream {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+/* ─── Instagram Card ─────────────────────────── */
+.instaCard {
+  width: 100%;
+  max-width: 600px;
   border-radius: 12px;
   border: 1px solid var(--border-faint);
   background: var(--bg-surface);
   overflow: hidden;
   cursor: pointer;
-  transition: border-color 0.15s ease, box-shadow 0.2s ease, transform 0.15s ease;
+  transition: box-shadow 0.2s ease;
 }
-.feedCard:hover {
-  border-color: var(--border);
+.instaCard:hover {
   box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
 }
 
-.cardImage {
+.instaHeader {
+  padding: 12px 16px;
+}
+
+.instaImage {
   width: 100%;
   aspect-ratio: 16 / 9;
   object-fit: cover;
   display: block;
 }
 
-.cardImageFallback {
+.instaImageFallback {
   width: 100%;
   aspect-ratio: 16 / 9;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.8);
 }
 
-.cardBody {
-  padding: 18px 20px;
+.instaBody {
+  padding: 12px 16px 16px;
 }
 
-.cardMeta {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11.5px;
-  color: var(--text-tertiary);
+.instaTitle {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.4;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.instaComment {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
   margin-bottom: 8px;
 }
 
+.instaDomain {
+  display: block;
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  font-family: var(--font-jetbrains-mono);
+}
+
+/* ─── Category Tag (shared, used by FeedDetail) ── */
 .categoryTag {
   font-size: 10.5px;
   padding: 2px 7px;
@@ -129,55 +225,10 @@
   display: inline-block;
 }
 
-.cardTitle {
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--text-primary);
-  line-height: 1.4;
-  margin-bottom: 8px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
+/* ═══════════════════════════════════════════════
+   FeedDetail (existing — kept intact)
+   ═══════════════════════════════════════════════ */
 
-.cardComment {
-  font-size: 13.5px;
-  color: var(--text-secondary);
-  line-height: 1.6;
-  margin-bottom: 14px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.cardFooter {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.cardAuthor {
-  font-size: 12.5px;
-  color: var(--text-secondary);
-}
-
-.cardStats {
-  display: flex;
-  gap: 10px;
-  font-size: 12px;
-  color: var(--text-tertiary);
-}
-
-/* ─── Feed Grid ──────────────────────────────── */
-.feedGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-}
-
-/* ─── FeedDetail ──────────────────────────────── */
 .detailOgCard {
   border-radius: 12px;
   overflow: hidden;
@@ -190,6 +241,17 @@
   max-height: 300px;
   object-fit: cover;
   display: block;
+}
+
+.detailImageFallback {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-secondary);
 }
 
 .actionBar {
@@ -225,7 +287,7 @@
   border-bottom: 1px solid var(--border-faint);
 }
 
-/* ─── Home Tab (unused now but kept for compat) ── */
+/* ─── Home Tab (compat) ───────────────────────── */
 .homeTab {
   display: flex;
   gap: 4px;
@@ -250,26 +312,30 @@
   font-weight: 600;
 }
 
-/* ─── Responsive ──────────────────────────────── */
+/* ═══════════════════════════════════════════════
+   Responsive
+   ═══════════════════════════════════════════════ */
+
 @media (max-width: 639px) {
-  .feedGrid {
-    grid-template-columns: 1fr;
+  .feedMainContent {
+    padding: 0;
   }
 
-  .cardBody {
-    padding: 14px 16px;
+  .feedSidebarLeft {
+    display: none;
   }
 
-  .cardTitle {
-    font-size: 15px;
+  .instaCard {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
   }
 
-  .filterBar {
-    gap: 8px;
+  .feedStream {
+    gap: 12px;
   }
 
-  .catLink {
-    padding: 8px 10px;
-    font-size: 12px;
+  .instaTitle {
+    font-size: 14px;
   }
 }

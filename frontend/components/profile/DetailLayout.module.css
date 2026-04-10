@@ -25,6 +25,7 @@
 
 @media (max-width: 639px) {
   .root {
+    grid-template-columns: 1fr;
     padding: 16px 0;
   }
 }

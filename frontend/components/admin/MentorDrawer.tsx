@@ -54,6 +54,13 @@ interface MentorDrawerProps {
 }
 
 export default function MentorDrawer({ applicationId, open, onClose, onActionComplete }: MentorDrawerProps) {
+  const [drawerWidth, setDrawerWidth] = useState<string | number>(560);
+  useEffect(() => {
+    const update = () => setDrawerWidth(window.innerWidth < 640 ? '100%' : 560);
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
   const [detail, setDetail] = useState<AdminMentorApp | null>(null);
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
@@ -114,7 +121,7 @@ export default function MentorDrawer({ applicationId, open, onClose, onActionCom
         title="멘토 신청 상세"
         open={open}
         onClose={onClose}
-        width={560}
+        width={drawerWidth}
         destroyOnClose
       >
         {loading ? (

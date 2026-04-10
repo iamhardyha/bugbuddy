@@ -166,6 +166,7 @@ export default function AdminUsersPage() {
         dataSource={users}
         rowKey="id"
         loading={loading}
+        scroll={{ x: 'max-content' }}
         pagination={{
           current: page,
           total,

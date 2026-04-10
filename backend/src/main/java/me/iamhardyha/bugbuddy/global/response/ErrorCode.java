@@ -68,6 +68,7 @@ public enum ErrorCode {
     // 테크피드
     FEED_NOT_FOUND(HttpStatus.NOT_FOUND, "피드를 찾을 수 없습니다."),
     FEED_FORBIDDEN(HttpStatus.FORBIDDEN, "피드 삭제 권한이 없습니다."),
+    FEED_UPDATE_FORBIDDEN(HttpStatus.FORBIDDEN, "피드 수정 권한이 없습니다."),
     FEED_ALREADY_LIKED(HttpStatus.CONFLICT, "이미 추천한 피드입니다."),
     FEED_LIKE_NOT_FOUND(HttpStatus.NOT_FOUND, "추천 기록을 찾을 수 없습니다."),
     FEED_ALREADY_BOOKMARKED(HttpStatus.CONFLICT, "이미 북마크한 피드입니다."),

@@ -73,7 +73,7 @@ export default function FeedCommentSection({ feedId, currentUserId }: FeedCommen
             showCount
             rows={3}
             placeholder="댓글을 입력하세요"
-            style={{ marginBottom: 8 }}
+            style={{ marginBottom: 24 }}
           />
           <Flex justify="flex-end">
             <Button

@@ -1,0 +1,24 @@
+.loading {
+  text-align: center;
+  padding: 48px;
+}
+
+.sectionTitle {
+  margin-top: 24px;
+}
+
+.q1Card {
+  margin-top: 24px;
+}
+
+.q2Card {
+  margin-top: 16px;
+}
+
+.preWrap {
+  white-space: pre-wrap;
+}
+
+.fullWidth {
+  width: 100%;
+}

@@ -27,6 +27,7 @@ import {
   adjustXp,
   changeMentorStatus,
 } from '@/lib/admin/users';
+import styles from './UserDrawer.module.css';
 
 const { Text } = Typography;
 
@@ -54,6 +55,13 @@ interface UserDrawerProps {
 }
 
 export default function UserDrawer({ userId, open, onClose, onActionComplete }: UserDrawerProps) {
+  const [drawerWidth, setDrawerWidth] = useState<string | number>(520);
+  useEffect(() => {
+    const update = () => setDrawerWidth(window.innerWidth < 640 ? '100%' : 520);
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
   const [detail, setDetail] = useState<AdminUserDetail | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -152,11 +160,11 @@ export default function UserDrawer({ userId, open, onClose, onActionComplete }: 
         title="사용자 상세"
         open={open}
         onClose={onClose}
-        width={520}
+        width={drawerWidth}
         destroyOnClose
       >
         {loading ? (
-          <div style={{ textAlign: 'center', padding: 48 }}>
+          <div className={styles.loading}>
             <Spin size="large" />
           </div>
         ) : detail ? (
@@ -193,7 +201,7 @@ export default function UserDrawer({ userId, open, onClose, onActionComplete }: 
               )}
             </Descriptions>
 
-            <Typography.Title level={5} style={{ marginTop: 24 }}>
+            <Typography.Title level={5} className={styles.sectionTitle}>
               최근 신고 내역
             </Typography.Title>
             <List
@@ -227,10 +235,10 @@ export default function UserDrawer({ userId, open, onClose, onActionComplete }: 
               )}
             />
 
-            <Typography.Title level={5} style={{ marginTop: 24 }}>
+            <Typography.Title level={5} className={styles.sectionTitle}>
               관리 액션
             </Typography.Title>
-            <Space direction="vertical" style={{ width: '100%' }}>
+            <Space direction="vertical" className={styles.fullWidth}>
               <Space wrap>
                 <Button onClick={() => setSuspendModalOpen(true)} disabled={actionLoading}>
                   정지
@@ -259,7 +267,7 @@ export default function UserDrawer({ userId, open, onClose, onActionComplete }: 
                   value={detail.mentorStatus}
                   options={MENTOR_STATUS_OPTIONS}
                   onChange={handleChangeMentorStatus}
-                  style={{ width: 140 }}
+                  className={styles.mentorSelect}
                   disabled={actionLoading}
                 />
               </Space>
@@ -293,14 +301,14 @@ export default function UserDrawer({ userId, open, onClose, onActionComplete }: 
         okText="정지"
         cancelText="취소"
       >
-        <Space direction="vertical" style={{ width: '100%' }}>
+        <Space direction="vertical" className={styles.fullWidth}>
           <Text>정지 기간 (일):</Text>
           <InputNumber
             min={1}
             max={365}
             value={suspendDays}
             onChange={(v) => setSuspendDays(v ?? 1)}
-            style={{ width: '100%' }}
+            className={styles.fullWidth}
           />
         </Space>
       </Modal>
@@ -315,7 +323,7 @@ export default function UserDrawer({ userId, open, onClose, onActionComplete }: 
         okText="변경"
         cancelText="취소"
       >
-        <Space direction="vertical" style={{ width: '100%' }}>
+        <Space direction="vertical" className={styles.fullWidth}>
           <Text>새 닉네임:</Text>
           <Input
             value={newNickname}
@@ -335,12 +343,12 @@ export default function UserDrawer({ userId, open, onClose, onActionComplete }: 
         okText="조정"
         cancelText="취소"
       >
-        <Space direction="vertical" style={{ width: '100%' }}>
+        <Space direction="vertical" className={styles.fullWidth}>
           <Text>XP 변동량 (음수 가능):</Text>
           <InputNumber
             value={deltaXp}
             onChange={(v) => setDeltaXp(v ?? 0)}
-            style={{ width: '100%' }}
+            className={styles.fullWidth}
           />
           <Text>사유:</Text>
           <Input

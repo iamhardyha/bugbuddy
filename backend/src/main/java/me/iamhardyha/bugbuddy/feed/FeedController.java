@@ -6,6 +6,7 @@ import me.iamhardyha.bugbuddy.feed.dto.FeedCommentCreateRequest;
 import me.iamhardyha.bugbuddy.feed.dto.FeedCommentResponse;
 import me.iamhardyha.bugbuddy.feed.dto.FeedCreateRequest;
 import me.iamhardyha.bugbuddy.feed.dto.FeedResponse;
+import me.iamhardyha.bugbuddy.feed.dto.FeedUpdateRequest;
 import me.iamhardyha.bugbuddy.global.response.ApiResponse;
 import me.iamhardyha.bugbuddy.model.enums.FeedCategory;
 import org.springframework.data.domain.Page;
@@ -49,6 +50,15 @@ public class FeedController {
             @PathVariable Long id,
             @AuthenticationPrincipal Long userId) {
         FeedResponse response = feedService.getFeed(id, userId);
+        return ResponseEntity.ok(ApiResponse.ok(response));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<FeedResponse>> update(
+            @PathVariable Long id,
+            @AuthenticationPrincipal Long userId,
+            @RequestBody @Valid FeedUpdateRequest request) {
+        FeedResponse response = feedService.update(id, userId, request);
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
@@ -101,6 +111,14 @@ public class FeedController {
             @AuthenticationPrincipal Long userId,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<FeedResponse> response = feedService.getBookmarks(userId, pageable);
+        return ResponseEntity.ok(ApiResponse.ok(response));
+    }
+
+    @GetMapping("/liked")
+    public ResponseEntity<ApiResponse<Page<FeedResponse>>> getLikedFeeds(
+            @AuthenticationPrincipal Long userId,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<FeedResponse> response = feedService.getLikedFeeds(userId, pageable);
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 

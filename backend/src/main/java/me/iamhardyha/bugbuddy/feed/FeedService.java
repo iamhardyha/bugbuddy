@@ -6,6 +6,7 @@ import me.iamhardyha.bugbuddy.feed.dto.FeedCommentCreateRequest;
 import me.iamhardyha.bugbuddy.feed.dto.FeedCommentResponse;
 import me.iamhardyha.bugbuddy.feed.dto.FeedCreateRequest;
 import me.iamhardyha.bugbuddy.feed.dto.FeedResponse;
+import me.iamhardyha.bugbuddy.feed.dto.FeedUpdateRequest;
 import me.iamhardyha.bugbuddy.global.exception.BugBuddyException;
 import me.iamhardyha.bugbuddy.global.response.ErrorCode;
 import me.iamhardyha.bugbuddy.model.entity.FeedBookmark;
@@ -26,8 +27,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -221,6 +223,55 @@ public class FeedService {
         });
     }
 
+    public Page<FeedResponse> getLikedFeeds(Long userId, Pageable pageable) {
+        Page<FeedLike> likePage = feedLikeRepository.findAllByUserIdOrderByCreatedAtDesc(userId, pageable);
+
+        if (likePage.isEmpty()) {
+            return likePage.map(l -> null);
+        }
+
+        List<Long> feedIds = likePage.stream().map(FeedLike::getFeedId).toList();
+        Map<Long, TechFeed> feedMap = feedRepository.findAllById(feedIds).stream()
+                .collect(Collectors.toMap(TechFeed::getId, f -> f));
+
+        List<Long> userIds = feedMap.values().stream()
+                .map(TechFeed::getAuthorUserId)
+                .distinct()
+                .toList();
+        Map<Long, String> nicknameMap = buildNicknameMap(userIds);
+
+        Set<Long> myBookmarkedIds = feedBookmarkRepository.findBookmarkedFeedIds(feedIds, userId);
+
+        return likePage.map(l -> {
+            TechFeed feed = feedMap.get(l.getFeedId());
+            if (feed == null) {
+                return null;
+            }
+            return FeedResponse.of(
+                    feed,
+                    nicknameMap.get(feed.getAuthorUserId()),
+                    true,
+                    myBookmarkedIds.contains(feed.getId())
+            );
+        });
+    }
+
+    @Transactional
+    public FeedResponse update(Long feedId, Long userId, FeedUpdateRequest request) {
+        TechFeed feed = findFeedOrThrow(feedId);
+        if (!feed.getAuthorUserId().equals(userId)) {
+            throw new BugBuddyException(ErrorCode.FEED_UPDATE_FORBIDDEN);
+        }
+
+        feed.setCategory(request.category());
+        feed.setComment(request.comment());
+
+        String nickname = getUserNickname(feed.getAuthorUserId());
+        boolean myLiked = feedLikeRepository.existsByFeedIdAndUserId(feedId, userId);
+        boolean myBookmarked = feedBookmarkRepository.existsByFeedIdAndUserId(feedId, userId);
+        return FeedResponse.of(feed, nickname, myLiked, myBookmarked);
+    }
+
     @Transactional
     public FeedCommentResponse createComment(Long feedId, Long userId, FeedCommentCreateRequest request) {
         TechFeed feed = findFeedOrThrow(feedId);
@@ -334,11 +385,24 @@ public class FeedService {
                 (String) row[5],
                 ((Number) row[6]).intValue(),
                 ((Number) row[7]).intValue(),
-                ((Number) row[8]).intValue() == 1,
-                row[9] != null ? ((Timestamp) row[9]).toInstant() : null,
-                row[10] != null ? ((Timestamp) row[10]).toInstant() : null,
+                toBoolean(row[8]),
+                toInstant(row[9]),
+                toInstant(row[10]),
                 ((Number) row[11]).longValue(),
                 (String) row[12]
         );
+    }
+
+    private static boolean toBoolean(Object value) {
+        if (value instanceof Boolean b) return b;
+        if (value instanceof Number n) return n.intValue() == 1;
+        return false;
+    }
+
+    private static Instant toInstant(Object value) {
+        if (value == null) return null;
+        if (value instanceof LocalDateTime ldt) return ldt.toInstant(ZoneOffset.UTC);
+        if (value instanceof java.sql.Timestamp ts) return ts.toInstant();
+        return Instant.parse(value.toString());
     }
 }

@@ -3,6 +3,7 @@
 import React from 'react';
 import { Empty, Spin } from 'antd';
 import dynamic from 'next/dynamic';
+import styles from './TrendChart.module.css';
 
 const Line = dynamic(
   () => import('@ant-design/charts').then((mod) => mod.Line),
@@ -17,7 +18,7 @@ interface TrendChartProps {
 export default function TrendChart({ data, loading }: TrendChartProps) {
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}>
+      <div className={styles.loading}>
         <Spin />
       </div>
     );

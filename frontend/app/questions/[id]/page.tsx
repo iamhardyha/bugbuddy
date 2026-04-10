@@ -121,7 +121,7 @@ export default function QuestionDetailPage() {
 
   return (
     <div className="page-root">
-      {/* 브레드크럼 + 작성자 액션 헤더 */}
+      {/* 브레드크럼 헤더 */}
       <header className="page-header">
         <Flex
           align="center"
@@ -138,37 +138,6 @@ export default function QuestionDetailPage() {
               {question.title}
             </span>
           </Flex>
-
-          {isAuthor && (
-            <Flex align="center" gap={8}>
-              {question.status !== 'CLOSED' && (
-                <>
-                  <Button
-                    size="small"
-                    onClick={() => router.push(`/questions/${id}/edit`)}
-                  >
-                    수정
-                  </Button>
-                  <Button
-                    size="small"
-                    onClick={handleClose}
-                    loading={closing}
-                    style={{ borderColor: 'var(--warning-text)', color: 'var(--warning-text)' }}
-                  >
-                    마감
-                  </Button>
-                </>
-              )}
-              <Button
-                size="small"
-                danger
-                onClick={handleDelete}
-                loading={deleting}
-              >
-                삭제
-              </Button>
-            </Flex>
-          )}
         </Flex>
       </header>
 
@@ -177,41 +146,53 @@ export default function QuestionDetailPage() {
         {/* 왼쪽: 질문 + 답변 */}
         <div>
           <article className={styles.article}>
-            {/* 배지 영역 */}
-            <Flex wrap align="center" gap={8} style={{ marginBottom: 18 }}>
-              <Tag
-                style={{
-                  ...status.style,
-                  borderRadius: 999,
-                  border: 'none',
-                  fontWeight: 600,
-                  fontSize: 11,
-                }}
-              >
-                {status.label}
-              </Tag>
-              <Tag
-                style={{
-                  background: 'var(--accent-subtle)',
-                  color: 'var(--accent)',
-                  borderRadius: 999,
-                  border: 'none',
-                  fontSize: 11,
-                }}
-              >
-                {category.label}
-              </Tag>
-              <Tag
-                style={{
-                  background: 'var(--warning-bg)',
-                  color: 'var(--warning-text)',
-                  borderRadius: 999,
-                  border: 'none',
-                  fontSize: 11,
-                }}
-              >
-                {type.label}
-              </Tag>
+            {/* 배지 + 마감 버튼 영역 */}
+            <Flex wrap align="center" justify="space-between" gap={8} style={{ marginBottom: 18 }}>
+              <Flex wrap align="center" gap={8}>
+                <Tag
+                  style={{
+                    ...status.style,
+                    borderRadius: 999,
+                    border: 'none',
+                    fontWeight: 600,
+                    fontSize: 11,
+                  }}
+                >
+                  {status.label}
+                </Tag>
+                <Tag
+                  style={{
+                    background: 'var(--accent-subtle)',
+                    color: 'var(--accent)',
+                    borderRadius: 999,
+                    border: 'none',
+                    fontSize: 11,
+                  }}
+                >
+                  {category.label}
+                </Tag>
+                <Tag
+                  style={{
+                    background: 'var(--warning-bg)',
+                    color: 'var(--warning-text)',
+                    borderRadius: 999,
+                    border: 'none',
+                    fontSize: 11,
+                  }}
+                >
+                  {type.label}
+                </Tag>
+              </Flex>
+              {isAuthor && question.status !== 'CLOSED' && (
+                <Button
+                  size="small"
+                  onClick={handleClose}
+                  loading={closing}
+                  style={{ borderColor: 'var(--warning-text)', color: 'var(--warning-text)' }}
+                >
+                  마감
+                </Button>
+              )}
             </Flex>
 
             {/* 제목 */}
@@ -266,6 +247,38 @@ export default function QuestionDetailPage() {
 
             {/* 본문 */}
             <MarkdownRenderer content={question.body} />
+
+            {/* 수정/삭제 액션 바 */}
+            {isAuthor && (
+              <Flex
+                align="center"
+                justify="space-between"
+                style={{
+                  marginTop: 24,
+                  paddingTop: 16,
+                  borderTop: '1px solid var(--border-faint)',
+                }}
+              >
+                {question.status !== 'CLOSED' ? (
+                  <Button
+                    size="small"
+                    onClick={() => router.push(`/questions/${id}/edit`)}
+                  >
+                    수정
+                  </Button>
+                ) : (
+                  <span />
+                )}
+                <Button
+                  size="small"
+                  danger
+                  onClick={handleDelete}
+                  loading={deleting}
+                >
+                  삭제
+                </Button>
+              </Flex>
+            )}
           </article>
 
           {/* 답변 섹션 */}

@@ -5,6 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -21,4 +24,7 @@ public interface FeedLikeRepository extends JpaRepository<FeedLike, Long> {
     /** Batch check for feed list — which feeds has user liked */
     @Query("SELECT fl.feedId FROM FeedLike fl WHERE fl.feedId IN :feedIds AND fl.userId = :userId")
     Set<Long> findLikedFeedIds(@Param("feedIds") List<Long> feedIds, @Param("userId") Long userId);
+
+    /** User's liked feeds, newest first */
+    Page<FeedLike> findAllByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
 }
