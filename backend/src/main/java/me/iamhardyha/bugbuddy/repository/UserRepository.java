@@ -35,9 +35,40 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
             @Param("suspended") Boolean suspended,
             Pageable pageable);
 
+    @Query(value = "SELECT u FROM UserEntity u " +
+            "WHERE u.mentorStatus = me.iamhardyha.bugbuddy.model.enums.MentorStatus.APPROVED " +
+            "  AND u.deactivatedAt IS NULL " +
+            "  AND (:keyword IS NULL " +
+            "       OR LOWER(u.nickname) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "       OR LOWER(COALESCE(u.bio, '')) LIKE LOWER(CONCAT('%', :keyword, '%')))",
+            countQuery = "SELECT COUNT(u) FROM UserEntity u " +
+            "WHERE u.mentorStatus = me.iamhardyha.bugbuddy.model.enums.MentorStatus.APPROVED " +
+            "  AND u.deactivatedAt IS NULL " +
+            "  AND (:keyword IS NULL " +
+            "       OR LOWER(u.nickname) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "       OR LOWER(COALESCE(u.bio, '')) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<UserEntity> findApprovedMentors(@Param("keyword") String keyword, Pageable pageable);
+
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE UserEntity u SET u.xp = u.xp + :delta WHERE u.id = :userId")
     void addXp(@Param("userId") Long userId, @Param("delta") int delta);
+
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query(value = "UPDATE users SET xp = xp + :delta, " +
+            "level = CASE " +
+            "  WHEN xp + :delta >= 10000 THEN 10 " +
+            "  WHEN xp + :delta >= 6000 THEN 9 " +
+            "  WHEN xp + :delta >= 4000 THEN 8 " +
+            "  WHEN xp + :delta >= 2500 THEN 7 " +
+            "  WHEN xp + :delta >= 1500 THEN 6 " +
+            "  WHEN xp + :delta >= 900 THEN 5 " +
+            "  WHEN xp + :delta >= 500 THEN 4 " +
+            "  WHEN xp + :delta >= 250 THEN 3 " +
+            "  WHEN xp + :delta >= 100 THEN 2 " +
+            "  ELSE 1 " +
+            "END " +
+            "WHERE id = :userId", nativeQuery = true)
+    void addXpAndRecalculateLevel(@Param("userId") Long userId, @Param("delta") int delta);
 
     @Modifying
     @Query("UPDATE UserEntity u SET u.mentorAvgRating = (SELECT COALESCE(AVG(f.rating), 0) FROM ChatRoomFeedback f WHERE f.roomId IN (SELECT r.id FROM ChatRoom r WHERE r.mentor.id = :userId)), u.mentorRatingCount = (SELECT COUNT(f) FROM ChatRoomFeedback f WHERE f.roomId IN (SELECT r.id FROM ChatRoom r WHERE r.mentor.id = :userId)) WHERE u.id = :userId")

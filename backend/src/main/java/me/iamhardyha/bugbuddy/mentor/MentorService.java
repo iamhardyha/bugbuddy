@@ -6,6 +6,7 @@ import me.iamhardyha.bugbuddy.global.response.ErrorCode;
 import me.iamhardyha.bugbuddy.mentor.dto.AdminMentorApplicationResponse;
 import me.iamhardyha.bugbuddy.mentor.dto.MentorApplicationResponse;
 import me.iamhardyha.bugbuddy.mentor.dto.MentorApplyRequest;
+import me.iamhardyha.bugbuddy.mentor.dto.MentorCardResponse;
 import me.iamhardyha.bugbuddy.mentor.dto.MentorRejectRequest;
 import me.iamhardyha.bugbuddy.model.entity.MentorApplication;
 import me.iamhardyha.bugbuddy.model.entity.MentorApplicationLink;
@@ -17,7 +18,9 @@ import me.iamhardyha.bugbuddy.notification.event.MentorRejectedEvent;
 import me.iamhardyha.bugbuddy.repository.UserRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -82,6 +85,31 @@ public class MentorService {
         user.setMentorStatus(MentorStatus.PENDING);
 
         return MentorApplicationResponse.of(saved, savedLinks);
+    }
+
+    public Page<MentorCardResponse> listMentors(String keyword, String sort, Pageable pageable) {
+        Sort sortOption = resolveSort(sort);
+        Pageable effective = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortOption);
+        String kw = (keyword == null || keyword.isBlank()) ? null : keyword.trim();
+        return userRepository.findApprovedMentors(kw, effective)
+                .map(MentorCardResponse::of);
+    }
+
+    private Sort resolveSort(String sort) {
+        if (sort == null) return defaultRatingSort();
+        return switch (sort.toUpperCase()) {
+            case "RECENT" -> Sort.by(Sort.Order.desc("id"));
+            case "LEVEL"  -> Sort.by(Sort.Order.desc("level"), Sort.Order.desc("xp"), Sort.Order.desc("id"));
+            default       -> defaultRatingSort();
+        };
+    }
+
+    private Sort defaultRatingSort() {
+        return Sort.by(
+                Sort.Order.desc("mentorAvgRating"),
+                Sort.Order.desc("mentorRatingCount"),
+                Sort.Order.desc("id")
+        );
     }
 
     public MentorApplicationResponse getMyApplication(Long userId) {

@@ -22,3 +22,15 @@ export interface MentorApplyRequest {
   q1Answer: string;
   q2Answer: string;
 }
+
+export type MentorSort = 'RATING' | 'RECENT' | 'LEVEL';
+
+export interface MentorCard {
+  id: number;
+  nickname: string;
+  bio: string | null;
+  level: number;
+  xp: number;
+  mentorAvgRating: number | null;
+  mentorRatingCount: number;
+}

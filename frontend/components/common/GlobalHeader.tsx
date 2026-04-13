@@ -56,6 +56,12 @@ export default function GlobalHeader() {
           >
             TechFeed
           </Link>
+          <Link
+            href="/mentor"
+            className={`${styles.navLink}${pathname.startsWith('/mentor') ? ` ${styles.navLinkActive}` : ''}`}
+          >
+            Mentors
+          </Link>
         </nav>
 
         <div className={styles.searchBox}>
