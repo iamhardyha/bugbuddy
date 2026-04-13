@@ -35,6 +35,25 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
            countQuery = "SELECT COUNT(q) FROM Question q WHERE q.hidden = false AND q.category = :category AND q.questionType = :type")
     Page<Question> findAllActiveByCategoryAndType(@Param("category") QuestionCategory category, @Param("type") QuestionType type, Pageable pageable);
 
+    @Query(value = "SELECT q FROM Question q JOIN FETCH q.author WHERE q.hidden = false " +
+                   "AND (LOWER(q.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+                   "     OR LOWER(q.body) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+                   "AND (:category IS NULL OR q.category = :category) " +
+                   "AND (:type IS NULL OR q.questionType = :type) " +
+                   "AND (:status IS NULL OR q.status = :status) " +
+                   "ORDER BY q.createdAt DESC",
+           countQuery = "SELECT COUNT(q) FROM Question q WHERE q.hidden = false " +
+                        "AND (LOWER(q.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+                        "     OR LOWER(q.body) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+                        "AND (:category IS NULL OR q.category = :category) " +
+                        "AND (:type IS NULL OR q.questionType = :type) " +
+                        "AND (:status IS NULL OR q.status = :status)")
+    Page<Question> searchByKeyword(@Param("keyword") String keyword,
+                                   @Param("category") QuestionCategory category,
+                                   @Param("type") QuestionType type,
+                                   @Param("status") QuestionStatus status,
+                                   Pageable pageable);
+
     @Query("SELECT q FROM Question q JOIN FETCH q.author WHERE q.id = :id")
     Optional<Question> findActiveById(@Param("id") Long id);
 

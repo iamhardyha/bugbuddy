@@ -73,13 +73,17 @@ public class QuestionService {
         return QuestionDetailResponse.of(saved, tagNames);
     }
 
-    public Page<QuestionSummaryResponse> findAll(QuestionCategory category,
+    public Page<QuestionSummaryResponse> findAll(String keyword,
+                                                  QuestionCategory category,
                                                   QuestionType questionType,
                                                   QuestionStatus status,
                                                   Pageable pageable) {
         Page<Question> questions;
 
-        if (category != null && questionType != null) {
+        if (keyword != null && !keyword.isBlank()) {
+            questions = questionRepository.searchByKeyword(
+                    keyword.trim(), category, questionType, status, pageable);
+        } else if (category != null && questionType != null) {
             questions = questionRepository.findAllActiveByCategoryAndType(category, questionType, pageable);
         } else if (category != null) {
             questions = questionRepository.findAllActiveByCategory(category, pageable);

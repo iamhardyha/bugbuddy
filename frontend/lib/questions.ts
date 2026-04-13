@@ -10,6 +10,7 @@ import type {
 } from '@/types/question';
 
 export function getQuestions(params?: {
+  keyword?: string;
   category?: QuestionCategory;
   questionType?: QuestionType;
   status?: QuestionStatus;
@@ -17,7 +18,7 @@ export function getQuestions(params?: {
   size?: number;
 }) {
   const filtered = Object.fromEntries(
-    Object.entries(params ?? {}).filter(([, v]) => v != null)
+    Object.entries(params ?? {}).filter(([, v]) => v != null && v !== '')
   );
   const query = new URLSearchParams(filtered as Record<string, string>).toString();
   return apiFetch<Page<QuestionSummary>>(`/api/questions${query ? `?${query}` : ''}`);

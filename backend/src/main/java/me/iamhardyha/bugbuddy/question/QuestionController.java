@@ -39,12 +39,13 @@ public class QuestionController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<QuestionSummaryResponse>>> findAll(
+            @RequestParam(required = false) String keyword,
             @RequestParam(required = false) QuestionCategory category,
             @RequestParam(required = false) QuestionType questionType,
             @RequestParam(required = false) QuestionStatus status,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Page<QuestionSummaryResponse> response = questionService.findAll(category, questionType, status, pageable);
+        Page<QuestionSummaryResponse> response = questionService.findAll(keyword, category, questionType, status, pageable);
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
