@@ -109,6 +109,7 @@ public class SecurityConfig {
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/questions", "/api/questions/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/users/{userId}", "/api/users/{userId}/questions", "/api/users/{userId}/answers", "/api/users/{userId}/stats", "/api/users/{userId}/xp-events").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/mentors").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/rankings", "/api/rankings/**").permitAll()
                         .requestMatchers("/api/auth/me", "/api/questions/**", "/api/uploads/**").authenticated()
                         .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/users/me").authenticated()
                         .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/users/me").authenticated()
