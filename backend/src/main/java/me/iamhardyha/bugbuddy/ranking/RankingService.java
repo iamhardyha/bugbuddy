@@ -7,6 +7,7 @@ import me.iamhardyha.bugbuddy.ranking.dto.RankingResponse;
 import me.iamhardyha.bugbuddy.ranking.dto.RankingRowResponse;
 import me.iamhardyha.bugbuddy.repository.UserRepository;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,11 +29,14 @@ public class RankingService {
 
     private final RankingQueryRepository rankingQueryRepository;
     private final UserRepository userRepository;
+    private final RankingService self;
 
     public RankingService(RankingQueryRepository rankingQueryRepository,
-                          UserRepository userRepository) {
+                          UserRepository userRepository,
+                          @Lazy RankingService self) {
         this.rankingQueryRepository = rankingQueryRepository;
         this.userRepository = userRepository;
+        this.self = self;
     }
 
     public RankingResponse getRanking(RankingPeriod period, RankingOffset offset, Long currentUserId) {
@@ -45,7 +49,7 @@ public class RankingService {
     // --- 전체 누적 ---
 
     private RankingResponse buildAllRanking(Long currentUserId) {
-        List<RankingRowResponse> top100 = getCachedAllTimeTop100();
+        List<RankingRowResponse> top100 = self.getCachedAllTimeTop100();
         MyRankResponse myRank = computeAllTimeMyRank(currentUserId);
         List<RankingRowResponse> marked = markCurrentUser(top100, currentUserId);
         return new RankingResponse("all", "current", null, null, marked, myRank);
@@ -78,8 +82,8 @@ public class RankingService {
         LocalDateTime end = range[1];
 
         List<RankingRowResponse> top100 = (offset == RankingOffset.PREVIOUS)
-                ? getCachedPreviousPeriodTop100(period, start, end)
-                : getCachedCurrentPeriodTop100(period, start, end);
+                ? self.getCachedPreviousPeriodTop100(period, start, end)
+                : self.getCachedCurrentPeriodTop100(period, start, end);
 
         MyRankResponse myRank = computePeriodMyRank(currentUserId, start, end);
         List<RankingRowResponse> marked = markCurrentUser(top100, currentUserId);
