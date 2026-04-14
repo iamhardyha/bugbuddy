@@ -56,11 +56,9 @@ public class RankingQueryRepository {
                 WITH period_xp AS (
                   SELECT user_id, SUM(delta_xp) AS period_xp
                     FROM xp_events
-                   WHERE created_at BETWEEN :start AND :end
+                   WHERE created_at >= :start AND created_at < :end
                    GROUP BY user_id
                   HAVING SUM(delta_xp) > 0
-                   ORDER BY period_xp DESC, user_id ASC
-                   LIMIT 100
                 )
                 SELECT u.id AS user_id,
                        u.nickname AS nickname,
@@ -73,21 +71,22 @@ public class RankingQueryRepository {
                          WHERE a.author_user_id = u.id
                            AND a.is_accepted = 1
                            AND a.deleted_at IS NULL
-                           AND a.created_at BETWEEN :start AND :end) AS accepted_cnt,
+                           AND a.created_at >= :start AND a.created_at < :end) AS accepted_cnt,
                        (SELECT COUNT(*) FROM answers a
                          WHERE a.author_user_id = u.id
                            AND a.deleted_at IS NULL
-                           AND a.created_at BETWEEN :start AND :end) AS answer_cnt,
+                           AND a.created_at >= :start AND a.created_at < :end) AS answer_cnt,
                        (SELECT COUNT(*) FROM questions q
                          WHERE q.author_user_id = u.id
                            AND q.deleted_at IS NULL
-                           AND q.created_at BETWEEN :start AND :end) AS question_cnt
+                           AND q.created_at >= :start AND q.created_at < :end) AS question_cnt
                   FROM period_xp p
                   JOIN users u ON u.id = p.user_id
                  WHERE u.deleted_at IS NULL
                    AND u.deactivated_at IS NULL
                    AND (u.suspended_until IS NULL OR u.suspended_until < NOW())
                  ORDER BY p.period_xp DESC, p.user_id ASC
+                 LIMIT 100
                 """;
         List<Tuple> rows = em.createNativeQuery(sql, Tuple.class)
                 .setParameter("start", Timestamp.valueOf(start))
@@ -131,7 +130,7 @@ public class RankingQueryRepository {
                 SELECT COALESCE(SUM(delta_xp), 0)
                   FROM xp_events
                  WHERE user_id = :userId
-                   AND created_at BETWEEN :start AND :end
+                   AND created_at >= :start AND created_at < :end
                 """)
                 .setParameter("userId", userId)
                 .setParameter("start", Timestamp.valueOf(start))
@@ -146,7 +145,7 @@ public class RankingQueryRepository {
                 SELECT COUNT(*) FROM (
                   SELECT user_id, SUM(delta_xp) AS s
                     FROM xp_events
-                   WHERE created_at BETWEEN :start AND :end
+                   WHERE created_at >= :start AND created_at < :end
                    GROUP BY user_id
                   HAVING SUM(delta_xp) > :myPeriodXp
                 ) t
@@ -164,16 +163,18 @@ public class RankingQueryRepository {
 
     /** 누적 랭킹에서 내 활동 카운트 (accepted/answer/question). */
     public long[] countMyActivityAllTime(Long userId) {
-        long accepted = ((Number) em.createNativeQuery("""
-                SELECT COUNT(*) FROM answers
-                 WHERE author_user_id = :userId AND is_accepted = 1 AND deleted_at IS NULL
-                """).setParameter("userId", userId).getSingleResult()).longValue();
-        long answers = ((Number) em.createNativeQuery("""
-                SELECT COUNT(*) FROM answers
+        Tuple answerRow = (Tuple) em.createNativeQuery("""
+                SELECT COALESCE(SUM(CASE WHEN is_accepted = 1 THEN 1 ELSE 0 END), 0) AS accepted,
+                       COALESCE(COUNT(*), 0) AS total
+                  FROM answers
                  WHERE author_user_id = :userId AND deleted_at IS NULL
-                """).setParameter("userId", userId).getSingleResult()).longValue();
+                """, Tuple.class)
+                .setParameter("userId", userId)
+                .getSingleResult();
+        long accepted = ((Number) answerRow.get("accepted")).longValue();
+        long answers = ((Number) answerRow.get("total")).longValue();
         long questions = ((Number) em.createNativeQuery("""
-                SELECT COUNT(*) FROM questions
+                SELECT COALESCE(COUNT(*), 0) FROM questions
                  WHERE author_user_id = :userId AND deleted_at IS NULL
                 """).setParameter("userId", userId).getSingleResult()).longValue();
         return new long[]{accepted, answers, questions};
@@ -181,26 +182,23 @@ public class RankingQueryRepository {
 
     /** 기간 랭킹에서 내 활동 카운트. */
     public long[] countMyActivityInPeriod(Long userId, LocalDateTime start, LocalDateTime end) {
-        long accepted = ((Number) em.createNativeQuery("""
-                SELECT COUNT(*) FROM answers
-                 WHERE author_user_id = :userId AND is_accepted = 1
-                   AND deleted_at IS NULL AND created_at BETWEEN :start AND :end
-                """).setParameter("userId", userId)
-                .setParameter("start", Timestamp.valueOf(start))
-                .setParameter("end", Timestamp.valueOf(end))
-                .getSingleResult()).longValue();
-        long answers = ((Number) em.createNativeQuery("""
-                SELECT COUNT(*) FROM answers
+        Tuple answerRow = (Tuple) em.createNativeQuery("""
+                SELECT COALESCE(SUM(CASE WHEN is_accepted = 1 THEN 1 ELSE 0 END), 0) AS accepted,
+                       COALESCE(COUNT(*), 0) AS total
+                  FROM answers
                  WHERE author_user_id = :userId AND deleted_at IS NULL
-                   AND created_at BETWEEN :start AND :end
-                """).setParameter("userId", userId)
+                   AND created_at >= :start AND created_at < :end
+                """, Tuple.class)
+                .setParameter("userId", userId)
                 .setParameter("start", Timestamp.valueOf(start))
                 .setParameter("end", Timestamp.valueOf(end))
-                .getSingleResult()).longValue();
+                .getSingleResult();
+        long accepted = ((Number) answerRow.get("accepted")).longValue();
+        long answers = ((Number) answerRow.get("total")).longValue();
         long questions = ((Number) em.createNativeQuery("""
-                SELECT COUNT(*) FROM questions
+                SELECT COALESCE(COUNT(*), 0) FROM questions
                  WHERE author_user_id = :userId AND deleted_at IS NULL
-                   AND created_at BETWEEN :start AND :end
+                   AND created_at >= :start AND created_at < :end
                 """).setParameter("userId", userId)
                 .setParameter("start", Timestamp.valueOf(start))
                 .setParameter("end", Timestamp.valueOf(end))

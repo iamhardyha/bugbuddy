@@ -79,20 +79,21 @@ public class RankingService {
     private RankingResponse buildPeriodRanking(RankingPeriod period, RankingOffset offset, Long currentUserId) {
         LocalDateTime[] range = computeRange(period, offset);
         LocalDateTime start = range[0];
-        LocalDateTime end = range[1];
+        LocalDateTime endExclusive = range[1];
+        LocalDateTime displayEnd = range[2];
 
         List<RankingRowResponse> top100 = (offset == RankingOffset.PREVIOUS)
-                ? self.getCachedPreviousPeriodTop100(period, start, end)
-                : self.getCachedCurrentPeriodTop100(period, start, end);
+                ? self.getCachedPreviousPeriodTop100(period, start, endExclusive)
+                : self.getCachedCurrentPeriodTop100(period, start, endExclusive);
 
-        MyRankResponse myRank = computePeriodMyRank(currentUserId, start, end);
+        MyRankResponse myRank = computePeriodMyRank(currentUserId, start, endExclusive);
         List<RankingRowResponse> marked = markCurrentUser(top100, currentUserId);
 
         return new RankingResponse(
                 period.name().toLowerCase(),
                 offset.name().toLowerCase(),
                 start.atZone(KST).toOffsetDateTime(),
-                end.atZone(KST).toOffsetDateTime(),
+                displayEnd.atZone(KST).toOffsetDateTime(),
                 marked,
                 myRank
         );
@@ -127,6 +128,10 @@ public class RankingService {
 
     // --- 기간 경계 계산 ---
 
+    /**
+     * 기간 경계 계산 — 반-열린 구간 [start, endExclusive) + 응답용 displayEnd(endDate 23:59:59).
+     * 반환 배열: [start, endExclusive, displayEnd]
+     */
     private LocalDateTime[] computeRange(RankingPeriod period, RankingOffset offset) {
         LocalDate today = LocalDate.now(KST);
         LocalDate startDate;
@@ -143,10 +148,10 @@ public class RankingService {
             startDate = first;
             endDate = first.with(TemporalAdjusters.lastDayOfMonth());
         }
-        return new LocalDateTime[]{
-                startDate.atStartOfDay(),
-                endDate.atTime(LocalTime.of(23, 59, 59))
-        };
+        LocalDateTime start = startDate.atStartOfDay();
+        LocalDateTime endExclusive = endDate.plusDays(1).atStartOfDay();
+        LocalDateTime displayEnd = endDate.atTime(LocalTime.of(23, 59, 59));
+        return new LocalDateTime[]{start, endExclusive, displayEnd};
     }
 
     // --- isCurrentUser 플래그 마킹 ---
