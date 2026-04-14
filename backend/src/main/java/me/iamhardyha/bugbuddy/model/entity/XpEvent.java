@@ -13,7 +13,9 @@ import me.iamhardyha.bugbuddy.model.enums.XpEventType;
         name = "xp_events",
         indexes = {
                 @Index(name = "idx_xp_events_user_created", columnList = "user_id, created_at"),
-                @Index(name = "idx_xp_events_ref", columnList = "ref_type, ref_id")
+                @Index(name = "idx_xp_events_ref", columnList = "ref_type, ref_id"),
+                @Index(name = "idx_xp_events_user_type_delta", columnList = "user_id, event_type, delta_xp"),
+                @Index(name = "idx_xp_events_created_user_delta", columnList = "created_at, user_id, delta_xp")
         }
 )
 @Getter
