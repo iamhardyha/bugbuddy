@@ -62,6 +62,12 @@ export default function GlobalHeader() {
           >
             Mentors
           </Link>
+          <Link
+            href="/rankings"
+            className={`${styles.navLink}${pathname.startsWith('/rankings') ? ` ${styles.navLinkActive}` : ''}`}
+          >
+            Rankings
+          </Link>
         </nav>
 
         <div className={styles.searchBox}>
