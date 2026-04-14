@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import Link from 'next/link';
 import { Avatar, Tag } from 'antd';
 import { CheckCircleOutlined, MessageOutlined, QuestionCircleOutlined } from '@ant-design/icons';
@@ -32,7 +33,7 @@ interface Props {
   showPeriodXp: boolean;
 }
 
-export default function RankingRow({ row, showPeriodXp }: Props) {
+function RankingRow({ row, showPeriodXp }: Props) {
   const xpValue = showPeriodXp && row.periodXp !== null ? row.periodXp : row.xp;
   const aria = `${row.rank}위, ${row.nickname}, 레벨 ${row.level}, ${xpValue.toLocaleString()} XP, 답변 채택 ${row.acceptedAnswerCount}, 답변 ${row.answerCount}, 질문 ${row.questionCount}`;
 
@@ -69,3 +70,5 @@ export default function RankingRow({ row, showPeriodXp }: Props) {
     </Link>
   );
 }
+
+export default memo(RankingRow);

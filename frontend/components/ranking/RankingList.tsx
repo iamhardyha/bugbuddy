@@ -6,6 +6,7 @@ import { Segmented, Skeleton, Empty, Typography, message } from 'antd';
 import RankingRow from './RankingRow';
 import RankingMyBanner from './RankingMyBanner';
 import { fetchRanking, type RankingPeriod, type RankingOffset, type RankingResponse } from '@/lib/rankings';
+import { isLoggedIn as checkIsLoggedIn } from '@/lib/auth';
 import styles from './RankingList.module.css';
 
 function normalizePeriod(raw: string | null): RankingPeriod {
@@ -32,7 +33,12 @@ export default function RankingList() {
 
   const [data, setData] = useState<RankingResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    setIsLoggedIn(checkIsLoggedIn());
+  }, []);
 
   useEffect(() => {
     abortRef.current?.abort();
@@ -52,7 +58,6 @@ export default function RankingList() {
         if (err instanceof DOMException && err.name === 'AbortError') return;
         setLoading(false);
         message.error('랭킹을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.');
-        console.error(err);
       });
 
     return () => controller.abort();
@@ -103,7 +108,7 @@ export default function RankingList() {
         )}
       </div>
 
-      {data && <RankingMyBanner myRank={data.myRank} showPeriodXp={showPeriodXp} />}
+      {data && isLoggedIn && <RankingMyBanner myRank={data.myRank} showPeriodXp={showPeriodXp} />}
 
       {loading && !data && (
         <div className={styles.list}>
