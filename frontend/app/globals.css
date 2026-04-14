@@ -49,6 +49,11 @@
   /* Code blocks – intentionally always dark */
   --code-bg:      #1e1e2e;
   --code-border:  rgba(255, 255, 255, 0.06);
+  /* Ranking medals */
+  --rank-gold:   #f5c518;
+  --rank-silver: #b8bcc4;
+  --rank-bronze: #cd7f32;
+  --rank-row-highlight: rgba(245, 197, 24, 0.08);
 }
 
 [data-theme="dark"] {
@@ -83,6 +88,11 @@
   --error-bg:     rgba(248, 113, 113, 0.1);
   --warning-text: #fbbf24;
   --warning-bg:   rgba(251, 191, 36, 0.1);
+  /* Ranking medals */
+  --rank-gold:   #ffd740;
+  --rank-silver: #d0d4dc;
+  --rank-bronze: #e39555;
+  --rank-row-highlight: rgba(255, 215, 64, 0.1);
 }
 
 @theme inline {
